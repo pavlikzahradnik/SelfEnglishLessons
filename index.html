@@ -169,6 +169,10 @@
   .cztrans{text-align:center;color:var(--muted);margin-bottom:16px;font-size:.88rem}
   .typerow{display:flex;gap:10px;margin-top:6px}
   .tinput{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:13px 15px;font-size:1.05rem;font-weight:600;outline:none}
+  .pwrap{position:relative;flex:1;display:flex}
+  .pwrap .tinput{width:100%;padding-right:48px}
+  .eye{position:absolute;right:6px;top:50%;transform:translateY(-50%);background:transparent;border:none;cursor:pointer;font-size:1.15rem;line-height:1;padding:6px;border-radius:8px;color:var(--muted)}
+  .eye:hover{background:var(--surface2)}
   .tinput:focus{border-color:var(--accent)}
   .bigspeak{width:104px;height:104px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;font-size:2.3rem;display:flex;align-items:center;justify-content:center;margin:4px auto 18px;box-shadow:0 12px 30px rgba(79,70,229,.4);transition:.15s}
   .bigspeak:hover{transform:scale(1.04)}
@@ -1339,6 +1343,27 @@ function reloadFromStorage(){
   ensureDefaultProfile();
   goHome();
 }
+function togglePw(id,btn){const el=$('#'+id);if(!el)return;const hidden=el.type==='password';el.type=hidden?'text':'password';if(btn){btn.textContent=hidden?'🙈':'👁';btn.title=hidden?'Skrýt heslo':'Zobrazit heslo';}el.focus();}
+function fbChangePass(){
+  if(!fbUser)return;
+  const cur=($('#cpCur').value||''),pw=($('#cpNew').value||'');
+  if(!cur)return toast('Zadej současné heslo');
+  if(pw.length<6)return toast('Nové heslo musí mít aspoň 6 znaků');
+  function doUpdate(){
+    fbUser.updatePassword(pw).then(function(){
+      toast('Heslo změněno ✓');
+      const a=$('#cpCur'),b=$('#cpNew');if(a)a.value='';if(b)b.value='';
+    }).catch(function(e){toast('Chyba: '+fbErr(e));});
+  }
+  try{
+    const cred=firebase.auth.EmailAuthProvider.credential(fbUser.email,cur);
+    fbUser.reauthenticateWithCredential(cred).then(doUpdate).catch(function(e){
+      const c=(e&&e.code)||'';
+      if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)toast('Současné heslo je špatně');
+      else toast('Chyba: '+fbErr(e));
+    });
+  }catch(e){doUpdate();}
+}
 function fbErr(e){const c=(e&&e.code)||'';if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)return 'špatný e-mail nebo heslo';if(c.indexOf('user-not-found')>=0)return 'účet neexistuje';if(c.indexOf('email-already')>=0)return 'e-mail už je použit';if(c.indexOf('weak-password')>=0)return 'slabé heslo (min. 6 znaků)';if(c.indexOf('invalid-email')>=0)return 'neplatný e-mail';return (e&&e.message)||'chyba';}
 function fbRegister(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.createUserWithEmailAndPassword(em,pw).then(function(){toast('Účet vytvořen ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
 function fbLogin(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.signInWithEmailAndPassword(em,pw).then(function(){toast('Přihlášeno ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
@@ -1355,11 +1380,15 @@ function renderAccount(){
   if(fbUser){
     html+='<p class="lead">Přihlášen jako <b>'+(fbUser.email||'uživatel')+'</b>. Postup se ukládá do cloudu automaticky a načte se na jiném zařízení po přihlášení.</p>'+
       '<p class="lead" id="cloudStat">'+(cloudStat||'Synchronizováno')+'</p>'+
-      '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="cloudSave()">Uložit teď</button><button class="btn ghost" onclick="fbLogout()">Odhlásit</button></div>';
+      '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="cloudSave()">Uložit teď</button><button class="btn ghost" onclick="fbLogout()">Odhlásit</button></div>'+
+      '<div class="setcol" style="max-width:440px"><h3 style="margin-bottom:2px">🔑 Změnit heslo</h3>'+
+      '<div class="typerow" style="margin-top:8px"><div class="pwrap"><input class="tinput" id="cpCur" type="password" placeholder="současné heslo" autocomplete="current-password"><button class="eye" type="button" title="Zobrazit heslo" onclick="togglePw(\'cpCur\',this)">👁</button></div></div>'+
+      '<div class="typerow" style="margin-top:8px"><div class="pwrap"><input class="tinput" id="cpNew" type="password" placeholder="nové heslo (min. 6 znaků)" autocomplete="new-password"><button class="eye" type="button" title="Zobrazit heslo" onclick="togglePw(\'cpNew\',this)">👁</button></div></div>'+
+      '<div style="margin-top:10px"><button class="btn" onclick="fbChangePass()">Uložit nové heslo</button></div></div>';
   }else{
     html+='<p class="lead">Přihlas se, aby se tvůj postup ukládal do cloudu a byl dostupný i na druhém počítači.</p>'+
       '<div class="typerow"><input class="tinput" id="acEmail" placeholder="e-mail" autocomplete="username"></div>'+
-      '<div class="typerow" style="margin-top:10px"><input class="tinput" id="acPass" type="password" placeholder="heslo (min. 6 znaků)" autocomplete="current-password"></div>'+
+      '<div class="typerow" style="margin-top:10px"><div class="pwrap"><input class="tinput" id="acPass" type="password" placeholder="heslo (min. 6 znaků)" autocomplete="current-password"><button class="eye" type="button" title="Zobrazit heslo" onclick="togglePw(\'acPass\',this)">👁</button></div></div>'+
       '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">Přihlásit</button><button class="btn ghost" onclick="fbRegister()">Vytvořit účet</button></div>';
   }
   el.innerHTML=html;
