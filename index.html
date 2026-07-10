@@ -1367,6 +1367,14 @@ function fbChangePass(){
 function fbErr(e){const c=(e&&e.code)||'';if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)return 'špatný e-mail nebo heslo';if(c.indexOf('user-not-found')>=0)return 'účet neexistuje';if(c.indexOf('email-already')>=0)return 'e-mail už je použit';if(c.indexOf('weak-password')>=0)return 'slabé heslo (min. 6 znaků)';if(c.indexOf('invalid-email')>=0)return 'neplatný e-mail';return (e&&e.message)||'chyba';}
 function fbRegister(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.createUserWithEmailAndPassword(em,pw).then(function(){toast('Účet vytvořen ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
 function fbLogin(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.signInWithEmailAndPassword(em,pw).then(function(){toast('Přihlášeno ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
+function fbResetPass(){
+  if(!fbAuth)return;
+  const em=($('#acEmail').value||'').trim();
+  if(!em)return toast('Napiš e-mail výše a klikni znovu');
+  fbAuth.sendPasswordResetEmail(em).then(function(){
+    toast('Poslali jsme e-mail pro obnovení hesla ✓');
+  }).catch(function(e){toast('Chyba: '+fbErr(e));});
+}
 function fbLogout(){if(fbAuth)fbAuth.signOut().then(function(){toast('Odhlášeno');renderAccount();});}
 function openAccount(){renderAccount();show('account');}
 function renderAccount(){
@@ -1389,7 +1397,8 @@ function renderAccount(){
     html+='<p class="lead">Přihlas se, aby se tvůj postup ukládal do cloudu a byl dostupný i na druhém počítači.</p>'+
       '<div class="typerow"><input class="tinput" id="acEmail" placeholder="e-mail" autocomplete="username"></div>'+
       '<div class="typerow" style="margin-top:10px"><div class="pwrap"><input class="tinput" id="acPass" type="password" placeholder="heslo (min. 6 znaků)" autocomplete="current-password"><button class="eye" type="button" title="Zobrazit heslo" onclick="togglePw(\'acPass\',this)">👁</button></div></div>'+
-      '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">Přihlásit</button><button class="btn ghost" onclick="fbRegister()">Vytvořit účet</button></div>';
+      '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">Přihlásit</button><button class="btn ghost" onclick="fbRegister()">Vytvořit účet</button></div>'+
+      '<div style="margin-top:12px"><a href="#" onclick="fbResetPass();return false;" style="color:var(--accent);font-weight:600;text-decoration:none">Zapomněl jsi heslo?</a></div>';
   }
   el.innerHTML=html;
 }
