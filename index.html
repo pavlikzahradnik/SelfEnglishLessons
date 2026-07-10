@@ -276,6 +276,7 @@
         <div class="panel" id="levelPick">
           <h2>Vyber úroveň znalosti</h2>
           <p class="lead">Na jaké úrovni chceš procvičovat? Každá úroveň má vlastní témata i postup.</p>
+          <button class="btn ghost" style="margin-bottom:16px" onclick="startPlacement()">🎯 Nevím, jakou úroveň zvolit — udělat rozřazovací test</button>
           <div class="lvlpick">
             <button class="lvlcard" onclick="chooseLevel('A1')">
               <div class="lc-badge">A1</div>
@@ -772,6 +773,10 @@ const LEVEL_DATA={
   B1:{cats:CATS_B1,gram:GRAMMAR_B1,path:PATH_B1,test:'b1_test'},
   B2:{cats:CATS_B2,gram:GRAMMAR_B2,path:PATH_B2,test:'b2_test'}
 };
+/* ===== Rozřazovací test (adaptivní) ===== */
+const PLC_LEVELS=['A1','A2','B1','B2'];
+const PLC_SRC={A1:GRAMMAR_A1,A2:GRAMMAR_A2,B1:GRAMMAR_B1,B2:GRAMMAR_B2};
+function plcPool(lvl){const arr=[];PLC_SRC[lvl].forEach(g=>g.items.forEach((it,i)=>arr.push({level:lvl,topic:g.title,gitem:it,key:g.id+'#'+i})));return arr;}
 function buildLevel(lvl){
   const d=LEVEL_DATA[lvl]||LEVEL_DATA.A1;
   CATS=d.cats; GRAMMAR=d.gram; PATH=d.path;
@@ -954,7 +959,11 @@ function renderActions(){
 let levelChosen=false;
 const A2_UNLOCK_PCT=90;
 const LVL_PREREQ={A2:'g_test',B1:'a2_test',B2:'b1_test'};   // pro odemčení úrovně je potřeba test předchozí úrovně >=90 %
-function levelUnlocked(lvl){const t=LVL_PREREQ[lvl];if(!t)return true;const e=S.exlog[t+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);}
+function levelUnlocked(lvl){
+  const maxU=S.settings.maxUnlockedLevel;
+  if(maxU && PLC_LEVELS.indexOf(lvl)<=PLC_LEVELS.indexOf(maxU))return true;
+  const t=LVL_PREREQ[lvl];if(!t)return true;const e=S.exlog[t+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
+}
 function updateBrand(){const bl=$('#brandLvl');if(bl)bl.textContent=S.settings.level;const ct=$('#curLvlTag');if(ct)ct.textContent=S.settings.level;}
 function renderLevelPick(){
   [['A2','a2Card','a2go','A1'],['B1','b1Card','b1go','A2'],['B2','b2Card','b2go','B1']].forEach(function(x){
@@ -1095,7 +1104,7 @@ function finishSession(){
     '<button class="btn big" onclick="goHome()">Domů</button></div>';
   sess=null;persist();
 }
-function quitSession(){sess=null;if(window.speechSynthesis)speechSynthesis.cancel();stopRec();goHome();}
+function quitSession(){sess=null;plc=null;if(window.speechSynthesis)speechSynthesis.cancel();stopRec();goHome();}
 function recordExlog(cat,type,pct){
   const beforeC=completedCount();
   const k=cat+':'+type;const p=S.exlog[k]||{done:0};S.exlog[k]={done:p.done+1,last:pct,ts:Date.now()};
@@ -1115,6 +1124,74 @@ function startTest(){
   const gramPick=shuffle(gramItems).slice(0,12);
   const cards=shuffle(vocabPick.concat(gramPick));
   startSession(cards,{tag:'Závěrečný test', cat:FINAL.id, type:'test'});
+}
+/* ---- rozřazovací test: adaptivně určí startovní úroveň ---- */
+let plc=null;
+function startPlacement(){
+  const pools={};PLC_LEVELS.forEach(l=>pools[l]=shuffle(plcPool(l)));
+  plc={pools, idx:{A1:0,A2:0,B1:0,B2:0}, ability:1, step:1, n:0, history:[]};
+  show('activity');
+  $('#sessTag').style.display='inline-block';$('#sessTag').textContent='Rozřazovací test';
+  nextPlacementQ();
+}
+function plcCurLevel(){return PLC_LEVELS[Math.max(0,Math.min(3,Math.round(plc.ability)))];}
+function plcDrawItem(){
+  const lvl=plcCurLevel();
+  const order=[lvl].concat(PLC_LEVELS.filter(l=>l!==lvl));
+  for(const l of order){const pool=plc.pools[l];if(plc.idx[l]<pool.length)return pool[plc.idx[l]++];}
+  return null;
+}
+function nextPlacementQ(){
+  if(!plc)return;
+  if(plc.n>=50)return finishPlacement();
+  if(plc.n>=15){
+    const last6=plc.history.slice(-6).map(h=>h.ability);
+    if(last6.length>=6 && (Math.max.apply(null,last6)-Math.min.apply(null,last6))<=0.55)return finishPlacement();
+  }
+  const item=plcDrawItem();
+  if(!item)return finishPlacement();
+  plc.cur=item;
+  $('#counter').textContent='Otázka '+(plc.n+1)+' · odhad úrovně: '+plcCurLevel();
+  setProg(plc.n, Math.max(plc.n+1,15));
+  const q=item.gitem[0],a=item.gitem[1],opts=item.gitem[2],cz=item.gitem[3];
+  const options=shuffle(opts.slice());
+  $('#stage').innerHTML='<div class="tag" style="display:inline-block">'+item.level+' · '+item.topic+'</div>'+
+    '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
+    '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
+  $('#opts').innerHTML=options.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o+'</button>').join('');
+  $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
+    const ok=options[k]===a;
+    $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(options[j]===a)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
+    const fb=$('#fb'),full=q.replace('___',a);
+    if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}
+    speak(full);
+    answerPlacement(ok);
+  });
+}
+function answerPlacement(ok){
+  if(!plc)return;
+  plc.n++;
+  plc.ability=Math.max(0,Math.min(3, plc.ability + (ok?plc.step:-plc.step)));
+  if(plc.n%5===0)plc.step=Math.max(0.25, plc.step*0.65);
+  plc.history.push({ok:ok, lvlIdx:Math.round(plc.ability), ability:plc.ability});
+  showContinue(()=>nextPlacementQ(), ok);
+}
+function finishPlacement(){
+  if(!plc)return;
+  const lvl=PLC_LEVELS[Math.max(0,Math.min(3,Math.round(plc.ability)))];
+  const n=plc.n;
+  $('#sessTag').style.display='none';$('#counter').textContent='';setProg(1,1);
+  $('#stage').innerHTML='<div class="result"><div class="stars">🎯</div><div class="score">'+lvl+'</div>'+
+    '<div class="rowstat"><div><b>'+n+'</b>otázek</div><div><b>'+PLC_LEVELS.indexOf(lvl)+1+'/4</b>úroveň</div></div>'+
+    '<p class="lead" style="margin-top:10px">Podle tvých odpovědí ti nejlíp sedí úroveň <b>'+lvl+'</b>. Nižší úrovně zůstanou odemčené, kdybys je někdy chtěl projít.</p>'+
+    '<button class="btn big" onclick="applyPlacement(\''+lvl+'\')">Začít na úrovni '+lvl+' →</button></div>';
+  plc=null;
+}
+function applyPlacement(lvl){
+  const cur=S.settings.maxUnlockedLevel;
+  if(!cur || PLC_LEVELS.indexOf(lvl)>PLC_LEVELS.indexOf(cur))S.settings.maxUnlockedLevel=lvl;
+  S.settings.level=lvl;persist();buildLevel(lvl);levelChosen=true;persist();
+  toast('Nastaveno na úroveň '+lvl+' ✓');refreshHome();
 }
 function showTheory(g){
   show('activity');
