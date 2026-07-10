@@ -234,7 +234,6 @@
       <div class="chip">🔥 <b id="hDays">0</b> dní</div>
       <button class="iconbtn" id="cloudBtn" title="Účet a synchronizace" onclick="openAccount()">☁</button>
       <button class="iconbtn" id="themeBtn" title="Světlý / tmavý režim">◐</button>
-      <button class="iconbtn" id="whoBtn" title="Přepnout profil" onclick="openProfiles()">?</button>
     </div>
   </header>
 
@@ -1275,7 +1274,7 @@ function selectProfile(id){
   curProfileId=id;try{localStorage.setItem('anj_cur',id);}catch(e){}
   S=load();ensureStateDefaults();buildLevel(S.settings.level);persist();
   const p=PROFILES.find(x=>x.id===id);
-  $('#whoBtn').textContent=p?(p.name.trim()[0]||'?').toUpperCase():'?';
+  const wb=$('#whoBtn');if(wb)wb.textContent=p?(p.name.trim()[0]||'?').toUpperCase():'?';
   applyTheme();ensureDaily();
   initSeg('segDir','dir');initSeg('segFill','fill');initSeg('segGoal','goal',renderMission);
   levelChosen=false;refreshHome();show('home');
@@ -1289,6 +1288,15 @@ function migrateOld(){
       curProfileId=p.id;localStorage.setItem('anj_cur',p.id);
       localStorage.removeItem('anj_a1_v2');
     }}catch(e){}
+}
+/* Tiše zajistí jeden profil na pozadí (bez obrazovky výběru profilu). */
+function ensureDefaultProfile(){
+  PROFILES=loadProfiles();
+  curProfileId=localStorage.getItem('anj_cur')||null;
+  if(curProfileId && PROFILES.find(p=>p.id===curProfileId)){selectProfile(curProfileId);return;}
+  if(PROFILES.length){selectProfile(PROFILES[0].id);return;}
+  const p={id:newId(),name:'Já',color:AVA_COLORS[0],pin:''};
+  PROFILES.push(p);saveProfiles();selectProfile(p.id);
 }
 /* ================= FIREBASE SYNCHRONIZACE ================= */
 /* !!! Sem vlož svůj Firebase config z konzole (Project settings). apiKey je pro klienta bezpečný. */
@@ -1328,10 +1336,8 @@ function onAuthChange(){
   }
 }
 function reloadFromStorage(){
-  PROFILES=loadProfiles();
-  curProfileId=localStorage.getItem('anj_cur')||null;
-  if(curProfileId && PROFILES.find(function(p){return p.id===curProfileId;})){selectProfile(curProfileId);}
-  else{openProfiles();}
+  ensureDefaultProfile();
+  goHome();
 }
 function fbErr(e){const c=(e&&e.code)||'';if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)return 'špatný e-mail nebo heslo';if(c.indexOf('user-not-found')>=0)return 'účet neexistuje';if(c.indexOf('email-already')>=0)return 'e-mail už je použit';if(c.indexOf('weak-password')>=0)return 'slabé heslo (min. 6 znaků)';if(c.indexOf('invalid-email')>=0)return 'neplatný e-mail';return (e&&e.message)||'chyba';}
 function fbRegister(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.createUserWithEmailAndPassword(em,pw).then(function(){toast('Účet vytvořen ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
@@ -1363,9 +1369,16 @@ function init(){
   applyTheme();
   initFirebase();
   migrateOld();
-  if(!PROFILES.length){createProfileUI();show('gate');return;}
-  if(curProfileId && PROFILES.find(p=>p.id===curProfileId)){selectProfile(curProfileId);}
-  else{openProfiles();}
+  ensureDefaultProfile();          /* tiše připraví postup na pozadí */
+  /* Není profilová obrazovka – rovnou přihlášení e-mailem.
+     Pokud je uživatel z minula přihlášený, onAuthChange po načtení
+     z cloudu automaticky přejde do appky. Bez přihlášení appka
+     funguje lokálně (tlačítko „← Zpět" na přihlašovací obrazovce). */
+  if(FIREBASE_READY && !(fbAuth && fbAuth.currentUser)){
+    openAccount();
+  }else{
+    goHome();
+  }
 }
 init();
 </script>
