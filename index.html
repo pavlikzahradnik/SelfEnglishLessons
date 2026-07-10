@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="cs" data-theme="dark">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Angličtina A1 — adaptivní učení</title>
+<style>
+  :root{
+    --bg-a:#0f172a; --bg-b:#1e293b;
+    --surface:#ffffff; --surface2:#f8fafc;
+    --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+    --accent:#4f46e5; --accent2:#0ea5e9;
+    --ok:#16a34a; --okbg:#f0fdf4; --bad:#dc2626; --badbg:#fef2f2;
+    --warn:#d97706; --warnbg:#fffbeb;
+  }
+  [data-theme="light"]{
+    --bg-a:#eef2f7; --bg-b:#dfe6f0;
+    --surface:#ffffff; --surface2:#f1f5f9;
+    --ink:#0f172a; --muted:#64748b; --line:#e2e8f0;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{font-family:'Inter','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;color:var(--ink);
+    background:linear-gradient(180deg,var(--bg-a),var(--bg-b));min-height:100vh;padding:14px 14px;-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1440px;margin:0 auto}
+  .dash{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:stretch}
+  .side .panel{margin-bottom:0}
+  .maincol .panel{margin-bottom:0;display:flex;flex-direction:column}
+  #catGrid{flex:1;grid-auto-rows:1fr}
+  .mission-v{flex-direction:column;align-items:stretch;text-align:center;gap:12px}
+  .mission-v .ring{margin:0 auto}
+  .mission-v .mtext{min-width:0}
+  .mission-v .btn{width:100%}
+  .actions-v{grid-template-columns:1fr;gap:7px;margin-top:10px}
+  .setcol{display:flex;flex-direction:column;gap:8px;margin-top:10px;border-top:1px solid var(--line);padding-top:10px}
+  .setline{display:flex;flex-direction:column;gap:5px}
+  .setline .setlabel{margin:0}
+  .setcol .seg{width:100%}
+  .setcol .seg button{flex:1;padding:8px 4px}
+  #stats,#activity{max-width:880px;margin-left:auto;margin-right:auto}
+  #gate{max-width:760px;margin-left:auto;margin-right:auto}
+  @media(max-width:900px){.dash{grid-template-columns:1fr}}
+  header.top{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;gap:12px;flex-wrap:wrap}
+  .brand{color:#fff;font-weight:700;font-size:1.15rem;display:flex;align-items:center;gap:9px}
+  [data-theme="light"] .brand{color:#0f172a}
+  .brand .dot{width:9px;height:9px;border-radius:50%;background:var(--accent2);box-shadow:0 0 0 4px rgba(14,165,233,.25)}
+  .brand .lvl{font-size:.68rem;font-weight:600;background:rgba(255,255,255,.14);color:#cbd5e1;padding:3px 8px;border-radius:6px;letter-spacing:.04em}
+  [data-theme="light"] .brand .lvl{background:#e2e8f0;color:#475569}
+  .hstats{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+  .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;padding:6px 11px;border-radius:8px;font-weight:600;font-size:.8rem;display:flex;gap:6px;align-items:center}
+  [data-theme="light"] .chip{background:#fff;border-color:var(--line);color:#334155}
+  .chip b{color:#fff}[data-theme="light"] .chip b{color:#0f172a}
+  .iconbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:1rem}
+  [data-theme="light"] .iconbtn{background:#fff;border-color:var(--line);color:#334155}
+  .panel{background:var(--surface);border-radius:18px;padding:16px 18px;box-shadow:0 20px 50px rgba(2,6,23,.45);margin-bottom:14px}
+  h2{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
+  h3{font-size:.95rem;font-weight:700;margin-bottom:10px}
+  .lead{color:var(--muted);font-size:.9rem;margin:4px 0 10px}
+  .mission{display:flex;align-items:center;gap:20px;flex-wrap:wrap}
+  .ring{--p:0;width:82px;height:82px;border-radius:50%;flex:0 0 auto;
+    background:conic-gradient(var(--accent) calc(var(--p)*1%), var(--line) 0);
+    display:flex;align-items:center;justify-content:center;position:relative}
+  .ring:before{content:"";position:absolute;inset:9px;border-radius:50%;background:var(--surface)}
+  .ring .rv{position:relative;text-align:center;font-weight:800;font-size:1.1rem;line-height:1}
+  .ring .rv small{display:block;font-size:.62rem;color:var(--muted);font-weight:600;margin-top:3px}
+  .mission .mtext{flex:1;min-width:180px}
+  .mission .mtext .big{font-weight:700;font-size:1.05rem}
+  .levelbar{height:8px;background:var(--line);border-radius:99px;overflow:hidden;margin-top:6px}
+  .levelbar>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:.4s}
+  .actions{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:16px}
+  .act{border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:10px 12px;cursor:pointer;text-align:left;transition:.15s}
+  .act:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .act .at{font-weight:700;font-size:1.05rem;display:flex;justify-content:space-between;gap:8px;align-items:center}
+  .act .as{font-size:.84rem;color:var(--muted);margin-top:3px}
+  .act .cnt{background:var(--accent);color:#fff;border-radius:99px;padding:1px 8px;font-size:.72rem;font-weight:700}
+  .act .cnt.warn{background:var(--warn)}
+  .act.disabled{opacity:.5;cursor:default}
+  .act.disabled:hover{border-color:var(--line);transform:none}
+  .setrow{display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-top:6px}
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:9px;overflow:hidden}
+  .seg button{border:none;background:var(--surface2);color:var(--ink);padding:8px 12px;font-weight:600;font-size:.82rem;cursor:pointer}
+  .seg button.on{background:var(--accent);color:#fff}
+  .setlabel{font-size:.76rem;color:var(--muted);font-weight:600;margin-right:2px}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+  .cat{text-align:left;border:1px solid var(--line);background:var(--surface2);border-radius:13px;padding:14px 15px;cursor:pointer;transition:.15s;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:104px}
+  .cat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}
+  .cat:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .cat .t{font-weight:700;font-size:1.05rem;margin-bottom:3px;line-height:1.2}
+  .cat .m{font-size:.85rem;color:var(--muted)}
+  .cat .bar{height:6px;background:var(--line);border-radius:99px;margin-top:12px;overflow:hidden}
+  .cat .bar>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0}
+  .cat .due{position:absolute;bottom:30px;right:13px;background:var(--warn);color:#fff;border-radius:99px;font-size:.74rem;font-weight:700;padding:2px 10px}
+  .cat .due.done{background:var(--ok)}
+  .cat.locked{opacity:.7;cursor:default;background:var(--surface2)}
+  .cat.locked:before{background:var(--line)}
+  .cat.locked:hover{transform:none;border-color:var(--line);box-shadow:none}
+  .cat.locked .t{color:var(--muted)}
+  .cat .lock{position:absolute;top:14px;right:14px;font-size:1.15rem;opacity:.7}
+  .cat .req{font-size:.9rem;color:var(--accent);font-weight:700;margin-top:10px}
+  .cat.locked .m{font-size:.9rem}
+  .cat.gram:before{background:#0d9488}
+  .cat.gram .t:before{content:"📖 "}
+  .cat.gram:hover{border-color:#0d9488}
+  .cat.test:before{background:#f7b500}
+  .cat.test .t:before{content:"🎓 "}
+  .cat.test:hover{border-color:#f7b500}
+  .theory{max-width:660px;margin:0 auto;text-align:left}
+  .theorytext{font-size:1.05rem;line-height:1.65;background:var(--surface2);border:1px solid var(--line);border-radius:12px;padding:16px 18px}
+  .gtab{width:100%;border-collapse:collapse;margin:16px 0;font-size:1rem}
+  .gtab th,.gtab td{border:1px solid var(--line);padding:10px 12px;text-align:left}
+  .gtab th{background:var(--accent);color:#fff;font-weight:700}
+  .gtab td{background:var(--surface)}
+  .gtab tr td:first-child{font-weight:700;color:var(--accent);background:var(--surface2)}
+  .modes{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+  @media(max-width:900px){.modes{grid-template-columns:1fr 1fr}}
+  @media(max-width:560px){.modes{grid-template-columns:1fr}}
+  .mode{border:1px solid var(--line);background:var(--surface2);border-radius:13px;padding:17px 16px;cursor:pointer;text-align:left;transition:.15s;min-height:98px;display:flex;flex-direction:column;justify-content:center}
+  .mode:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .mode .mt{font-weight:700;font-size:1.1rem;display:flex;align-items:center;gap:11px}
+  .mode small{color:var(--muted);font-weight:500;font-size:.95rem;display:block;margin-top:6px}
+  .exstat{font-size:.72rem;font-weight:600;margin-top:8px;color:var(--muted);display:flex;align-items:center;gap:6px}
+  .exstat .d{width:8px;height:8px;border-radius:50%;background:var(--line);flex:0 0 auto}
+  .exstat.done{color:var(--ok)}.exstat.done .d{background:var(--ok)}
+  .exstat.mid{color:var(--warn)}.exstat.mid .d{background:var(--warn)}
+  .exstat.low{color:var(--bad)}.exstat.low .d{background:var(--bad)}
+  .ic{width:40px;height:40px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#fff;font-size:1.25rem;flex:0 0 auto}
+  .i1{background:#4f46e5}.i2{background:#0ea5e9}.i3{background:#0d9488}.i4{background:#7c3aed}.i5{background:#db2777}.i6{background:#ea580c}
+  .btn{border:none;background:var(--accent);color:#fff;font-weight:600;padding:12px 18px;border-radius:10px;cursor:pointer;font-size:.95rem;transition:.15s}
+  .btn:hover{background:#4338ca}
+  .btn.ghost{background:var(--surface2);color:var(--ink);border:1px solid var(--line)}
+  .btn.ghost:hover{background:#eef2ff}
+  .btn.big{width:100%;padding:14px}
+  .back{background:none;border:none;color:var(--accent);font-weight:600;cursor:pointer;font-size:.9rem;margin-bottom:14px;display:inline-flex;align-items:center;gap:5px}
+  .progressbar{height:6px;background:var(--line);border-radius:99px;overflow:hidden;margin:6px 0 18px}
+  .progressbar>div{height:100%;background:linear-gradient(90deg,var(--accent),var(--accent2));width:0;transition:.3s}
+  .counter{font-size:.78rem;color:var(--muted);text-align:center;margin-bottom:8px;font-weight:600}
+  .tag{display:inline-block;font-size:.68rem;font-weight:700;color:var(--accent);background:rgba(79,70,229,.1);border-radius:6px;padding:2px 7px;margin-bottom:8px}
+  .flash{perspective:1200px;height:250px;margin-bottom:14px;cursor:pointer}
+  .exlist{margin-top:12px;display:flex;flex-direction:column;gap:7px;max-width:92%;padding:0 8px}
+  .exs{font-size:.92rem;line-height:1.35;text-align:center}
+  .exs span{color:var(--ink);font-weight:600}
+  .exs em{display:block;color:var(--muted);font-style:normal;font-size:.82rem;margin-top:1px}
+  .flash-inner{position:relative;width:100%;height:100%;transition:transform .45s;transform-style:preserve-3d}
+  .flash.flip .flash-inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;backface-visibility:hidden;border-radius:16px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:11px}
+  .front{background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff}
+  .back-face{background:var(--surface2);border:1px solid var(--line);transform:rotateY(180deg)}
+  .face .word{font-size:1.8rem;font-weight:700;text-align:center;padding:0 12px}
+  .face .sub{font-size:.82rem;opacity:.85}
+  .back-face .word{color:var(--accent)}
+  .speak{background:rgba(255,255,255,.2);border:none;color:#fff;border-radius:8px;padding:8px 13px;font-weight:600;cursor:pointer;font-size:.82rem}
+  .back-face .speak{background:#fff;color:var(--ink);border:1px solid var(--line)}
+  .rowbtns{display:flex;gap:10px}
+  .knowbtns{display:flex;gap:10px}
+  .knowbtns button{flex:1;border:none;border-radius:11px;padding:14px;font-weight:700;font-size:.95rem;cursor:pointer}
+  .kno{background:var(--badbg);color:#b91c1c;border:1px solid #fca5a5!important}
+  .kyes{background:var(--okbg);color:#15803d;border:1px solid #86efac!important}
+  .qword{font-size:1.7rem;font-weight:700;text-align:center;margin:6px 0}
+  .qsub{text-align:center;color:var(--muted);margin-bottom:16px;font-size:.88rem}
+  .opts{display:grid;gap:9px}
+  .opt{border:1px solid var(--line);background:var(--surface);padding:13px 15px;border-radius:11px;font-weight:600;font-size:1rem;cursor:pointer;text-align:left;transition:.12s;color:var(--ink)}
+  .opt:hover{border-color:var(--accent);background:var(--surface2)}
+  .opt.correct{background:var(--okbg);border-color:var(--ok);color:#15803d}
+  .opt.wrong{background:var(--badbg);border-color:var(--bad);color:#b91c1c}
+  .opt:disabled{cursor:default}
+  .feedback{text-align:center;font-weight:600;margin-top:13px;min-height:22px;font-size:.88rem}
+  .feedback.ok{color:var(--ok)}.feedback.bad{color:var(--bad)}
+  .sentence{font-size:1.2rem;text-align:center;font-weight:600;margin:8px 0;line-height:1.7}
+  .sentence .blank{display:inline-block;min-width:64px;border-bottom:2px solid var(--accent);color:var(--accent)}
+  .cztrans{text-align:center;color:var(--muted);margin-bottom:16px;font-size:.88rem}
+  .typerow{display:flex;gap:10px;margin-top:6px}
+  .tinput{flex:1;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:10px;padding:13px 15px;font-size:1.05rem;font-weight:600;outline:none}
+  .tinput:focus{border-color:var(--accent)}
+  .bigspeak{width:104px;height:104px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;font-size:2.3rem;display:flex;align-items:center;justify-content:center;margin:4px auto 18px;box-shadow:0 12px 30px rgba(79,70,229,.4);transition:.15s}
+  .bigspeak:hover{transform:scale(1.04)}
+  .bigspeak.playing{animation:pulse 1s infinite}
+  @keyframes pulse{0%,100%{transform:scale(1)}50%{transform:scale(1.06)}}
+  .micbtn{width:104px;height:104px;border-radius:50%;border:none;cursor:pointer;background:linear-gradient(135deg,#db2777,#7c3aed);color:#fff;font-size:2.1rem;display:flex;align-items:center;justify-content:center;margin:4px auto 14px;box-shadow:0 12px 30px rgba(219,39,119,.4)}
+  .micbtn.rec{animation:pulse .8s infinite}
+  .result{text-align:center;padding:14px 0}
+  .result .score{font-size:2.5rem;font-weight:800;color:var(--accent)}
+  .result .stars{font-size:1.3rem;margin:6px 0;letter-spacing:4px;color:var(--warn)}
+  .result .rowstat{display:flex;justify-content:center;gap:22px;margin:12px 0;flex-wrap:wrap}
+  .result .rowstat div{font-size:.82rem;color:var(--muted)}
+  .result .rowstat b{display:block;font-size:1.2rem;color:var(--ink)}
+  .statgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:11px;margin-bottom:16px}
+  .stat{border:1px solid var(--line);background:var(--surface2);border-radius:12px;padding:14px}
+  .stat .n{font-size:1.6rem;font-weight:800;color:var(--accent)}
+  .stat .l{font-size:.76rem;color:var(--muted);margin-top:2px}
+  .weaklist .row{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--line);font-size:.88rem}
+  .weaklist .row:last-child{border-bottom:none}
+  .weaklist .pct{font-weight:700}
+  .toast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(120px);background:#0f172a;color:#fff;padding:12px 20px;border-radius:10px;font-weight:600;transition:.35s;z-index:60;box-shadow:0 12px 30px rgba(0,0,0,.4);font-size:.9rem;border:1px solid rgba(255,255,255,.12)}
+  .toast.show{transform:translateX(-50%) translateY(0)}
+  .ach{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  .badge{background:var(--surface2);border:1px solid var(--line);border-radius:9px;padding:8px 11px;font-size:.78rem;font-weight:600;display:flex;align-items:center;gap:7px}
+  .badge.locked{opacity:.4}
+  .sec-label{font-size:.76rem;color:var(--muted);font-weight:600;text-transform:uppercase;letter-spacing:.06em;margin:18px 0 8px}
+  .foot{text-align:center;color:#94a3b8;font-size:.76rem;margin-top:12px;line-height:1.6}
+  .hidden{display:none!important}
+  .note{background:var(--warnbg);border:1px solid #fde68a;color:#92400e;border-radius:10px;padding:10px 12px;font-size:.82rem;margin-bottom:12px}
+  .pfgrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:12px;margin-top:10px}
+  .pf{position:relative;border:1px solid var(--line);background:var(--surface2);border-radius:14px;padding:16px 12px;text-align:center;cursor:pointer;transition:.15s}
+  .pf:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .pav{width:56px;height:56px;border-radius:50%;margin:0 auto 8px;display:flex;align-items:center;justify-content:center;color:#fff;font-weight:800;font-size:1.4rem;position:relative}
+  .plock{position:absolute;bottom:-3px;right:-3px;font-size:.7rem;background:var(--surface);border-radius:50%;padding:1px}
+  .pn{font-weight:700;font-size:.9rem}
+  .pl{font-size:.72rem;color:var(--muted);margin-top:1px}
+  .pf .pdel{position:absolute;top:6px;right:9px;color:var(--muted);font-size:.8rem;opacity:.45;font-weight:700}
+  .pf .pdel:hover{opacity:1;color:var(--bad)}
+  .pf.add .pav{border:1px dashed var(--accent);background:var(--surface)!important;color:var(--accent)}
+  #whoBtn{font-weight:800}
+  .lvlpick{display:grid;grid-template-columns:repeat(auto-fit,minmax(195px,1fr));gap:14px;margin-top:6px}
+  .lvlcard{border:1px solid var(--line);background:var(--surface2);border-radius:16px;padding:22px 20px;cursor:pointer;text-align:left;transition:.15s;display:flex;flex-direction:column;gap:8px;min-height:210px}
+  .lvlcard:nth-child(3) .lc-badge{background:linear-gradient(135deg,#7c3aed,#db2777)}
+  .lvlcard:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 12px 26px rgba(79,70,229,.15)}
+  .lc-badge{width:56px;height:56px;border-radius:14px;background:linear-gradient(135deg,#4f46e5,#0ea5e9);color:#fff;font-weight:800;font-size:1.5rem;display:flex;align-items:center;justify-content:center}
+  .lvlcard:nth-child(2) .lc-badge{background:linear-gradient(135deg,#0d9488,#0ea5e9)}
+  .lc-t{font-weight:800;font-size:1.25rem;margin-top:6px}
+  .lc-d{color:var(--muted);font-size:.92rem;line-height:1.5;flex:1}
+  .lc-go{font-weight:700;color:var(--accent)}
+  .lvlcard.locked{opacity:.65;cursor:default}
+  .lvlcard.locked:hover{transform:none;border-color:var(--line);box-shadow:none}
+  .lvlcard.locked .lc-badge{filter:grayscale(.5)}
+  .lvlcard.locked .lc-go{color:var(--warn)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top" id="topbar">
+    <div class="brand"><span class="dot"></span>Angličtina <span class="lvl" id="brandLvl">A1</span></div>
+    <div class="hstats">
+      <div class="chip">Lvl <b id="hLevel">1</b></div>
+      <div class="chip">Body <b id="hXp">0</b></div>
+      <div class="chip">🔥 <b id="hDays">0</b> dní</div>
+      <button class="iconbtn" id="cloudBtn" title="Účet a synchronizace" onclick="openAccount()">☁</button>
+      <button class="iconbtn" id="themeBtn" title="Světlý / tmavý režim">◐</button>
+      <button class="iconbtn" id="whoBtn" title="Přepnout profil" onclick="openProfiles()">?</button>
+    </div>
+  </header>
+
+  <div id="home">
+    <div class="dash">
+      <aside class="side">
+        <div class="panel">
+          <div class="mission mission-v">
+            <div class="ring" id="ring"><div class="rv"><span id="ringDone">0</span>/<span id="ringGoal">15</span><small>dnešní cíl</small></div></div>
+            <div class="mtext">
+              <div class="big">Level <span id="mLevel">1</span> · <span id="mXp">0</span> bodů</div>
+              <div class="levelbar"><div id="mLevelBar"></div></div>
+              <div class="as" style="font-size:.78rem;color:var(--muted);margin-top:5px"><span id="mToNext">0</span> b do levelu · série <b id="mDays">0</b> dní</div>
+            </div>
+            <button class="btn" id="startDaily">Dnešní mise ▸</button>
+          </div>
+          <div class="actions actions-v">
+            <button class="act" id="actReview" onclick="startReview()"><div class="at">Opakování <span class="cnt warn" id="dueCount">0</span></div><div class="as">Slova k zopakování (SRS)</div></button>
+            <button class="act" id="actProblem" onclick="startProblem()"><div class="at">Problémová slova <span class="cnt" id="probCount">0</span></div><div class="as">Slova, ve kterých chybuješ</div></button>
+            <button class="act" onclick="startMixed()"><div class="at">Zamíchat vše</div><div class="as">Náhodně napříč tématy</div></button>
+            <button class="act" onclick="start5min()"><div class="at">5 minut denně</div><div class="as">Krátká rychlá lekce</div></button>
+            <button class="act" onclick="openStats()"><div class="at">Statistiky</div><div class="as">Pokrok a slabá témata</div></button>
+          </div>
+          <div class="setcol">
+            <div class="setline"><span class="setlabel">Směr</span>
+              <div class="seg" id="segDir"><button data-v="en2cz">EN→CZ</button><button data-v="cz2en">CZ→EN</button><button data-v="mix">Mix</button></div></div>
+            <div class="setline"><span class="setlabel">Doplňování</span>
+              <div class="seg" id="segFill"><button data-v="easy">Výběr</button><button data-v="hard">Psaní</button></div></div>
+            <div class="setline"><span class="setlabel">Denní cíl</span>
+              <div class="seg" id="segGoal"><button data-v="10">10</button><button data-v="15">15</button><button data-v="25">25</button></div></div>
+          </div>
+        </div>
+      </aside>
+      <section class="maincol">
+        <div class="panel" id="levelPick">
+          <h2>Vyber úroveň znalosti</h2>
+          <p class="lead">Na jaké úrovni chceš procvičovat? Každá úroveň má vlastní témata i postup.</p>
+          <div class="lvlpick">
+            <button class="lvlcard" onclick="chooseLevel('A1')">
+              <div class="lc-badge">A1</div>
+              <div class="lc-t">Začátečník</div>
+              <div class="lc-d">Základní slovíčka a gramatika — pozdravy, čísla, sloveso to be, přítomný čas, členy…</div>
+              <div class="lc-go">Začít A1 →</div>
+            </button>
+            <button class="lvlcard" id="a2Card" onclick="chooseLevel('A2')">
+              <div class="lc-badge">A2</div>
+              <div class="lc-t">Mírně pokročilý</div>
+              <div class="lc-d">Rozšířená slovní zásoba a časy — minulý čas, budoucnost, stupňování, předpřítomný čas…</div>
+              <div class="lc-go" id="a2go">Začít A2 →</div>
+            </button>
+            <button class="lvlcard" id="b1Card" onclick="chooseLevel('B1')">
+              <div class="lc-badge">B1</div>
+              <div class="lc-t">Středně pokročilý</div>
+              <div class="lc-d">Složitější gramatika a témata — předminulý čas, kondicionály, trpný rod, nepřímá řeč, vztažné věty…</div>
+              <div class="lc-go" id="b1go">Začít B1 →</div>
+            </button>
+          </div>
+        </div>
+        <div class="panel hidden" id="topicsView">
+          <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">Témata <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()">← Změnit úroveň</button></h2>
+          <p class="lead">Celkem <b id="totalWords"></b> slov · naučeno <b id="learnedWords">0</b>. Klikni na téma pro výběr cvičení.</p>
+          <div id="catGrid" class="grid"></div>
+          <div class="sec-label">Úspěchy</div>
+          <div id="ach" class="ach"></div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <div id="catMenu" class="panel hidden">
+    <button class="back" onclick="goHome()">← Zpět</button>
+    <h2 id="cmTitle"></h2>
+    <p class="lead" id="cmSub"></p>
+    <div class="modes" id="modeBox"></div>
+  </div>
+
+  <div id="stats" class="panel hidden">
+    <button class="back" onclick="goHome()">← Zpět</button>
+    <h2>Statistiky</h2>
+    <p class="lead">Tvůj celkový pokrok.</p>
+    <div class="statgrid" id="statGrid"></div>
+    <h3>Nejslabší témata</h3>
+    <div class="weaklist" id="weakList"></div>
+    <div style="margin-top:16px"><button class="btn ghost" onclick="resetProgress()">Vymazat veškerý postup</button></div>
+  </div>
+
+  <div id="activity" class="panel hidden">
+    <button class="back" onclick="quitSession()">← Ukončit</button>
+    <div id="sessTag" class="tag" style="display:none"></div>
+    <div class="counter" id="counter"></div>
+    <div class="progressbar"><div id="prog"></div></div>
+    <div id="stage"></div>
+  </div>
+
+  <div id="gate" class="panel hidden"></div>
+  <div id="account" class="panel hidden"></div>
+
+  <div class="foot">
+    Adaptivní opakování (SRS) plánuje každé slovo zvlášť: chyba → za 2 min, správně → za hodinu → den → týden → měsíc. Postup se ukládá v tomto prohlížeči.<br>
+    Nedostupné offline (potřebují server): AI konverzace, AI generované věty, synchronizace mezi zařízeními, obrázky ke slovům.
+  </div>
+</div>
+<div id="toast" class="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+/* ============ VOCAB DATA (A1) ============ */
+const CATS_A1 = [
+ {id:'greet', title:'Pozdravy a fráze',
+  vocab:[["Hello","ahoj / dobrý den"],["Hi","ahoj"],["Goodbye","na shledanou"],["Good morning","dobré ráno"],["Good evening","dobrý večer"],["Good night","dobrou noc"],["Please","prosím"],["Thank you","děkuji"],["Sorry","promiň"],["Excuse me","s dovolením"],["Yes","ano"],["No","ne"],["Welcome","vítej"],["See you","uvidíme se"],["How are you","jak se máš"],["My name is","jmenuji se"]],
+  sentences:[["___ , how are you?","Hello","Ahoj, jak se máš?"],["___ you very much.","Thank","Mockrát děkuji."],["___ me, where is the station?","Excuse","S dovolením, kde je nádraží?"],["Good ___ , I am tired.","night","Dobrou noc, jsem unavený."],["Good ___ ! Did you sleep well?","morning","Dobré ráno! Vyspal ses dobře?"],["___ , I have to go now.","Goodbye","Na shledanou, teď musím jít."],["My ___ is Peter.","name","Jmenuji se Petr."],["Can you help me, ___ ?","please","Můžeš mi pomoct, prosím?"],["___ to our home!","Welcome","Vítej u nás doma!"],["___ , I don't understand.","Sorry","Promiň, nerozumím."]]},
+ {id:'numbers', title:'Čísla',
+  vocab:[["Zero","nula"],["One","jedna"],["Two","dva"],["Three","tři"],["Four","čtyři"],["Five","pět"],["Six","šest"],["Seven","sedm"],["Eight","osm"],["Nine","devět"],["Ten","deset"],["Eleven","jedenáct"],["Twelve","dvanáct"],["Thirteen","třináct"],["Fifteen","patnáct"],["Twenty","dvacet"],["Thirty","třicet"],["Forty","čtyřicet"],["Fifty","padesát"],["Hundred","sto"]],
+  sentences:[["I have ___ apples.","three","Mám tři jablka."],["She is ___ years old.","twenty","Je jí dvacet let."],["A week has ___ days.","seven","Týden má sedm dní."],["I get up at ___ o'clock.","six","Vstávám v šest hodin."],["I count from one to ___ .","ten","Počítám od jedné do deseti."],["There are ___ eggs in the box.","twelve","V krabici je dvanáct vajec."],["He has ___ fingers on one hand.","five","Na jedné ruce má pět prstů."],["Two plus two is ___ .","four","Dva plus dva jsou čtyři."],["The cat has ___ babies.","two","Kočka má dvě mláďata."],["One hundred minus fifty is ___ .","fifty","Sto mínus padesát je padesát."]]},
+ {id:'colors', title:'Barvy',
+  vocab:[["Red","červená"],["Blue","modrá"],["Green","zelená"],["Yellow","žlutá"],["Black","černá"],["White","bílá"],["Orange","oranžová"],["Purple","fialová"],["Pink","růžová"],["Brown","hnědá"],["Grey","šedá"]],
+  sentences:[["The sky is ___ .","blue","Obloha je modrá."],["Grass is ___ .","green","Tráva je zelená."],["Snow is ___ .","white","Sníh je bílý."],["A banana is ___ .","yellow","Banán je žlutý."],["Blood is ___ .","red","Krev je červená."],["At night the sky is ___ .","black","V noci je obloha černá."],["Chocolate is ___ .","brown","Čokoláda je hnědá."],["The little flower is ___ .","pink","Ta malá květina je růžová."],["An orange is ___ .","orange","Pomeranč je oranžový."],["The clouds are ___ today.","grey","Mraky jsou dnes šedé."]]},
+ {id:'family', title:'Rodina a lidé',
+  vocab:[["Mother","matka"],["Father","otec"],["Parents","rodiče"],["Sister","sestra"],["Brother","bratr"],["Grandmother","babička"],["Grandfather","dědeček"],["Son","syn"],["Daughter","dcera"],["Husband","manžel"],["Wife","manželka"],["Child","dítě"],["Baby","miminko"],["Friend","kamarád"],["Man","muž"],["Woman","žena"],["Boy","chlapec"],["Girl","dívka"]],
+  sentences:[["My ___ cooks dinner.","mother","Moje matka vaří večeři."],["His ___ is very tall.","brother","Jeho bratr je moc vysoký."],["I visit my ___ on Sunday.","grandmother","V neděli navštěvuji babičku."],["My ___ works in an office.","father","Můj otec pracuje v kanceláři."],["Her ___ goes to school.","daughter","Její dcera chodí do školy."],["The ___ is crying.","baby","Miminko pláče."],["My ___ and I play together.","sister","Se sestrou si spolu hrajeme."],["He is a good ___ of mine.","friend","Je to můj dobrý kamarád."],["My ___ reads the newspaper.","grandfather","Můj dědeček čte noviny."],["Her ___ is a kind man.","husband","Její manžel je hodný muž."]]},
+ {id:'food', title:'Jídlo a pití',
+  vocab:[["Bread","chléb"],["Water","voda"],["Milk","mléko"],["Cheese","sýr"],["Coffee","káva"],["Tea","čaj"],["Egg","vejce"],["Fish","ryba"],["Meat","maso"],["Chicken","kuře"],["Rice","rýže"],["Soup","polévka"],["Apple","jablko"],["Banana","banán"],["Orange","pomeranč"],["Potato","brambora"],["Tomato","rajče"],["Salt","sůl"],["Sugar","cukr"],["Breakfast","snídaně"],["Lunch","oběd"],["Dinner","večeře"],["Fruit","ovoce"],["Vegetable","zelenina"],["Butter","máslo"],["Juice","džus"],["Beer","pivo"],["Wine","víno"]],
+  sentences:[["I drink ___ every morning.","coffee","Každé ráno piju kávu."],["Can I have some ___ , please?","water","Můžu dostat vodu, prosím?"],["We have ___ at noon.","lunch","Obědváme v poledne."],["I put ___ on my bread.","cheese","Na chleba si dávám sýr."],["She eats an ___ every day.","apple","Každý den jí jablko."],["I like hot ___ in winter.","soup","V zimě mám rád horkou polévku."],["Would you like ___ with your cake?","tea","Dáš si k dortu čaj?"],["I add ___ to my food.","salt","Do jídla si přidávám sůl."],["The child drinks ___ before bed.","milk","Dítě pije před spaním mléko."],["We eat ___ in the evening.","dinner","Večer jíme večeři."]]},
+ {id:'animals', title:'Zvířata',
+  vocab:[["Dog","pes"],["Cat","kočka"],["Bird","pták"],["Horse","kůň"],["Cow","kráva"],["Pig","prase"],["Sheep","ovce"],["Rabbit","králík"],["Mouse","myš"],["Fish","ryba"],["Duck","kachna"],["Bear","medvěd"],["Lion","lev"],["Elephant","slon"],["Snake","had"],["Fox","liška"]],
+  sentences:[["The ___ says woof.","dog","Pes dělá haf."],["A ___ likes to catch mice.","cat","Kočka ráda chytá myši."],["The ___ can fly.","bird","Pták umí létat."],["The ___ gives us milk.","cow","Kráva nám dává mléko."],["An ___ is very big and grey.","elephant","Slon je velký a šedý."],["The ___ runs very fast.","horse","Kůň běhá velmi rychle."],["A ___ has long ears.","rabbit","Králík má dlouhé uši."],["The ___ swims in the water.","duck","Kachna plave ve vodě."],["The ___ is the king of animals.","lion","Lev je král zvířat."],["A ___ has no legs.","snake","Had nemá nohy."]]},
+ {id:'body', title:'Tělo',
+  vocab:[["Head","hlava"],["Hair","vlasy"],["Eye","oko"],["Ear","ucho"],["Nose","nos"],["Mouth","ústa"],["Tooth","zub"],["Hand","ruka (dlaň)"],["Arm","paže"],["Leg","noha"],["Foot","chodidlo"],["Finger","prst"],["Face","obličej"],["Heart","srdce"],["Back","záda"]],
+  sentences:[["I see with my ___ .","eyes","Vidím očima."],["I hear with my ___ .","ears","Slyším ušima."],["I walk on my ___ .","feet","Chodím po nohou."],["I smell with my ___ .","nose","Čichám nosem."],["I eat with my ___ .","mouth","Jím ústy."],["I have five fingers on my ___ .","hand","Na ruce mám pět prstů."],["I wash my ___ every morning.","face","Každé ráno si myji obličej."],["My ___ hurts, I need a dentist.","tooth","Bolí mě zub, potřebuji zubaře."],["I wear a hat on my ___ .","head","Na hlavě nosím čepici."],["I comb my ___ .","hair","Češu si vlasy."]]},
+ {id:'clothes', title:'Oblečení',
+  vocab:[["Shirt","košile"],["T-shirt","tričko"],["Trousers","kalhoty"],["Jeans","džíny"],["Dress","šaty"],["Skirt","sukně"],["Jacket","bunda"],["Coat","kabát"],["Shoes","boty"],["Socks","ponožky"],["Hat","klobouk / čepice"],["Scarf","šála"],["Gloves","rukavice"],["Sweater","svetr"],["Belt","pásek"]],
+  sentences:[["It is cold, wear a ___ .","coat","Je zima, vezmi si kabát."],["I put ___ on my feet.","shoes","Na nohy si obouvám boty."],["She wears a red ___ .","dress","Má na sobě červené šaty."],["In winter I wear a warm ___ .","sweater","V zimě nosím teplý svetr."],["He wears ___ and a shirt.","jeans","Nosí džíny a košili."],["Put a ___ on your head.","hat","Nasaď si čepici na hlavu."],["My ___ keep my feet warm.","socks","Ponožky mi hřejí nohy."],["It is raining, take a ___ .","jacket","Prší, vezmi si bundu."],["I wear a ___ around my neck.","scarf","Kolem krku nosím šálu."],["My trousers need a ___ .","belt","Ke kalhotám potřebuji pásek."]]},
+ {id:'house', title:'Dům a nábytek',
+  vocab:[["House","dům"],["Flat","byt"],["Room","pokoj"],["Kitchen","kuchyně"],["Bathroom","koupelna"],["Bedroom","ložnice"],["Door","dveře"],["Window","okno"],["Wall","zeď"],["Floor","podlaha"],["Table","stůl"],["Chair","židle"],["Bed","postel"],["Sofa","gauč"],["Lamp","lampa"],["Fridge","lednice"],["Mirror","zrcadlo"],["Key","klíč"],["Garden","zahrada"],["Roof","střecha"]],
+  sentences:[["I sleep in my ___ .","bed","Spím ve své posteli."],["We cook in the ___ .","kitchen","Vaříme v kuchyni."],["Open the ___ , it is hot.","window","Otevři okno, je horko."],["Please close the ___ .","door","Zavři prosím dveře."],["We eat at the ___ .","table","Jíme u stolu."],["I keep milk in the ___ .","fridge","Mléko mám v lednici."],["I sit on a ___ .","chair","Sedím na židli."],["The flowers are in the ___ .","garden","Květiny jsou na zahradě."],["I wash myself in the ___ .","bathroom","Myji se v koupelně."],["I need a ___ to open the door.","key","K otevření dveří potřebuji klíč."]]},
+ {id:'verbs', title:'Běžná slovesa',
+  vocab:[["Be","být"],["Have","mít"],["Do","dělat"],["Go","jít / jet"],["Come","přijít"],["Eat","jíst"],["Drink","pít"],["Sleep","spát"],["Work","pracovat"],["Play","hrát"],["Read","číst"],["Write","psát"],["Speak","mluvit"],["Listen","poslouchat"],["Watch","dívat se"],["See","vidět"],["Buy","koupit"],["Give","dát"],["Take","vzít"],["Open","otevřít"],["Close","zavřít"],["Walk","chodit"],["Run","běžet"],["Like","mít rád"],["Want","chtít"],["Need","potřebovat"],["Live","žít / bydlet"],["Learn","učit se"],["Help","pomáhat"],["Love","milovat"]],
+  sentences:[["I ___ coffee every day.","drink","Každý den piju kávu."],["They ___ football in the park.","play","Hrají fotbal v parku."],["Can you ___ me, please?","help","Můžeš mi pomoct, prosím?"],["I ___ a book before bed.","read","Před spaním čtu knihu."],["We ___ to school by bus.","go","Do školy jezdíme autobusem."],["She likes to ___ to music.","listen","Ráda poslouchá hudbu."],["I ___ English every day.","learn","Každý den se učím angličtinu."],["We ___ in a small town.","live","Bydlíme v malém městě."],["Please ___ the window.","open","Otevři prosím okno."],["I ___ to buy new shoes.","want","Chci si koupit nové boty."]]},
+ {id:'adj', title:'Přídavná jména',
+  vocab:[["Big","velký"],["Small","malý"],["Good","dobrý"],["Bad","špatný"],["New","nový"],["Old","starý"],["Hot","horký"],["Cold","studený"],["Happy","šťastný"],["Sad","smutný"],["Fast","rychlý"],["Slow","pomalý"],["Easy","snadný"],["Hard","těžký"],["Long","dlouhý"],["Short","krátký"],["High","vysoký"],["Low","nízký"],["Nice","milý / pěkný"],["Beautiful","krásný"],["Cheap","levný"],["Expensive","drahý"],["Clean","čistý"],["Dirty","špinavý"]],
+  sentences:[["This car is very ___ .","fast","Tohle auto je velmi rychlé."],["The coffee is too ___ .","hot","Ta káva je moc horká."],["My phone is ___ , I need a new one.","old","Můj telefon je starý, potřebuji nový."],["An elephant is very ___ .","big","Slon je velmi velký."],["The test was ___ , I passed easily.","easy","Test byl snadný, prošel jsem lehce."],["She is ___ because she won.","happy","Je šťastná, protože vyhrála."],["This shop is ___ , everything costs a lot.","expensive","Tenhle obchod je drahý, všechno stojí hodně."],["Please wash the ___ plates.","dirty","Umyj prosím špinavé talíře."],["In winter it is very ___ .","cold","V zimě je velká zima."],["A mouse is ___ .","small","Myš je malá."]]},
+ {id:'time', title:'Čas, dny a měsíce',
+  vocab:[["Monday","pondělí"],["Tuesday","úterý"],["Wednesday","středa"],["Thursday","čtvrtek"],["Friday","pátek"],["Saturday","sobota"],["Sunday","neděle"],["Day","den"],["Week","týden"],["Month","měsíc"],["Year","rok"],["Today","dnes"],["Tomorrow","zítra"],["Yesterday","včera"],["Morning","ráno"],["Afternoon","odpoledne"],["Evening","večer"],["Night","noc"],["Hour","hodina"],["Minute","minuta"],["Now","teď"],["Early","brzy"],["Late","pozdě"],["January","leden"],["July","červenec"],["December","prosinec"]],
+  sentences:[["I go to work on ___ .","Monday","V pondělí chodím do práce."],["We meet ___ , not today.","tomorrow","Sejdeme se zítra, ne dnes."],["It is seven in the ___ .","morning","Je sedm ráno."],["___ is the first day of the weekend.","Saturday","Sobota je první den víkendu."],["The new ___ starts in January.","year","Nový rok začíná v lednu."],["I was tired ___ .","yesterday","Včera jsem byl unavený."],["We eat dinner in the ___ .","evening","Večeříme večer."],["There are sixty minutes in one ___ .","hour","V jedné hodině je šedesát minut."],["Hurry up, we are ___ !","late","Pospěš si, jdeme pozdě!"],["Christmas is in ___ .","December","Vánoce jsou v prosinci."]]},
+ {id:'town', title:'Ve městě',
+  vocab:[["City","město"],["Street","ulice"],["Shop","obchod"],["Market","trh"],["Bank","banka"],["Hospital","nemocnice"],["School","škola"],["Restaurant","restaurace"],["Hotel","hotel"],["Station","nádraží"],["Airport","letiště"],["Park","park"],["Church","kostel"],["Museum","muzeum"],["Post office","pošta"],["Library","knihovna"],["Pharmacy","lékárna"],["Bridge","most"]],
+  sentences:[["I buy food at the ___ .","shop","Jídlo kupuji v obchodě."],["The train leaves from the ___ .","station","Vlak odjíždí z nádraží."],["We eat dinner at a ___ .","restaurant","Večeříme v restauraci."],["Children learn at ___ .","school","Děti se učí ve škole."],["I get money from the ___ .","bank","Peníze si vybírám v bance."],["The plane lands at the ___ .","airport","Letadlo přistává na letišti."],["We sleep at a ___ on holiday.","hotel","Na dovolené spíme v hotelu."],["I borrow books from the ___ .","library","Knihy si půjčuji v knihovně."],["Sick people go to the ___ .","hospital","Nemocní lidé chodí do nemocnice."],["Children play in the ___ .","park","Děti si hrají v parku."]]},
+ {id:'weather', title:'Počasí a příroda',
+  vocab:[["Sun","slunce"],["Rain","déšť"],["Snow","sníh"],["Wind","vítr"],["Cloud","mrak"],["Sky","obloha"],["Hot","horko"],["Cold","zima"],["Warm","teplo"],["Tree","strom"],["Flower","květina"],["River","řeka"],["Sea","moře"],["Mountain","hora"],["Forest","les"],["Grass","tráva"]],
+  sentences:[["Take an umbrella, it is going to ___ .","rain","Vezmi si deštník, bude pršet."],["In winter there is ___ .","snow","V zimě je sníh."],["We swim in the ___ .","sea","Plaveme v moři."],["The ___ is shining today.","sun","Slunce dnes svítí."],["Birds live in the ___ .","tree","Ptáci žijí na stromě."],["We climb the high ___ .","mountain","Šplháme na vysokou horu."],["The ___ flows to the sea.","river","Řeka teče do moře."],["It is very ___ in summer.","hot","V létě je velké horko."],["A strong ___ is blowing.","wind","Fouká silný vítr."],["We walk in the ___ among the trees.","forest","Procházíme se lesem mezi stromy."]]},
+ {id:'transport', title:'Doprava',
+  vocab:[["Car","auto"],["Bus","autobus"],["Train","vlak"],["Plane","letadlo"],["Bike","kolo"],["Taxi","taxi"],["Ship","loď"],["Tram","tramvaj"],["Road","silnice"],["Ticket","jízdenka"],["Driver","řidič"],["Metro","metro"]],
+  sentences:[["I go to work by ___ .","bus","Do práce jezdím autobusem."],["We need a ___ for the train.","ticket","Potřebujeme jízdenku na vlak."],["The ___ flies to London.","plane","Letadlo letí do Londýna."],["I ride my ___ to school.","bike","Do školy jezdím na kole."],["The ___ drives the bus.","driver","Řidič řídí autobus."],["We cross the sea by ___ .","ship","Přes moře plujeme lodí."],["Let's take a ___ , it is faster.","taxi","Vezměme si taxi, je to rychlejší."],["The ___ stops at every station.","train","Vlak staví na každém nádraží."],["In the city I take the ___ .","tram","Ve městě jezdím tramvají."],["Be careful when you cross the ___ .","road","Buď opatrný, když přecházíš silnici."]]}
+];
+
+let CATS, ALL, BYID, GRAMMAR, GMAP, PATH, CI, FINAL, TMAP;
+
+/* příkladové věty (kontext) pro nejčastější slova; klíč = anglicky malými písmeny bez mezer */
+const EXAMPLES={
+ hello:[["Hello, my name is Anna.","Ahoj, jmenuji se Anna."]],
+ water:[["I drink water every day.","Každý den piju vodu."],["The water is cold.","Voda je studená."]],
+ coffee:[["I like coffee in the morning.","Ráno mám rád kávu."]],
+ milk:[["The baby drinks milk.","Miminko pije mléko."]],
+ dog:[["The dog is very big.","Ten pes je velký."],["My dog runs fast.","Můj pes běhá rychle."]],
+ cat:[["The cat sleeps all day.","Kočka spí celý den."]],
+ eat:[["I eat breakfast at seven.","Snídám v sedm."],["We eat together.","Jíme spolu."]],
+ drink:[["I drink tea.","Piju čaj."]],
+ go:[["I go to school by bus.","Do školy jezdím autobusem."],["Let's go!","Pojďme!"]],
+ come:[["Come here, please.","Pojď sem, prosím."]],
+ play:[["Children play in the park.","Děti si hrají v parku."]],
+ read:[["I read a book before bed.","Před spaním čtu knihu."]],
+ write:[["Please write your name.","Napiš prosím své jméno."]],
+ work:[["I work in an office.","Pracuji v kanceláři."]],
+ help:[["Can you help me, please?","Můžeš mi pomoct, prosím?"]],
+ want:[["I want a coffee.","Chci kávu."]],
+ need:[["I need some water.","Potřebuji vodu."]],
+ buy:[["I want to buy bread.","Chci koupit chleba."]],
+ live:[["I live in Prague.","Bydlím v Praze."]],
+ learn:[["I learn English every day.","Každý den se učím anglicky."]],
+ love:[["I love my family.","Miluji svou rodinu."]],
+ like:[["I like tea.","Mám rád čaj."]],
+ run:[["I run every day.","Běhám každý den."],["Run, the bus is here!","Utíkej, jede autobus!"]],
+ big:[["This is a big house.","To je velký dům."]],
+ small:[["It is a small dog.","Je to malý pes."]],
+ hot:[["The soup is very hot.","Polévka je moc horká."]],
+ cold:[["It is cold today.","Dnes je zima."]],
+ good:[["This is good food.","To je dobré jídlo."]],
+ new:[["I have a new phone.","Mám nový telefon."]],
+ happy:[["I am happy today.","Dnes jsem šťastný."]],
+ fast:[["The car is very fast.","To auto je velmi rychlé."]],
+ house:[["My house is small.","Můj dům je malý."]],
+ school:[["Children go to school.","Děti chodí do školy."]],
+ car:[["The car is red.","To auto je červené."]],
+ apple:[["She eats an apple.","Jí jablko."]],
+ bread:[["I buy fresh bread.","Kupuji čerstvý chleba."]]
+};
+
+const BADGES=[
+ {id:'first',icon:'●',name:'Začátek',desc:'Dokonči první lekci'},
+ {id:'lvl5',icon:'◆',name:'Level 5',desc:'Dosáhni levelu 5'},
+ {id:'days7',icon:'🔥',name:'7 dní',desc:'7 dní v řadě'},
+ {id:'learn50',icon:'★',name:'50 slov',desc:'Nauč se 50 slov'},
+ {id:'learn150',icon:'★',name:'150 slov',desc:'Nauč se 150 slov'},
+ {id:'noProblem',icon:'✓',name:'Bez problémů',desc:'Vyčisti všechna problémová slova'}
+];
+
+const STEPS=[2, 60, 1440, 10080, 43200];
+const MIN=60000;
+
+/* ===== A1 GRAMATIKA ===== items: [věta s ___, správně, možnosti[], český překlad] */
+const GRAMMAR_A1=[
+ {id:'g_tobe', title:'Sloveso to be', type:'grammar',
+  theory:"Sloveso <b>to be</b> (být) je nepravidelné. Má tři tvary podle osoby a <b>otázku tvoříš prohozením slovosledu</b> (You are → Are you?):",
+  table:[["Osoba","Kladně","Zápor","Otázka"],["I","am","am not","Am I…?"],["you / we / they","are","aren't","Are you…?"],["he / she / it","is","isn't","Is he…?"]],
+  items:[["I ___ a teacher.","am",["am","is","are"],"Jsem učitel."],["She ___ happy.","is",["am","is","are"],"Ona je šťastná."],["They ___ at home.","are",["am","is","are"],"Jsou doma."],["We ___ friends.","are",["am","is","are"],"Jsme kamarádi."],["He ___ not here.","is",["am","is","are"],"Není tady."],["___ you ready?","Are",["Am","Is","Are"],"Jsi připravený?"],["It ___ cold today.","is",["am","is","are"],"Dnes je zima."],["I ___ not tired.","am",["am","is","are"],"Nejsem unavený."],["You ___ my friend.","are",["am","is","are"],"Jsi můj kamarád."],["The dog ___ big.","is",["am","is","are"],"Ten pes je velký."],["My parents ___ at work.","are",["am","is","are"],"Rodiče jsou v práci."],["___ she a doctor?","Is",["Am","Is","Are"],"Je lékařka?"],["I ___ from Prague.","am",["am","is","are"],"Jsem z Prahy."],["It ___ a nice day.","is",["am","is","are"],"Je hezký den."],["We ___ not late.","are",["am","is","are"],"Nejdeme pozdě."]]},
+ {id:'g_have', title:'Have got (mít)', type:'grammar',
+  theory:"<b>have got</b> = mít. Tvar se mění jen u he/she/it (has got). <b>Otázku tvoříš pomocným slovesem na začátku</b>: Have you got…? / Has he got…?",
+  table:[["Osoba","Kladně","Zápor","Otázka"],["I / you / we / they","have got","haven't got","Have you got…?"],["he / she / it","has got","hasn't got","Has he got…?"]],
+  items:[["I ___ got a dog.","have",["have","has"],"Mám psa."],["She ___ got two sisters.","has",["have","has"],"Má dvě sestry."],["We ___ got a new car.","have",["have","has"],"Máme nové auto."],["He ___ got a bike.","has",["have","has"],"Má kolo."],["___ you got a pen?","Have",["Have","Has"],"Máš pero?"],["They ___ got a big house.","have",["have","has"],"Mají velký dům."],["The cat ___ got green eyes.","has",["have","has"],"Kočka má zelené oči."],["I ___ got time today.","have",["have","has"],"Dnes mám čas."],["My brother ___ got a phone.","has",["have","has"],"Můj bratr má telefon."],["You ___ got nice shoes.","have",["have","has"],"Máš pěkné boty."],["___ she got children?","Has",["Have","Has"],"Má děti?"],["We ___ got a garden.","have",["have","has"],"Máme zahradu."],["It ___ got four legs.","has",["have","has"],"Má čtyři nohy."],["They ___ got a problem.","have",["have","has"],"Mají problém."],["He ___ got a good job.","has",["have","has"],"Má dobrou práci."]]},
+ {id:'g_pres', title:'Přítomný čas prostý', type:'grammar',
+  theory:"Pravidelná, opakovaná činnost. U <b>he/she/it</b> přidáváme <b>-s</b>. Zápor i <b>otázku tvoříš pomocí do/does</b> (Do you work? Does he work?) a hlavní sloveso je pak bez -s:",
+  table:[["Osoba","Kladně","Zápor","Otázka"],["I / you / we / they","work","don't work","Do you work?"],["he / she / it","works","doesn't work","Does he work?"]],
+  items:[["I ___ in an office.","work",["work","works"],"Pracuji v kanceláři."],["She ___ coffee every day.","drinks",["drink","drinks"],"Každý den pije kávu."],["They ___ football.","play",["play","plays"],"Hrají fotbal."],["He ___ English.","speaks",["speak","speaks"],"Mluví anglicky."],["We ___ in Prague.","live",["live","lives"],"Bydlíme v Praze."],["My father ___ tea.","likes",["like","likes"],"Můj otec má rád čaj."],["I ___ not like fish.","do",["do","does"],"Nemám rád rybu."],["___ she go to school?","Does",["Do","Does"],"Chodí do školy?"],["The shop ___ at nine.","opens",["open","opens"],"Obchod otevírá v devět."],["Cats ___ milk.","like",["like","likes"],"Kočky mají rády mléko."],["He ___ not work on Sunday.","does",["do","does"],"V neděli nepracuje."],["___ you speak English?","Do",["Do","Does"],"Mluvíš anglicky?"],["She ___ to music.","listens",["listen","listens"],"Poslouchá hudbu."],["We ___ TV in the evening.","watch",["watch","watches"],"Večer se díváme na televizi."],["My sister ___ in a bank.","works",["work","works"],"Moje sestra pracuje v bance."]]},
+ {id:'g_art', title:'Členy a / an / the', type:'grammar',
+  theory:"<b>a/an</b> = neurčitý člen (jeden z mnoha), <b>the</b> = určitý člen (ta konkrétní, známá věc).",
+  table:[["Člen","Použití","Příklad"],["a","před souhláskou","a dog, a car"],["an","před samohláskou (a,e,i,o,u)","an apple, an egg"],["the","konkrétní / známá věc","the sun, the door"]],
+  items:[["I have ___ apple.","an",["a","an","the"],"Mám jablko."],["She has ___ dog.","a",["a","an","the"],"Má psa."],["___ sun is hot.","The",["A","An","The"],"Slunce je horké."],["He is ___ teacher.","a",["a","an","the"],"Je učitel."],["I see ___ elephant.","an",["a","an","the"],"Vidím slona."],["Open ___ door, please.","the",["a","an","the"],"Otevři dveře, prosím."],["It is ___ easy question.","an",["a","an","the"],"Je to snadná otázka."],["We live in ___ city.","a",["a","an","the"],"Bydlíme ve městě."],["There is ___ egg on the plate.","an",["a","an","the"],"Na talíři je vejce."],["I want ___ banana.","a",["a","an","the"],"Chci banán."],["Look at ___ moon!","the",["a","an","the"],"Podívej na Měsíc!"],["She is ___ engineer.","an",["a","an","the"],"Je inženýrka."],["He has ___ old car.","an",["a","an","the"],"Má staré auto."],["Close ___ window, please.","the",["a","an","the"],"Zavři okno, prosím."],["I need ___ pen.","a",["a","an","the"],"Potřebuji pero."]]},
+ {id:'g_plural', title:'Množné číslo', type:'grammar',
+  theory:"Množné číslo podstatných jmen tvoříme podle těchto pravidel:",
+  table:[["Pravidlo","Příklad"],["většinou +s","dog → dogs"],["po s, x, ch, sh +es","box → boxes"],["souhláska + y → ies","city → cities"],["nepravidelná","man → men, child → children, foot → feet, tooth → teeth, woman → women"]],
+  items:[["one dog, two ___","dogs",["dogs","doges","dog"],"dva psi"],["one box, three ___","boxes",["boxs","boxes","box"],"tři krabice"],["one man, two ___","men",["mans","men","mens"],"dva muži"],["one child, two ___","children",["childs","childrens","children"],"dvě děti"],["one foot, two ___","feet",["foots","feet","foot"],"dvě nohy"],["one cat, five ___","cats",["cats","cates","cat"],"pět koček"],["one woman, two ___","women",["womans","women","womens"],"dvě ženy"],["one city, two ___","cities",["citys","cities","city"],"dvě města"],["one bus, two ___","buses",["buss","buses","busses"],"dva autobusy"],["one apple, three ___","apples",["apples","applees","apple"],"tři jablka"],["one baby, two ___","babies",["babys","babies","baby"],"dvě miminka"],["one watch, two ___","watches",["watchs","watches","watch"],"dvoje hodinky"],["one tooth, two ___","teeth",["tooths","teeth","tooth"],"dva zuby"],["one house, three ___","houses",["houss","houses","house"],"tři domy"],["one country, two ___","countries",["countrys","countries","country"],"dvě země"]]},
+ {id:'g_can', title:'Can (umět / moct)', type:'grammar',
+  theory:"<b>can</b> = umět/moct. Je stejné pro všechny osoby, po něm sloveso <b>bez to a bez -s</b>. <b>Otázku tvoříš prohozením</b>: You can → Can you…?",
+  table:[["","Tvar","Příklad"],["Kladně","can + sloveso","I can swim. He can swim."],["Zápor","can't (cannot)","She can't drive."],["Otázka","Can + osoba…?","Can you help?"]],
+  items:[["I ___ swim.","can",["can","cans","to can"],"Umím plavat."],["She can ___ .","sing",["sing","sings","to sing"],"Umí zpívat."],["___ you help me?","Can",["Can","Do","Are"],"Můžeš mi pomoct?"],["He ___ not drive.","can",["can","cans","do"],"Neumí řídit."],["We can ___ English.","speak",["speak","speaks","to speak"],"Umíme anglicky."],["Birds ___ fly.","can",["can","cans","are"],"Ptáci umí létat."],["I can't ___ it.","see",["see","sees","to see"],"Nevidím to."],["___ he cook?","Can",["Can","Does","Is"],"Umí vařit?"],["Fish can ___ .","swim",["swim","swims","to swim"],"Ryby umí plavat."],["She can ___ the piano.","play",["play","plays","to play"],"Umí hrát na klavír."],["___ they come today?","Can",["Can","Do","Are"],"Můžou dnes přijít?"],["A baby ___ not talk.","can",["can","cans","does"],"Miminko neumí mluvit."],["You can ___ here.","sit",["sit","sits","to sit"],"Můžeš si sednout tady."],["I ___ read English.","can",["can","cans","am"],"Umím číst anglicky."],["___ you swim fast?","Can",["Can","Do","Are"],"Umíš plavat rychle?"]]},
+ {id:'g_there', title:'There is / There are', type:'grammar',
+  theory:"<b>There is</b> = je (jedna věc), <b>There are</b> = jsou (více věcí). <b>Otázku tvoříš prohozením</b>: Is there…? / Are there…?",
+  table:[["Číslo","Kladně","Zápor","Otázka"],["jednotné","There is (There's)","There isn't","Is there…?"],["množné","There are","There aren't","Are there…?"]],
+  items:[["___ a book on the table.","There is",["There is","There are"],"Na stole je kniha."],["___ two cats in the garden.","There are",["There is","There are"],"Na zahradě jsou dvě kočky."],["___ a problem.","There is",["There is","There are"],"Je tu problém."],["___ many people here.","There are",["There is","There are"],"Je tu hodně lidí."],["___ some milk in the fridge.","There is",["There is","There are"],"V lednici je mléko."],["___ five days in a school week.","There are",["There is","There are"],"Ve školním týdnu je pět dní."],["___ a car in the street.","There is",["There is","There are"],"Na ulici je auto."],["___ three windows here.","There are",["There is","There are"],"Jsou tu tři okna."],["___ an apple on the plate.","There is",["There is","There are"],"Na talíři je jablko."],["___ two beds in the room.","There are",["There is","There are"],"V pokoji jsou dvě postele."],["___ a dog under the table.","There is",["There is","There are"],"Pod stolem je pes."],["___ many trees in the park.","There are",["There is","There are"],"V parku je hodně stromů."],["___ some water in the glass.","There is",["There is","There are"],"Ve sklenici je voda."],["___ four people in my family.","There are",["There is","There are"],"V mé rodině jsou čtyři lidé."],["___ a hotel near the station.","There is",["There is","There are"],"U nádraží je hotel."]]},
+ {id:'g_prep', title:'Předložky in / on / at', type:'grammar',
+  theory:"Předložky <b>in / on / at</b> se používají pro místo i pro čas:",
+  table:[["Předložka","Místo","Čas"],["in","uvnitř — in the box","měsíce, roky — in July"],["on","na povrchu — on the table","dny — on Monday"],["at","u bodu — at school","hodiny — at 7 o'clock"]],
+  items:[["The keys are ___ the table.","on",["in","on","at"],"Klíče jsou na stole."],["I am ___ home.","at",["in","on","at"],"Jsem doma."],["The milk is ___ the fridge.","in",["in","on","at"],"Mléko je v lednici."],["We meet ___ Monday.","on",["in","on","at"],"Sejdeme se v pondělí."],["The film starts ___ 8 o'clock.","at",["in","on","at"],"Film začíná v 8 hodin."],["My birthday is ___ July.","in",["in","on","at"],"Mám narozeniny v červenci."],["The cat is ___ the box.","in",["in","on","at"],"Kočka je v krabici."],["She is ___ work.","at",["in","on","at"],"Je v práci."],["The book is ___ the shelf.","on",["in","on","at"],"Kniha je na poličce."],["I get up ___ 7 o'clock.","at",["in","on","at"],"Vstávám v 7 hodin."],["We go skiing ___ winter.","in",["in","on","at"],"V zimě jezdíme lyžovat."],["There is a picture ___ the wall.","on",["in","on","at"],"Na zdi je obraz."],["He is ___ school now.","at",["in","on","at"],"Teď je ve škole."],["My keys are ___ my bag.","in",["in","on","at"],"Klíče mám v tašce."],["The shop opens ___ Saturday.","on",["in","on","at"],"Obchod otevírá v sobotu."]]},
+ {id:'g_wh', title:'Tázací slova', type:'grammar',
+  theory:"Tázacími slovy se ptáme na informaci. Stojí na začátku otázky a za nimi obvykle následuje sloveso (is/are/do…).",
+  table:[["Slovo","Význam","Příklad"],["What","co / jaký","What is this?"],["Where","kde / kam","Where are you?"],["When","kdy","When do you work?"],["Who","kdo","Who is she?"],["Why","proč","Why are you sad?"],["How","jak","How are you?"]],
+  items:[["___ is your name?","What",["What","Where","Who"],"Jak se jmenuješ?"],["___ are you from?","Where",["Where","What","When"],"Odkud jsi?"],["___ is that girl?","Who",["Who","What","Why"],"Kdo je ta dívka?"],["___ do you start work?","When",["When","Where","Why"],"Kdy začínáš práci?"],["___ are you happy?","Why",["Why","How","What"],"Proč jsi šťastný?"],["___ are you today?","How",["How","What","Who"],"Jak se dnes máš?"],["___ is my phone?","Where",["Where","When","Who"],"Kde je můj telefon?"],["___ colour is your car?","What",["What","Who","Why"],"Jakou barvu má tvé auto?"],["___ is your birthday?","When",["When","Where","What"],"Kdy máš narozeniny?"],["___ is she crying?","Why",["Why","How","Who"],"Proč pláče?"],["___ do you go to school?","How",["How","Why","Who"],"Jak jezdíš do školy?"],["___ lives in this house?","Who",["Who","What","Where"],"Kdo bydlí v tomto domě?"],["___ is in the box?","What",["What","Where","When"],"Co je v krabici?"],["___ old is your dog?","How",["How","What","Who"],"Jak starý je tvůj pes?"],["___ are my keys?","Where",["Where","When","Why"],"Kde jsou moje klíče?"]]}
+];
+
+/* ===== A2 SLOVÍČKA ===== */
+const CATS_A2=[
+ {id:'a2_jobs', title:'Práce a povolání',
+  vocab:[["Manager","manažer"],["Engineer","inženýr"],["Lawyer","právník"],["Journalist","novinář"],["Accountant","účetní"],["Salary","plat"],["Colleague","kolega"],["Meeting","schůzka"],["Office","kancelář"],["Interview","pohovor"],["Employee","zaměstnanec"],["Boss","šéf"],["Career","kariéra"],["Experience","zkušenost"]],
+  sentences:[["She works as a ___ in a big company.","manager","Pracuje jako manažerka ve velké firmě."],["I have a job ___ tomorrow.","interview","Zítra mám pracovní pohovor."],["My ___ is not very high.","salary","Můj plat není moc vysoký."],["We have a ___ at nine.","meeting","V devět máme schůzku."],["He is a good ___ .","colleague","Je to dobrý kolega."],["I need more ___ for this job.","experience","Na tuhle práci potřebuji víc zkušeností."]]},
+ {id:'a2_health', title:'Zdraví a nemoci',
+  vocab:[["Doctor","lékař"],["Nurse","sestra"],["Hospital","nemocnice"],["Medicine","lék"],["Headache","bolest hlavy"],["Fever","horečka"],["Cough","kašel"],["Cold","nachlazení"],["Pain","bolest"],["Healthy","zdravý"],["Ill","nemocný"],["Injury","zranění"],["Appointment","termín"],["Dentist","zubař"]],
+  sentences:[["I have a ___ , I need a pill.","headache","Bolí mě hlava, potřebuji prášek."],["She is ___ , she can't go to work.","ill","Je nemocná, nemůže do práce."],["The ___ gave me some medicine.","doctor","Lékař mi dal lék."],["He has a high ___ .","fever","Má vysokou horečku."],["Eating fruit keeps you ___ .","healthy","Jíst ovoce tě udrží zdravého."],["I have an ___ with the dentist.","appointment","Mám termín u zubaře."]]},
+ {id:'a2_travel', title:'Cestování a dovolená',
+  vocab:[["Flight","let"],["Airport","letiště"],["Passport","pas"],["Luggage","zavazadlo"],["Hotel","hotel"],["Booking","rezervace"],["Journey","cesta"],["Abroad","v zahraničí"],["Tourist","turista"],["Suitcase","kufr"],["Departure","odjezd"],["Arrival","příjezd"],["Currency","měna"],["Sightseeing","prohlídka památek"]],
+  sentences:[["Our ___ leaves at 6 a.m.","flight","Náš let odlétá v 6 ráno."],["Don't forget your ___ at the airport.","passport","Nezapomeň si pas na letišti."],["I made a ___ for two nights.","booking","Udělal jsem rezervaci na dvě noci."],["We travelled ___ last summer.","abroad","Minulé léto jsme cestovali do zahraničí."],["My ___ is very heavy.","suitcase","Můj kufr je moc těžký."],["We did some ___ in Rome.","sightseeing","V Římě jsme si prohlédli památky."]]},
+ {id:'a2_shopping', title:'Nakupování a peníze',
+  vocab:[["Money","peníze"],["Price","cena"],["Discount","sleva"],["Receipt","účtenka"],["Cash","hotovost"],["Card","karta"],["Customer","zákazník"],["Change","drobné"],["Expensive","drahý"],["Cheap","levný"],["Sale","výprodej"],["Refund","vrácení peněz"],["Wallet","peněženka"],["Bill","účet"]],
+  sentences:[["Can I pay by ___ ?","card","Můžu platit kartou?"],["There is a big ___ in the shop.","sale","V obchodě je velký výprodej."],["Keep the ___ , you may need it.","receipt","Nech si účtenku, možná ji budeš potřebovat."],["This jacket is too ___ .","expensive","Tahle bunda je moc drahá."],["I got a 20% ___ .","discount","Dostal jsem 20% slevu."],["I paid in ___ .","cash","Zaplatil jsem hotově."]]},
+ {id:'a2_restaurant', title:'Jídlo a restaurace',
+  vocab:[["Menu","jídelní lístek"],["Waiter","číšník"],["Order","objednávka"],["Dish","pokrm"],["Starter","předkrm"],["Dessert","dezert"],["Bill","účet"],["Tip","spropitné"],["Delicious","výborný"],["Recipe","recept"],["Vegetarian","vegetariánský"],["Reservation","rezervace"],["Meal","jídlo"],["Fresh","čerstvý"]],
+  sentences:[["Can I see the ___ , please?","menu","Můžu vidět jídelní lístek, prosím?"],["The ___ took our order.","waiter","Číšník si vzal naši objednávku."],["This soup is ___ !","delicious","Tahle polévka je výborná!"],["We had ice cream for ___ .","dessert","K dezertu jsme měli zmrzlinu."],["Can we have the ___ , please?","bill","Můžeme dostat účet, prosím?"],["I made a ___ for two people.","reservation","Udělal jsem rezervaci pro dva."]]},
+ {id:'a2_hobbies', title:'Volný čas a sport',
+  vocab:[["Football","fotbal"],["Swimming","plavání"],["Cycling","cyklistika"],["Painting","malování"],["Photography","fotografování"],["Concert","koncert"],["Gym","posilovna"],["Team","tým"],["Match","zápas"],["Hobby","koníček"],["Camping","kempování"],["Chess","šachy"],["Dancing","tanec"],["Running","běhání"]],
+  sentences:[["My favourite ___ is reading.","hobby","Můj oblíbený koníček je čtení."],["We watched an exciting ___ .","match","Sledovali jsme napínavý zápas."],["She goes to the ___ every morning.","gym","Každé ráno chodí do posilovny."],["They play in the same ___ .","team","Hrají ve stejném týmu."],["We went ___ in the mountains.","camping","Byli jsme kempovat v horách."],["He loves ___ in the lake.","swimming","Miluje plavání v jezeře."]]},
+ {id:'a2_tech', title:'Technologie',
+  vocab:[["Computer","počítač"],["Phone","telefon"],["Screen","obrazovka"],["Internet","internet"],["Email","e-mail"],["Password","heslo"],["App","aplikace"],["Website","web"],["Download","stáhnout"],["Message","zpráva"],["Battery","baterie"],["Charger","nabíječka"],["Keyboard","klávesnice"],["Update","aktualizace"]],
+  sentences:[["I forgot my ___ .","password","Zapomněl jsem heslo."],["My ___ is almost dead.","battery","Baterie mi skoro došla."],["I sent you an ___ .","email","Poslal jsem ti e-mail."],["Can you ___ the app?","download","Můžeš stáhnout tu aplikaci?"],["The ___ is very slow today.","internet","Internet je dnes moc pomalý."],["I got a ___ from my friend.","message","Dostal jsem zprávu od kamaráda."]]},
+ {id:'a2_feelings', title:'Pocity a emoce',
+  vocab:[["Happy","šťastný"],["Angry","naštvaný"],["Tired","unavený"],["Excited","nadšený"],["Nervous","nervózní"],["Bored","znuděný"],["Surprised","překvapený"],["Worried","ustaraný"],["Proud","hrdý"],["Scared","vyděšený"],["Relaxed","uvolněný"],["Lonely","osamělý"],["Confused","zmatený"],["Calm","klidný"]],
+  sentences:[["I am ___ about the exam.","nervous","Jsem nervózní z toho testu."],["She was ___ to see her friends.","excited","Byla nadšená, že vidí kamarády."],["He looks ___ today, is he okay?","worried","Vypadá dnes ustaraně, je v pořádku?"],["I am ___ , I want to sleep.","tired","Jsem unavený, chci spát."],["They were ___ by the news.","surprised","Ta zpráva je překvapila."],["After yoga I feel ___ .","relaxed","Po józe se cítím uvolněně."]]},
+ {id:'a2_people', title:'Popis lidí',
+  vocab:[["Tall","vysoký"],["Short","malý"],["Slim","štíhlý"],["Blond","blonďatý"],["Beard","vousy"],["Curly","kudrnatý"],["Friendly","přátelský"],["Shy","stydlivý"],["Clever","chytrý"],["Funny","vtipný"],["Kind","laskavý"],["Polite","zdvořilý"],["Lazy","líný"],["Honest","čestný"]],
+  sentences:[["My brother is very ___ .","tall","Můj bratr je hodně vysoký."],["She has ___ hair.","curly","Má kudrnaté vlasy."],["He is ___ and always helps.","kind","Je laskavý a vždy pomáhá."],["Our teacher is very ___ .","friendly","Náš učitel je moc přátelský."],["He is too ___ to clean his room.","lazy","Je moc líný, aby si uklidil pokoj."],["My grandpa has a grey ___ .","beard","Můj děda má šedivé vousy."]]},
+ {id:'a2_education', title:'Vzdělání',
+  vocab:[["University","univerzita"],["Student","student"],["Teacher","učitel"],["Exam","zkouška"],["Homework","domácí úkol"],["Subject","předmět"],["Lesson","lekce"],["Degree","titul"],["Library","knihovna"],["Notebook","sešit"],["Grade","známka"],["Classroom","třída"],["Course","kurz"],["Knowledge","znalost"]],
+  sentences:[["I have an ___ next week.","exam","Příští týden mám zkoušku."],["My favourite ___ is history.","subject","Můj oblíbený předmět je dějepis."],["She studies at ___ .","university","Studuje na univerzitě."],["Have you done your ___ ?","homework","Udělal jsi domácí úkol?"],["He got a good ___ in maths.","grade","Z matematiky dostal dobrou známku."],["I borrow books from the ___ .","library","Půjčuji si knihy v knihovně."]]},
+ {id:'a2_nature', title:'Příroda a prostředí',
+  vocab:[["Environment","životní prostředí"],["Pollution","znečištění"],["Recycling","recyklace"],["Climate","podnebí"],["Forest","les"],["Ocean","oceán"],["Energy","energie"],["Plastic","plast"],["Rubbish","odpadky"],["Planet","planeta"],["Weather","počasí"],["Nature","příroda"],["Waste","odpad"],["Clean","čistý"]],
+  sentences:[["We must protect the ___ .","environment","Musíme chránit životní prostředí."],["___ is a big problem in cities.","Pollution","Znečištění je ve městech velký problém."],["Please put the bottle in the ___ bin.","recycling","Dej tu láhev do koše na recyklaci."],["Too much ___ is bad for the ocean.","plastic","Příliš plastu škodí oceánu."],["We should save ___ at home.","energy","Doma bychom měli šetřit energii."],["The ___ here is beautiful.","nature","Příroda je tady krásná."]]},
+ {id:'a2_house', title:'Domácnost',
+  vocab:[["Furniture","nábytek"],["Cupboard","skříňka"],["Blanket","deka"],["Curtain","závěs"],["Drawer","zásuvka"],["Shelf","police"],["Cushion","polštář"],["Dishwasher","myčka"],["Iron","žehlička"],["Balcony","balkon"],["Ceiling","strop"],["Rug","koberec"],["Vacuum","vysavač"],["Kettle","konvice"]],
+  sentences:[["The books are on the ___ .","shelf","Knihy jsou na polici."],["Close the ___ , it's too bright.","curtain","Zatáhni závěs, je moc světlo."],["We have new ___ in the living room.","furniture","V obývacím pokoji máme nový nábytek."],["The plates are in the ___ .","cupboard","Talíře jsou ve skříňce."],["We sit on the ___ in summer.","balcony","V létě sedáváme na balkoně."],["Put the dirty plates in the ___ .","dishwasher","Dej špinavé talíře do myčky."]]},
+ {id:'a2_directions', title:'Ve městě a orientace',
+  vocab:[["Corner","roh"],["Traffic","provoz"],["Roundabout","kruhový objezd"],["Crossroads","křižovatka"],["Straight","rovně"],["Left","vlevo"],["Right","vpravo"],["Opposite","naproti"],["Near","blízko"],["Between","mezi"],["Square","náměstí"],["Pedestrian","chodec"],["Pavement","chodník"],["Corner","roh"]],
+  sentences:[["Go ___ and then turn left.","straight","Jdi rovně a pak zahni doleva."],["Turn ___ at the traffic lights.","right","Na semaforu zahni doprava."],["The bank is ___ the post office.","opposite","Banka je naproti poště."],["There is a lot of ___ this morning.","traffic","Dnes ráno je velký provoz."],["The shop is ___ the bank and the café.","between","Obchod je mezi bankou a kavárnou."],["Walk on the ___ , not on the road.","pavement","Jdi po chodníku, ne po silnici."]]},
+ {id:'a2_clothes', title:'Oblečení a móda',
+  vocab:[["Fashion","móda"],["Size","velikost"],["Jumper","svetr"],["Boots","kozačky"],["Suit","oblek"],["Pocket","kapsa"],["Sleeve","rukáv"],["Wardrobe","šatník"],["Cotton","bavlna"],["Leather","kůže"],["Style","styl"],["Tight","těsný"],["Loose","volný"],["Trendy","módní"]],
+  sentences:[["What ___ are these shoes?","size","Jakou velikost mají tyhle boty?"],["This shirt is too ___ for me.","tight","Tahle košile je mi moc těsná."],["He wears a ___ to work.","suit","Do práce nosí oblek."],["I like your ___ .","style","Líbí se mi tvůj styl."],["My phone is in my ___ .","pocket","Telefon mám v kapse."],["This bag is made of ___ .","leather","Tahle taška je z kůže."]]},
+ {id:'a2_comm', title:'Komunikace',
+  vocab:[["Conversation","rozhovor"],["Language","jazyk"],["Question","otázka"],["Answer","odpověď"],["Advice","rada"],["News","zprávy"],["Opinion","názor"],["Meaning","význam"],["Voice","hlas"],["Silence","ticho"],["Argument","hádka"],["Joke","vtip"],["Promise","slib"],["Secret","tajemství"]],
+  sentences:[["Can I ask you a ___ ?","question","Můžu se tě zeptat na otázku?"],["He gave me good ___ .","advice","Dal mi dobrou radu."],["What is your ___ about this?","opinion","Jaký na to máš názor?"],["Please keep it a ___ .","secret","Prosím, nech si to jako tajemství."],["I don't know the ___ of this word.","meaning","Neznám význam tohoto slova."],["They had a big ___ .","argument","Měli velkou hádku."]]}
+];
+
+/* ===== A2 GRAMATIKA ===== */
+const GRAMMAR_A2=[
+ {id:'a2g_past', title:'Minulý čas prostý', type:'grammar',
+  theory:"Děj v minulosti. Sloveso <b>to be</b> má tvary <b>was/were</b>. Pravidelná slovesa přidávají <b>-ed</b> (work → worked). Zápor a otázku tvoříš přes <b>did/didn't</b> a hlavní sloveso je pak v základním tvaru.",
+  table:[["","Kladně","Zápor","Otázka"],["to be","I was / you were","wasn't / weren't","Were you…?"],["ostatní","I worked","I didn't work","Did you work?"]],
+  items:[["I ___ at home yesterday.","was",["was","were","did"],"Včera jsem byl doma."],["They ___ very happy.","were",["was","were","did"],"Byli moc šťastní."],["She ___ in the park.","played",["play","played","plays"],"Hrála si v parku."],["We ___ pizza last night.","cooked",["cook","cooked","cooks"],"Včera večer jsme uvařili pizzu."],["He ___ not at school.","was",["was","were","did"],"Nebyl ve škole."],["___ you tired after the trip?","Were",["Was","Were","Did"],"Byl jsi po výletě unavený?"],["I ___ not watch TV.","did",["did","was","were"],"Nedíval jsem se na televizi."],["___ she call you?","Did",["Did","Was","Were"],"Zavolala ti?"],["The film ___ great.","was",["was","were","did"],"Ten film byl skvělý."],["They ___ football on Sunday.","played",["play","played","plays"],"V neděli hráli fotbal."],["We ___ in Italy last year.","were",["was","were","did"],"Loni jsme byli v Itálii."],["I ___ my homework.","finished",["finish","finished","finishes"],"Dodělal jsem úkol."],["___ they at the party?","Were",["Was","Were","Did"],"Byli na té oslavě?"],["He ___ not like the food.","did",["did","was","were"],"To jídlo mu nechutnalo."],["She ___ a doctor ten years ago.","was",["was","were","did"],"Před deseti lety byla lékařka."]]},
+ {id:'a2g_irr', title:'Nepravidelná slovesa (minulost)', type:'grammar',
+  theory:"Mnoho běžných sloves má v minulém čase <b>nepravidelný tvar</b>, který se učíš zpaměti. Např. go → <b>went</b>, have → <b>had</b>, see → <b>saw</b>, buy → <b>bought</b>.",
+  table:[["Základ","Minulý čas"],["go","went"],["have","had"],["see","saw"],["eat","ate"],["buy","bought"],["make","made"]],
+  items:[["I ___ to school by bus.","went",["goed","went","gone"],"Jel jsem do školy autobusem."],["She ___ a new car.","bought",["buyed","bought","buy"],"Koupila si nové auto."],["We ___ a film last night.","saw",["seed","saw","seen"],"Včera večer jsme viděli film."],["He ___ breakfast at eight.","had",["haved","had","has"],"Snídal v osm."],["They ___ a cake.","made",["maked","made","make"],"Udělali dort."],["I ___ a photo of the castle.","took",["taked","took","take"],"Vyfotil jsem hrad."],["She ___ home late.","came",["comed","came","come"],"Přišla domů pozdě."],["We ___ pizza for dinner.","ate",["eated","ate","eaten"],"K večeři jsme jedli pizzu."],["He ___ a letter to his friend.","wrote",["writed","wrote","written"],"Napsal dopis kamarádovi."],["I ___ my keys this morning.","lost",["losed","lost","lose"],"Ráno jsem ztratil klíče."],["She ___ a beautiful song.","sang",["singed","sang","sung"],"Zazpívala krásnou píseň."],["We ___ a lot of money.","spent",["spended","spent","spend"],"Utratili jsme hodně peněz."],["He ___ the ball to me.","threw",["throwed","threw","thrown"],"Hodil mi míč."],["I ___ my grandmother yesterday.","met",["meeted","met","meet"],"Včera jsem potkal babičku."],["The bird ___ away.","flew",["flyed","flew","flown"],"Pták odletěl."]]},
+ {id:'a2g_prescont', title:'Přítomný čas průběhový', type:'grammar',
+  theory:"Děj, který se odehrává <b>právě teď</b>. Tvoří se <b>am/is/are + sloveso-ing</b>. Otázku tvoříš prohozením: <b>Are you working?</b>",
+  table:[["Osoba","Tvar","Příklad"],["I","am + -ing","I am eating."],["he / she / it","is + -ing","She is running."],["you / we / they","are + -ing","They are playing."]],
+  items:[["I ___ reading a book now.","am",["am","is","are"],"Právě čtu knihu."],["She ___ cooking dinner.","is",["am","is","are"],"Vaří večeři."],["They ___ playing football.","are",["am","is","are"],"Hrají fotbal."],["Look! It ___ raining.","is",["am","is","are"],"Podívej! Prší."],["We ___ watching TV.","are",["am","is","are"],"Díváme se na televizi."],["He is ___ to music.","listening",["listen","listening","listens"],"Poslouchá hudbu."],["What ___ you doing?","are",["am","is","are"],"Co děláš?"],["The children are ___ .","sleeping",["sleep","sleeping","sleeps"],"Děti spí."],["I am ___ my homework.","doing",["do","doing","does"],"Dělám úkol."],["She ___ not working today.","is",["am","is","are"],"Dnes nepracuje."],["They are ___ a new house.","building",["build","building","builds"],"Staví nový dům."],["___ he studying now?","Is",["Am","Is","Are"],"Učí se teď?"],["We are ___ for the bus.","waiting",["wait","waiting","waits"],"Čekáme na autobus."],["The dog ___ running in the garden.","is",["am","is","are"],"Pes běhá po zahradě."],["I ___ having lunch right now.","am",["am","is","are"],"Právě obědvám."]]},
+ {id:'a2g_comp', title:'Stupňování přídavných jmen', type:'grammar',
+  theory:"Krátká přídavná: <b>-er</b> a <b>the …-est</b> (big → bigger → the biggest). Dlouhá: <b>more</b> a <b>the most</b>. Nepravidelná: good → <b>better → the best</b>, bad → <b>worse → the worst</b>. Po 2. stupni bývá <b>than</b>.",
+  table:[["Typ","2. stupeň","3. stupeň"],["krátká (big)","bigger","the biggest"],["dlouhá (modern)","more modern","the most modern"],["good","better","the best"],["bad","worse","the worst"]],
+  items:[["A car is ___ than a bike.","faster",["fast","faster","fastest"],"Auto je rychlejší než kolo."],["This is the ___ day of my life.","best",["good","better","best"],"Tohle je nejlepší den mého života."],["My bag is ___ than yours.","bigger",["big","bigger","biggest"],"Moje taška je větší než tvoje."],["He is the ___ boy in the class.","tallest",["tall","taller","tallest"],"Je to nejvyšší kluk ve třídě."],["This phone is ___ expensive than that one.","more",["more","most","much"],"Tenhle telefon je dražší než tamten."],["Today is ___ than yesterday.","worse",["bad","worse","worst"],"Dnešek je horší než včerejšek."],["She is the ___ student in school.","best",["good","better","best"],"Je to nejlepší studentka ve škole."],["Winter is ___ than summer.","colder",["cold","colder","coldest"],"Zima je chladnější než léto."],["It is the ___ interesting book.","most",["more","most","much"],"Je to nejzajímavější kniha."],["This exercise is ___ than the last one.","easier",["easy","easier","easiest"],"Tohle cvičení je snazší než minulé."],["He runs ___ than me.","faster",["fast","faster","fastest"],"Běhá rychleji než já."],["This is the ___ shop in town.","cheapest",["cheap","cheaper","cheapest"],"Tohle je nejlevnější obchod ve městě."],["My room is ___ than the kitchen.","smaller",["small","smaller","smallest"],"Můj pokoj je menší než kuchyň."],["Health is ___ important than money.","more",["more","most","much"],"Zdraví je důležitější než peníze."],["She is a ___ singer than her sister.","better",["good","better","best"],"Zpívá líp než její sestra."]]},
+ {id:'a2g_pastcont', title:'Minulý čas průběhový', type:'grammar',
+  theory:"Děj, který <b>probíhal</b> v určitý okamžik v minulosti. Tvoří se <b>was/were + sloveso-ing</b>. Často s <b>when/while</b>.",
+  table:[["Osoba","Tvar"],["I / he / she / it","was + -ing"],["you / we / they","were + -ing"]],
+  items:[["I ___ sleeping at 10 p.m.","was",["was","were","did"],"V deset večer jsem spal."],["They ___ watching a film.","were",["was","were","did"],"Dívali se na film."],["She ___ cooking when I arrived.","was",["was","were","did"],"Když jsem přišel, vařila."],["We ___ waiting for you.","were",["was","were","did"],"Čekali jsme na tebe."],["He was ___ a book.","reading",["read","reading","reads"],"Četl knihu."],["What ___ you doing at 8?","were",["was","were","did"],"Co jsi dělal v osm?"],["It ___ raining all morning.","was",["was","were","did"],"Celé ráno pršelo."],["The kids were ___ in the garden.","playing",["play","playing","plays"],"Děti si hrály na zahradě."],["I ___ having dinner at seven.","was",["was","were","did"],"V sedm jsem večeřel."],["They were ___ to music.","listening",["listen","listening","listens"],"Poslouchali hudbu."],["She ___ not working yesterday.","was",["was","were","did"],"Včera nepracovala."],["We were ___ about you.","talking",["talk","talking","talks"],"Bavili jsme se o tobě."],["___ they sleeping when you called?","Were",["Was","Were","Did"],"Spali, když jsi volal?"],["He was ___ his car.","washing",["wash","washing","washes"],"Myl si auto."],["I was ___ home when it started.","walking",["walk","walking","walks"],"Šel jsem domů, když to začalo."]]},
+ {id:'a2g_future', title:'Budoucnost: will / going to', type:'grammar',
+  theory:"<b>will</b> = rozhodnutí teď, předpověď, slib. <b>be going to</b> = plán nebo úmysl. Po obou je sloveso v základním tvaru.",
+  table:[["Forma","Použití","Příklad"],["will + sloveso","rozhodnutí, předpověď","It will rain."],["be going to + sloveso","plán, úmysl","I'm going to study."]],
+  items:[["I think it ___ rain tomorrow.","will",["will","going","am"],"Myslím, že zítra bude pršet."],["I'm ___ to visit my aunt.","going",["will","going","go"],"Chystám se navštívit tetu."],["She ___ help you later.","will",["will","going","is"],"Později ti pomůže."],["We are going ___ buy a house.","to",["to","will","for"],"Chystáme se koupit dům."],["Don't worry, I ___ call you.","will",["will","going","am"],"Neboj, zavolám ti."],["They are going to ___ a party.","have",["have","will","has"],"Uspořádají oslavu."],["Maybe he ___ come tonight.","will",["will","going","is"],"Možná dnes večer přijde."],["Look at the clouds! It's going ___ rain.","to",["to","will","for"],"Podívej na mraky! Bude pršet."],["I ___ probably stay home.","will",["will","going","am"],"Nejspíš zůstanu doma."],["We ___ never forget this day.","will",["will","going","are"],"Na tenhle den nikdy nezapomeneme."],["She's ___ to start a new job.","going",["will","going","go"],"Nastupuje do nové práce."],["___ you help me, please?","Will",["Will","Going","Are"],"Pomůžeš mi, prosím?"],["I'm going to ___ English this year.","learn",["learn","learns","learning"],"Letos se budu učit anglicky."],["The train ___ leave at six.","will",["will","going","is"],"Vlak odjede v šest."],["They are going to ___ married.","get",["get","gets","getting"],"Budou se brát."]]},
+ {id:'a2g_quant', title:'Some / any, much / many', type:'grammar',
+  theory:"<b>some</b> v kladné větě, <b>any</b> v záporu a otázce. <b>many</b> + počitatelná (many books), <b>much</b> + nepočitatelná (much water).",
+  table:[["","Počitatelná (books)","Nepočitatelná (water)"],["kladně","some","some"],["zápor / otázka","any","any"],["množství","many","much"]],
+  items:[["There is ___ milk in the fridge.","some",["some","any","many"],"V lednici je nějaké mléko."],["I don't have ___ money.","any",["some","any","much"],"Nemám žádné peníze."],["How ___ books do you have?","many",["much","many","some"],"Kolik máš knih?"],["How ___ water do you drink?","much",["much","many","some"],"Kolik piješ vody?"],["Are there ___ apples?","any",["some","any","much"],"Jsou tam nějaká jablka?"],["We have ___ friends here.","many",["much","many","any"],"Máme tu hodně kamarádů."],["Would you like ___ coffee?","some",["some","any","many"],"Dáš si kávu?"],["There isn't ___ bread.","any",["some","any","many"],"Není tu žádný chleba."],["I don't eat ___ sugar.","much",["much","many","some"],"Nejím moc cukru."],["She has ___ nice clothes.","some",["some","any","much"],"Má nějaké pěkné oblečení."],["Do you have ___ questions?","any",["some","any","much"],"Máš nějaké otázky?"],["There are ___ people in the park.","many",["much","many","any"],"V parku je hodně lidí."],["He doesn't have ___ time.","much",["much","many","some"],"Nemá moc času."],["Can I have ___ water, please?","some",["some","any","many"],"Můžu dostat vodu, prosím?"],["How ___ sisters do you have?","many",["much","many","some"],"Kolik máš sester?"]]},
+ {id:'a2g_modal', title:'Have to / must / should', type:'grammar',
+  theory:"<b>must</b> a <b>have to</b> = muset. <b>mustn't</b> = nesmět, <b>don't have to</b> = nemuset. <b>should</b> = měl bys (rada). Po všech je sloveso v základním tvaru.",
+  table:[["Modál","Význam","Příklad"],["must / have to","muset","You must stop."],["mustn't","nesmět","You mustn't smoke."],["don't have to","nemuset","You don't have to come."],["should","měl bys (rada)","You should rest."]],
+  items:[["You ___ wear a seatbelt in the car.","must",["must","mustn't","don't"],"V autě musíš mít pás."],["I ___ to get up early tomorrow.","have",["have","must","should"],"Zítra musím vstát brzy."],["You ___ smoke here.","mustn't",["must","mustn't","should"],"Tady nesmíš kouřit."],["You ___ see a doctor.","should",["should","mustn't","don't"],"Měl bys jít k lékaři."],["We don't ___ to hurry, there's time.","have",["have","must","should"],"Nemusíme spěchat, je čas."],["Children ___ listen to their parents.","should",["should","mustn't","don't"],"Děti by měly poslouchat rodiče."],["She ___ to work on Saturday.","has",["has","have","must"],"V sobotu musí do práce."],["You ___ be quiet in the library.","must",["must","don't","should"],"V knihovně musíš být potichu."],["You ___ tell anyone. It's a secret.","mustn't",["must","mustn't","should"],"Nesmíš to nikomu říct. Je to tajemství."],["I think you ___ rest more.","should",["should","mustn't","have"],"Myslím, že by ses měl víc odpočívat."],["Do we ___ to pay for this?","have",["have","must","should"],"Musíme za tohle platit?"],["You ___ eat more vegetables.","should",["should","mustn't","don't"],"Měl bys jíst víc zeleniny."],["Drivers ___ stop at a red light.","must",["must","mustn't","don't"],"Řidiči musí zastavit na červenou."],["He ___ to study for the exam.","has",["has","have","must"],"Musí se učit na zkoušku."],["You ___ worry, everything is fine.","shouldn't",["should","shouldn't","must"],"Neměl by ses bát, všechno je v pořádku."]]},
+ {id:'a2g_pp', title:'Předpřítomný čas', type:'grammar',
+  theory:"<b>Present perfect</b> = <b>have/has + 3. tvar slovesa</b>. Pro zkušenosti a děje s dopadem do teď. Často s <b>ever, never, already, yet, just</b>.",
+  table:[["Osoba","Tvar","Příklad"],["I / you / we / they","have + 3. tvar","I have finished."],["he / she / it","has + 3. tvar","She has left."]],
+  items:[["I ___ finished my work.","have",["have","has","had"],"Dodělal jsem práci."],["She ___ never been to London.","has",["have","has","had"],"Nikdy nebyla v Londýně."],["We ___ already eaten.","have",["have","has","did"],"Už jsme jedli."],["___ you ever seen a lion?","Have",["Have","Has","Did"],"Viděl jsi někdy lva?"],["He has ___ his keys.","lost",["lose","lost","losed"],"Ztratil klíče."],["They ___ just arrived.","have",["have","has","had"],"Právě přijeli."],["I have ___ this film before.","seen",["see","saw","seen"],"Ten film jsem už viděl."],["She has ___ to work.","gone",["go","went","gone"],"Odešla do práce."],["We haven't finished ___ .","yet",["yet","already","ever"],"Ještě jsme neskončili."],["Have you ___ your homework?","done",["do","did","done"],"Udělal jsi úkol?"],["He ___ written three books.","has",["have","has","had"],"Napsal tři knihy."],["I have ___ eaten sushi.","never",["never","yet","just"],"Nikdy jsem nejedl sushi."],["They have ___ bought a new car.","just",["just","yet","ever"],"Právě si koupili nové auto."],["She has ___ her homework already.","done",["do","did","done"],"Úkol už udělala."],["We ___ known him for years.","have",["have","has","had"],"Známe ho už roky."]]}
+];
+
+/* ===== B1 SLOVÍČKA ===== */
+const CATS_B1=[
+ {id:'b1_work', title:'Práce a kariéra',
+  vocab:[["Career","kariéra"],["Promotion","povýšení"],["Deadline","termín"],["Employer","zaměstnavatel"],["Skill","dovednost"],["Application","žádost"],["Contract","smlouva"],["Overtime","přesčas"],["Wage","mzda"],["Redundancy","propuštění"],["Shift","směna"],["Task","úkol"],["Staff","personál"],["Reference","doporučení"]],
+  sentences:[["She got a ___ to senior manager.","promotion","Byla povýšena na vrchní manažerku."],["I have to meet a tight ___ .","deadline","Musím stihnout přísný termín."],["He signed a two-year ___ .","contract","Podepsal dvouletou smlouvu."],["I sent my job ___ yesterday.","application","Včera jsem poslal žádost o práci."],["Communication is an important ___ .","skill","Komunikace je důležitá dovednost."],["I worked a lot of ___ this month.","overtime","Tento měsíc jsem měl hodně přesčasů."]]},
+ {id:'b1_money', title:'Peníze a finance',
+  vocab:[["Budget","rozpočet"],["Loan","půjčka"],["Interest","úrok"],["Savings","úspory"],["Debt","dluh"],["Income","příjem"],["Expense","výdaj"],["Invest","investovat"],["Afford","dovolit si"],["Tax","daň"],["Fee","poplatek"],["Account","účet"],["Profit","zisk"],["Currency","měna"]],
+  sentences:[["We need to make a monthly ___ .","budget","Musíme si udělat měsíční rozpočet."],["He took out a ___ to buy a house.","loan","Vzal si půjčku na koupi domu."],["I can't ___ a new car.","afford","Nemůžu si dovolit nové auto."],["The company made a big ___ .","profit","Firma měla velký zisk."],["I have some ___ in the bank.","savings","Mám v bance nějaké úspory."],["Everyone must pay ___ .","tax","Každý musí platit daně."]]},
+ {id:'b1_crime', title:'Zločin a právo',
+  vocab:[["Crime","zločin"],["Thief","zloděj"],["Robbery","loupež"],["Witness","svědek"],["Court","soud"],["Judge","soudce"],["Guilty","vinný"],["Innocent","nevinný"],["Prison","vězení"],["Lawyer","právník"],["Evidence","důkaz"],["Arrest","zatknout"],["Fine","pokuta"],["Victim","oběť"]],
+  sentences:[["The police will ___ the man.","arrest","Policie toho muže zatkne."],["He was found ___ by the court.","guilty","Soud ho uznal vinným."],["There was not enough ___ .","evidence","Nebylo dost důkazů."],["A ___ saw the accident.","witness","Nehodu viděl svědek."],["The thief went to ___ .","prison","Zloděj šel do vězení."],["I had to pay a parking ___ .","fine","Musel jsem zaplatit pokutu za parkování."]]},
+ {id:'b1_media', title:'Média a zprávy',
+  vocab:[["News","zprávy"],["Article","článek"],["Headline","titulek"],["Journalist","novinář"],["Advert","reklama"],["Broadcast","vysílání"],["Report","reportáž"],["Channel","kanál"],["Audience","publikum"],["Interview","rozhovor"],["Magazine","časopis"],["Source","zdroj"],["Social media","sociální sítě"],["Podcast","podcast"]],
+  sentences:[["I read an interesting ___ today.","article","Dnes jsem četl zajímavý článek."],["The ___ was very shocking.","headline","Ten titulek byl hodně šokující."],["She works as a ___ .","journalist","Pracuje jako novinářka."],["We watched the news ___ .","report","Dívali jsme se na zpravodajskou reportáž."],["This TV ___ shows films.","channel","Tenhle televizní kanál dává filmy."],["Many people spend hours on ___ .","social media","Hodně lidí tráví hodiny na sociálních sítích."]]},
+ {id:'b1_environment', title:'Životní prostředí',
+  vocab:[["Climate change","klimatická změna"],["Pollution","znečištění"],["Recycle","recyklovat"],["Renewable","obnovitelný"],["Emission","emise"],["Wildlife","divoká zvěř"],["Drought","sucho"],["Flood","povodeň"],["Sustainable","udržitelný"],["Litter","odpadky"],["Species","druh"],["Global warming","globální oteplování"],["Solar","solární"],["Waste","odpad"]],
+  sentences:[["___ is the biggest problem today.","Climate change","Klimatická změna je dnes největší problém."],["We should ___ paper and glass.","recycle","Měli bychom recyklovat papír a sklo."],["___ energy comes from the sun and wind.","Renewable","Obnovitelná energie pochází ze slunce a větru."],["Many ___ are in danger.","species","Mnoho druhů je v ohrožení."],["Cars produce a lot of ___ .","emission","Auta produkují hodně emisí."],["Please don't drop ___ in the park.","litter","V parku prosím neodhazuj odpadky."]]},
+ {id:'b1_health', title:'Zdraví a životní styl',
+  vocab:[["Diet","strava"],["Exercise","cvičení"],["Stress","stres"],["Symptom","příznak"],["Treatment","léčba"],["Prevention","prevence"],["Vitamin","vitamín"],["Muscle","sval"],["Rest","odpočinek"],["Balanced","vyvážený"],["Illness","nemoc"],["Recover","zotavit se"],["Mental","duševní"],["Wellbeing","pohoda"]],
+  sentences:[["A ___ diet keeps you healthy.","balanced","Vyvážená strava tě udrží zdravého."],["Too much ___ is bad for you.","stress","Příliš stresu ti škodí."],["Regular ___ is good for the heart.","exercise","Pravidelné cvičení prospívá srdci."],["It took a week to ___ from the flu.","recover","Zotavit se z chřipky trvalo týden."],["A high fever is a ___ of illness.","symptom","Vysoká horečka je příznak nemoci."],["___ health is as important as physical.","Mental","Duševní zdraví je stejně důležité jako fyzické."]]},
+ {id:'b1_relationships', title:'Vztahy',
+  vocab:[["Friendship","přátelství"],["Trust","důvěra"],["Argument","hádka"],["Partner","partner"],["Marriage","manželství"],["Divorce","rozvod"],["Couple","pár"],["Neighbour","soused"],["Colleague","kolega"],["Relative","příbuzný"],["Support","podpora"],["Respect","respekt"],["Loyal","loajální"],["Jealous","žárlivý"]],
+  sentences:[["___ is based on trust.","Friendship","Přátelství je založené na důvěře."],["They had a big ___ yesterday.","argument","Včera měli velkou hádku."],["My ___ helped me a lot.","partner","Můj partner mi hodně pomohl."],["Good friends ___ each other.","support","Dobří přátelé se navzájem podporují."],["He is very ___ to his friends.","loyal","Ke svým přátelům je moc loajální."],["She felt ___ when he talked to others.","jealous","Když mluvil s ostatními, žárlila."]]},
+ {id:'b1_personality', title:'Osobnost a povaha',
+  vocab:[["Ambitious","ambiciózní"],["Generous","štědrý"],["Reliable","spolehlivý"],["Selfish","sobecký"],["Confident","sebevědomý"],["Patient","trpělivý"],["Stubborn","tvrdohlavý"],["Sensitive","citlivý"],["Outgoing","společenský"],["Reserved","zdrženlivý"],["Creative","kreativní"],["Hardworking","pracovitý"],["Rude","hrubý"],["Cheerful","veselý"]],
+  sentences:[["She is very ___ and wants a top job.","ambitious","Je hodně ambiciózní a chce vrcholovou práci."],["He is ___ ; he always keeps his word.","reliable","Je spolehlivý; vždy dodrží slovo."],["Don't be so ___ , share with others.","selfish","Nebuď tak sobecký, poděl se s ostatními."],["You need to be ___ with children.","patient","S dětmi musíš být trpělivý."],["She is ___ and makes friends easily.","outgoing","Je společenská a snadno si dělá přátele."],["He is too ___ to change his mind.","stubborn","Je moc tvrdohlavý, aby změnil názor."]]},
+ {id:'b1_science', title:'Věda a technika',
+  vocab:[["Research","výzkum"],["Experiment","pokus"],["Invention","vynález"],["Discovery","objev"],["Data","data"],["Device","zařízení"],["Software","software"],["Robot","robot"],["Laboratory","laboratoř"],["Theory","teorie"],["Result","výsledek"],["Develop","vyvíjet"],["Artificial","umělý"],["Progress","pokrok"]],
+  sentences:[["Scientists do a lot of ___ .","research","Vědci dělají hodně výzkumu."],["The ___ changed the world.","invention","Ten vynález změnil svět."],["They tested a new ___ .","device","Testovali nové zařízení."],["We are waiting for the ___ .","result","Čekáme na výsledek."],["The company will ___ a new app.","develop","Firma vyvine novou aplikaci."],["___ intelligence is growing fast.","Artificial","Umělá inteligence rychle roste."]]},
+ {id:'b1_travel', title:'Cestování a kultura',
+  vocab:[["Culture","kultura"],["Tradition","tradice"],["Abroad","v zahraničí"],["Destination","destinace"],["Accommodation","ubytování"],["Sightseeing","prohlídka památek"],["Souvenir","suvenýr"],["Guide","průvodce"],["Adventure","dobrodružství"],["Landscape","krajina"],["Local","místní"],["Customs","zvyky"],["Backpack","batoh"],["Explore","prozkoumat"]],
+  sentences:[["I love learning about other ___ .","cultures","Rád poznávám jiné kultury."],["We booked our ___ near the beach.","accommodation","Ubytování jsme si zarezervovali blízko pláže."],["Let's ___ the old town.","explore","Pojďme prozkoumat staré město."],["I bought a small ___ .","souvenir","Koupil jsem si malý suvenýr."],["Try the ___ food, it's delicious.","local","Ochutnej místní jídlo, je výborné."],["The mountain ___ was beautiful.","landscape","Horská krajina byla krásná."]]},
+ {id:'b1_education', title:'Vzdělávání',
+  vocab:[["Knowledge","znalost"],["Qualification","kvalifikace"],["Degree","titul"],["Lecture","přednáška"],["Essay","esej"],["Scholarship","stipendium"],["Graduate","absolvent"],["Skill","dovednost"],["Progress","pokrok"],["Motivation","motivace"],["Tutor","lektor"],["Assessment","hodnocení"],["Achievement","úspěch"],["Subject","předmět"]],
+  sentences:[["She got a ___ to study abroad.","scholarship","Dostala stipendium na studium v zahraničí."],["The professor gave a great ___ .","lecture","Profesor měl skvělou přednášku."],["I have to write a long ___ .","essay","Musím napsat dlouhou esej."],["You need the right ___ for this job.","qualification","Na tuhle práci potřebuješ správnou kvalifikaci."],["Learning a language takes ___ .","motivation","Naučit se jazyk vyžaduje motivaci."],["Passing the exam was a big ___ .","achievement","Složit zkoušku byl velký úspěch."]]},
+ {id:'b1_business', title:'Byznys',
+  vocab:[["Company","firma"],["Customer","zákazník"],["Product","produkt"],["Market","trh"],["Competition","konkurence"],["Profit","zisk"],["Meeting","schůzka"],["Strategy","strategie"],["Brand","značka"],["Supply","dodávka"],["Demand","poptávka"],["Manager","manažer"],["Deal","obchod"],["Launch","uvést"]],
+  sentences:[["Our ___ sells software.","company","Naše firma prodává software."],["There is a lot of ___ in this market.","competition","Na tomto trhu je velká konkurence."],["They will ___ a new product next week.","launch","Příští týden uvedou nový produkt."],["The ___ is very happy with the service.","customer","Zákazník je se službou moc spokojený."],["We made a good ___ with them.","deal","Uzavřeli jsme s nimi dobrý obchod."],["High ___ means we need more staff.","demand","Vysoká poptávka znamená, že potřebujeme víc lidí."]]},
+ {id:'b1_entertainment', title:'Zábava a umění',
+  vocab:[["Film","film"],["Actor","herec"],["Director","režisér"],["Novel","román"],["Painting","obraz"],["Concert","koncert"],["Exhibition","výstava"],["Performance","představení"],["Comedy","komedie"],["Review","recenze"],["Audience","publikum"],["Talent","talent"],["Plot","děj"],["Scene","scéna"]],
+  sentences:[["The ___ of the film was exciting.","plot","Děj filmu byl napínavý."],["My favourite ___ won an award.","actor","Můj oblíbený herec vyhrál cenu."],["We saw a great ___ at the theatre.","performance","V divadle jsme viděli skvělé představení."],["I read a good ___ of the book.","review","Četl jsem dobrou recenzi té knihy."],["The ___ of paintings was amazing.","exhibition","Ta výstava obrazů byla úžasná."],["She has a real ___ for music.","talent","Má opravdový talent na hudbu."]]},
+ {id:'b1_feelings', title:'Emoce a nálady',
+  vocab:[["Delighted","nadšený"],["Frustrated","frustrovaný"],["Anxious","úzkostný"],["Grateful","vděčný"],["Disappointed","zklamaný"],["Embarrassed","v rozpacích"],["Curious","zvědavý"],["Guilty","provinilý"],["Content","spokojený"],["Overwhelmed","zahlcený"],["Enthusiastic","nadšený"],["Miserable","nešťastný"],["Relieved","ulevený"],["Furious","zuřivý"]],
+  sentences:[["I was ___ with the gift.","delighted","Ten dárek mě nadchl."],["She felt ___ after the exam.","relieved","Po zkoušce se jí ulevilo."],["He was ___ because he failed.","disappointed","Byl zklamaný, protože neuspěl."],["I am ___ for your help.","grateful","Jsem vděčný za tvou pomoc."],["I feel ___ about all this work.","overwhelmed","Cítím se zahlcený vší tou prací."],["She was ___ when she fell in public.","embarrassed","Byla v rozpacích, když upadla na veřejnosti."]]},
+ {id:'b1_society', title:'Společnost',
+  vocab:[["Government","vláda"],["Citizen","občan"],["Election","volby"],["Law","zákon"],["Rights","práva"],["Equality","rovnost"],["Community","komunita"],["Population","populace"],["Poverty","chudoba"],["Charity","charita"],["Volunteer","dobrovolník"],["Society","společnost"],["Freedom","svoboda"],["Protest","protest"]],
+  sentences:[["The ___ makes new laws.","government","Vláda tvoří nové zákony."],["Everyone should have equal ___ .","rights","Každý by měl mít stejná práva."],["Many people voted in the ___ .","election","Ve volbách hlasovalo hodně lidí."],["She works as a ___ at a hospital.","volunteer","Pracuje jako dobrovolnice v nemocnici."],["We must fight against ___ .","poverty","Musíme bojovat proti chudobě."],["___ means everyone is treated the same.","Equality","Rovnost znamená, že se se všemi zachází stejně."]]}
+];
+
+/* ===== B1 GRAMATIKA ===== */
+const GRAMMAR_B1=[
+ {id:'b1g_pastperf', title:'Předminulý čas', type:'grammar',
+  theory:"<b>Past perfect</b> = <b>had + 3. tvar slovesa</b>. Vyjadřuje děj, který se stal <b>ještě před</b> jiným dějem v minulosti. When I arrived, they <b>had</b> already <b>left</b>.",
+  table:[["Osoba","Tvar","Příklad"],["všechny osoby","had + 3. tvar","I had finished."]],
+  items:[["When I arrived, they ___ already left.","had",["had","have","did"],"Když jsem přišel, už odešli."],["She ___ never seen the sea before.","had",["had","has","was"],"Moře předtím nikdy neviděla."],["He was tired because he ___ worked all day.","had",["had","has","was"],"Byl unavený, protože celý den pracoval."],["After we ___ eaten, we went out.","had",["had","have","did"],"Když jsme dojedli, šli jsme ven."],["The train ___ left when we got there.","had",["had","has","was"],"Vlak už odjel, když jsme tam dorazili."],["I couldn't get in because I ___ lost my key.","had",["had","have","did"],"Nemohl jsem dovnitř, protože jsem ztratil klíč."],["They ___ finished the work before noon.","had",["had","have","were"],"Práci dokončili před polednem."],["She realised she ___ met him before.","had",["had","has","was"],"Uvědomila si, že ho už předtím potkala."],["We ___ booked the hotel before we left.","had",["had","have","did"],"Hotel jsme zarezervovali, než jsme odjeli."],["By 8 o'clock he ___ gone home.","had",["had","has","was"],"V osm už šel domů."],["I didn't know that you ___ moved.","had",["had","have","did"],"Nevěděl jsem, že ses přestěhoval."],["The film ___ started when we arrived.","had",["had","has","was"],"Film už začal, když jsme přišli."],["She was sad because her friend ___ left.","had",["had","has","was"],"Byla smutná, protože její kamarád odešel."],["After they ___ paid, they left the shop.","had",["had","have","did"],"Když zaplatili, odešli z obchodu."],["He passed because he ___ studied hard.","had",["had","has","was"],"Uspěl, protože se hodně učil."]]},
+ {id:'b1g_ppcont', title:'Předpřítomný průběhový', type:'grammar',
+  theory:"<b>Present perfect continuous</b> = <b>have/has been + sloveso-ing</b>. Zdůrazňuje <b>trvání</b> činnosti do teď. Často s <b>for</b> (po dobu) a <b>since</b> (od).",
+  table:[["Osoba","Tvar","Příklad"],["I / you / we / they","have been + -ing","I have been working."],["he / she / it","has been + -ing","She has been running."]],
+  items:[["I ___ been waiting for an hour.","have",["have","has","had"],"Čekám už hodinu."],["She ___ been studying all day.","has",["have","has","had"],"Celý den se učí."],["We have been ___ here since 9.","working",["work","working","worked"],"Pracujeme tu od devíti."],["How long ___ you been learning English?","have",["have","has","did"],"Jak dlouho se učíš anglicky?"],["It ___ been raining for hours.","has",["have","has","had"],"Prší už hodiny."],["They have been ___ for the bus.","waiting",["wait","waiting","waited"],"Čekají na autobus."],["He has been ___ football since morning.","playing",["play","playing","played"],"Hraje fotbal od rána."],["I've been ___ for you everywhere.","looking",["look","looking","looked"],"Hledám tě všude."],["She ___ been feeling tired lately.","has",["have","has","had"],"V poslední době se cítí unavená."],["We ___ been living here for ten years.","have",["have","has","had"],"Bydlíme tu už deset let."],["My eyes hurt; I ___ been reading too long.","have",["have","has","had"],"Bolí mě oči; četl jsem moc dlouho."],["He has been ___ hard for the exam.","studying",["study","studying","studied"],"Tvrdě se učí na zkoušku."],["They've been ___ about you.","talking",["talk","talking","talked"],"Bavili se o tobě."],["I ___ been trying to call you.","have",["have","has","had"],"Snažím se ti dovolat."],["She has been ___ Spanish for a year.","learning",["learn","learning","learned"],"Rok se učí španělsky."]]},
+ {id:'b1g_usedto', title:'Used to / would (minulé zvyky)', type:'grammar',
+  theory:"<b>used to</b> = kdysi jsem (zvykem) dělal, ale už ne. V otázce a záporu: <b>didn't use to / did you use to</b>. <b>would</b> se používá pro opakované minulé činnosti.",
+  table:[["Forma","Příklad"],["kladně","I used to play tennis."],["zápor","I didn't use to like it."],["otázka","Did you use to live here?"]],
+  items:[["I ___ to play football as a child.","used",["use","used","using"],"Jako dítě jsem hrával fotbal."],["She ___ to have long hair.","used",["use","used","using"],"Kdysi mívala dlouhé vlasy."],["Did you ___ to live in London?","use",["use","used","using"],"Bydlel jsi kdysi v Londýně?"],["We didn't ___ to have a car.","use",["use","used","using"],"Kdysi jsme neměli auto."],["He ___ to smoke, but he stopped.","used",["use","used","using"],"Kdysi kouřil, ale přestal."],["There ___ to be a shop here.","used",["use","used","using"],"Kdysi tu byl obchod."],["I ___ to be afraid of dogs.","used",["use","used","using"],"Kdysi jsem se bál psů."],["They ___ to visit us every summer.","used",["use","used","using"],"Kdysi nás každé léto navštěvovali."],["My grandma ___ to tell great stories.","used",["use","used","using"],"Babička vyprávěla skvělé příběhy."],["Did she ___ to work here?","use",["use","used","using"],"Pracovala tu kdysi?"],["We ___ to walk to school.","used",["use","used","using"],"Kdysi jsme chodili do školy pěšky."],["I didn't ___ to like coffee.","use",["use","used","using"],"Kdysi mi káva nechutnala."],["He ___ to be much thinner.","used",["use","used","using"],"Kdysi byl mnohem hubenější."],["They ___ to live near the sea.","used",["use","used","using"],"Kdysi bydleli u moře."],["I ___ to read a lot when I was young.","used",["use","used","using"],"Když jsem byl mladý, hodně jsem četl."]]},
+ {id:'b1g_cond1', title:'První kondicionál', type:'grammar',
+  theory:"Reálná podmínka v budoucnosti: <b>if + přítomný čas, will + sloveso</b>. If it rains, I <b>will</b> stay home. Po <b>if</b> nedáváme will.",
+  table:[["Část","Čas","Příklad"],["if-věta","přítomný prostý","If you study,"],["hlavní věta","will + sloveso","you will pass."]],
+  items:[["If it rains, I ___ stay home.","will",["will","would","am"],"Když bude pršet, zůstanu doma."],["If you ___ hard, you will pass.","study",["study","will study","studied"],"Když se budeš učit, uděláš to."],["She will call you if she ___ time.","has",["has","will have","had"],"Zavolá ti, když bude mít čas."],["If we hurry, we ___ catch the train.","will",["will","would","are"],"Když si pospíšíme, chytneme vlak."],["I ___ help you if you ask.","will",["will","would","am"],"Pomůžu ti, když požádáš."],["If he ___ late, we will start without him.","is",["is","will be","was"],"Když přijde pozdě, začneme bez něj."],["What will you do if it ___ ?","snows",["snows","will snow","snowed"],"Co budeš dělat, když bude sněžit?"],["If you eat too much, you ___ feel sick.","will",["will","would","are"],"Když sníš moc, bude ti špatně."],["We will go out if the weather ___ nice.","is",["is","will be","was"],"Půjdeme ven, když bude hezky."],["If I ___ you, I will tell you.","see",["see","will see","saw"],"Když tě uvidím, řeknu ti to."],["She ___ be happy if you come.","will",["will","would","is"],"Bude šťastná, když přijdeš."],["If they ___ , they will win.","practise",["practise","will practise","practised"],"Když budou trénovat, vyhrají."],["I will buy it if it ___ cheap.","is",["is","will be","was"],"Koupím to, když to bude levné."],["If you don't hurry, you ___ miss the bus.","will",["will","would","are"],"Když si nepospíšíš, zmeškáš autobus."],["He will be angry if you ___ late.","are",["are","will be","were"],"Bude naštvaný, když přijdeš pozdě."]]},
+ {id:'b1g_passive', title:'Trpný rod', type:'grammar',
+  theory:"<b>Trpný rod</b> = <b>be + 3. tvar slovesa</b>. Zdůrazňuje děj, ne kdo ho dělá; původce se uvede s <b>by</b>. The house <b>was built</b> in 1990.",
+  table:[["Čas","Tvar","Příklad"],["přítomný","am/is/are + 3. tvar","It is made here."],["minulý","was/were + 3. tvar","It was made in 1990."]],
+  items:[["This car ___ made in Germany.","is",["is","was","has"],"Tohle auto se vyrábí v Německu."],["The bridge ___ built in 1930.","was",["is","was","has"],"Ten most byl postaven v roce 1930."],["English ___ spoken all over the world.","is",["is","was","has"],"Anglicky se mluví po celém světě."],["The letters ___ sent yesterday.","were",["are","were","have"],"Ty dopisy byly poslány včera."],["The room is ___ every day.","cleaned",["clean","cleaned","cleaning"],"Pokoj se uklízí každý den."],["The thief ___ caught by the police.","was",["is","was","has"],"Zloděj byl chycen policií."],["These phones ___ made in China.","are",["is","are","was"],"Tyhle telefony se vyrábí v Číně."],["The book was ___ by a famous writer.","written",["write","wrote","written"],"Tu knihu napsal slavný spisovatel."],["Breakfast ___ served at 8 a.m.","is",["is","was","has"],"Snídaně se podává v 8 ráno."],["The window ___ broken last night.","was",["is","was","has"],"To okno bylo rozbité včera v noci."],["Rice ___ grown in Asia.","is",["is","was","has"],"Rýže se pěstuje v Asii."],["The homework ___ finished on time.","was",["is","was","has"],"Úkol byl dokončen včas."],["Millions of cars ___ produced every year.","are",["is","are","was"],"Každý rok se vyrobí miliony aut."],["The song ___ played on the radio.","was",["is","was","has"],"Ta píseň hrála v rádiu."],["The museum ___ visited by many tourists.","is",["is","was","has"],"Muzeum navštěvuje mnoho turistů."]]},
+ {id:'b1g_cond2', title:'Druhý kondicionál', type:'grammar',
+  theory:"Nereálná / hypotetická přítomnost: <b>if + minulý prostý, would + sloveso</b>. If I <b>had</b> money, I <b>would</b> travel. U to be často <b>were</b> pro všechny osoby (If I were you…).",
+  table:[["Část","Čas","Příklad"],["if-věta","minulý prostý","If I had time,"],["hlavní věta","would + sloveso","I would help."]],
+  items:[["If I ___ rich, I would travel a lot.","were",["am","were","will be"],"Kdybych byl bohatý, hodně bych cestoval."],["If I had time, I ___ help you.","would",["will","would","did"],"Kdybych měl čas, pomohl bych ti."],["She would buy a house if she ___ enough money.","had",["has","had","would"],"Koupila by dům, kdyby měla dost peněz."],["If I ___ you, I would say sorry.","were",["am","were","was"],"Být tebou, omluvil bych se."],["What would you do if you ___ the lottery?","won",["win","won","would"],"Co bys dělal, kdybys vyhrál v loterii?"],["If he studied, he ___ pass.","would",["will","would","did"],"Kdyby se učil, uspěl by."],["We would go if we ___ invited.","were",["are","were","would"],"Šli bychom, kdyby nás pozvali."],["If it ___ warmer, we would swim.","were",["is","were","would"],"Kdyby bylo tepleji, plavali bychom."],["I would tell her if I ___ the truth.","knew",["know","knew","would"],"Řekl bych jí to, kdybych znal pravdu."],["If they had a car, they ___ drive.","would",["will","would","did"],"Kdyby měli auto, jezdili by."],["She ___ be happier if she had a dog.","would",["will","would","is"],"Byla by šťastnější, kdyby měla psa."],["If I spoke French, I ___ live in Paris.","would",["will","would","did"],"Kdybych uměl francouzsky, bydlel bych v Paříži."],["If you ___ harder, you would earn more.","worked",["work","worked","would"],"Kdybys víc pracoval, vydělával bys víc."],["I wouldn't do that if I ___ you.","were",["am","were","was"],"To bych nedělal, být tebou."],["We would help if we ___ how.","knew",["know","knew","would"],"Pomohli bychom, kdybychom věděli jak."]]},
+ {id:'b1g_reported', title:'Nepřímá řeč', type:'grammar',
+  theory:"V <b>nepřímé řeči</b> se čas posouvá o krok do minulosti: is → <b>was</b>, do → <b>did</b>, will → <b>would</b>, can → <b>could</b>. Věta I am tired se změní na He said he <b>was</b> tired.",
+  table:[["Přímá řeč","Nepřímá řeč"],["am / is / are","was / were"],["do / does","did"],["will","would"],["can","could"]],
+  items:[["He said he ___ tired.","was",["is","was","were"],"Řekl, že je unavený."],["She said she ___ come later.","would",["will","would","did"],"Řekla, že přijde později."],["They said they ___ hungry.","were",["are","were","was"],"Řekli, že mají hlad."],["He told me he ___ not know.","did",["do","did","does"],"Řekl mi, že neví."],["She said she ___ help me.","would",["will","would","can"],"Řekla, že mi pomůže."],["I said I ___ busy.","was",["am","was","were"],"Řekl jsem, že jsem zaneprázdněný."],["He said he ___ speak French.","could",["can","could","will"],"Řekl, že umí francouzsky."],["She told us she ___ living in Prague.","was",["is","was","were"],"Řekla nám, že bydlí v Praze."],["They said the shop ___ closed.","was",["is","was","were"],"Řekli, že obchod je zavřený."],["He said he ___ finished the work.","had",["has","had","was"],"Řekl, že práci dokončil."],["She said she ___ call me.","would",["will","would","did"],"Řekla, že mi zavolá."],["I told him I ___ not agree.","did",["do","did","does"],"Řekl jsem mu, že nesouhlasím."],["He said the train ___ late.","was",["is","was","were"],"Řekl, že vlak má zpoždění."],["She said she ___ swim well.","could",["can","could","will"],"Řekla, že umí dobře plavat."],["They said they ___ come to the party.","would",["will","would","did"],"Řekli, že přijdou na oslavu."]]},
+ {id:'b1g_relative', title:'Vztažné věty', type:'grammar',
+  theory:"Vztažná zájmena spojují věty: <b>who</b> (lidé), <b>which</b> (věci), <b>that</b> (obojí), <b>where</b> (místo), <b>whose</b> (přivlastnění). The man <b>who</b> called…",
+  table:[["Zájmeno","Použití","Příklad"],["who","lidé","the man who lives here"],["which","věci","the book which I read"],["where","místo","the city where I was born"],["whose","přivlastnění","the girl whose bag is red"]],
+  items:[["The man ___ called was my boss.","who",["who","which","where"],"Muž, který volal, byl můj šéf."],["This is the book ___ I told you about.","which",["who","which","where"],"To je ta kniha, o které jsem ti říkal."],["That's the house ___ I grew up.","where",["who","which","where"],"To je dům, kde jsem vyrostl."],["The woman ___ bag was stolen is here.","whose",["who","whose","which"],"Žena, které ukradli tašku, je tady."],["I know a girl ___ speaks five languages.","who",["who","which","where"],"Znám dívku, která mluví pěti jazyky."],["The restaurant ___ we ate was great.","where",["who","which","where"],"Restaurace, kde jsme jedli, byla skvělá."],["The film ___ we watched was boring.","which",["who","which","where"],"Film, který jsme viděli, byl nudný."],["He is the teacher ___ helped me.","who",["who","which","where"],"To je ten učitel, který mi pomohl."],["This is the phone ___ I bought.","which",["who","which","where"],"To je telefon, který jsem koupil."],["The boy ___ father is a doctor is my friend.","whose",["who","whose","which"],"Kluk, jehož otec je lékař, je můj kamarád."],["That's the park ___ we play.","where",["who","which","where"],"To je park, kde si hrajeme."],["The people ___ live next door are nice.","who",["who","which","where"],"Lidé, kteří bydlí vedle, jsou milí."],["I lost the keys ___ you gave me.","which",["who","which","where"],"Ztratil jsem klíče, které jsi mi dal."],["She's the singer ___ songs I love.","whose",["who","whose","which"],"To je zpěvačka, jejíž písně miluju."],["This is the town ___ my family lives.","where",["who","which","where"],"To je město, kde bydlí moje rodina."]]},
+ {id:'b1g_modalded', title:'Modální slovesa dedukce', type:'grammar',
+  theory:"Pro odhad/dedukci: <b>must</b> = jistě ano, <b>can't</b> = určitě ne, <b>might/may/could</b> = možná. He <b>must</b> be tired. She <b>can't</b> be serious. It <b>might</b> rain.",
+  table:[["Modál","Význam","Příklad"],["must","jistě ano","He must be rich."],["can't","určitě ne","She can't be 40."],["might / may / could","možná","It might rain."]],
+  items:[["He has a big house; he ___ be rich.","must",["must","can't","might"],"Má velký dům; jistě je bohatý."],["She isn't answering; she ___ be busy.","might",["must","can't","might"],"Nezvedá to; možná je zaneprázdněná."],["You ___ be serious! That's crazy.","can't",["must","can't","might"],"To nemyslíš vážně! To je šílené."],["It's dark; it ___ be late.","must",["must","can't","might"],"Je tma; jistě je pozdě."],["I'm not sure, but it ___ rain later.","might",["must","can't","might"],"Nejsem si jistý, ale možná bude pršet."],["He ___ be at home; his car isn't here.","can't",["must","can't","might"],"Nemůže být doma; auto tu nemá."],["They ___ be tired after the long trip.","must",["must","can't","might"],"Po dlouhé cestě jsou jistě unavení."],["She ___ know the answer, ask her.","might",["must","can't","might"],"Možná zná odpověď, zeptej se jí."],["That ___ be true, it's impossible.","can't",["must","can't","might"],"To nemůže být pravda, to je nemožné."],["He's yawning; he ___ be sleepy.","must",["must","can't","might"],"Zívá; jistě je ospalý."],["I ___ be wrong, but I think it's closed.","might",["must","can't","might"],"Možná se pletu, ale myslím, že je zavřeno."],["She ___ be hungry; she just ate.","can't",["must","can't","might"],"Nemůže mít hlad; právě jedla."],["The lights are on; someone ___ be home.","must",["must","can't","might"],"Svítí se; někdo jistě je doma."],["He ___ come tonight, he's not sure yet.","might",["must","can't","might"],"Možná dnes večer přijde, ještě neví."],["You've worked all day; you ___ be exhausted.","must",["must","can't","might"],"Pracoval jsi celý den; jistě jsi vyčerpaný."]]}
+];
+
+const PATH_A1=['greet','numbers','colors','g_tobe','family','food','animals','g_have','body','house','g_there','clothes','time','g_can','town','transport','g_art','weather','g_plural','verbs','g_pres','adj','g_prep','g_wh','g_test'];
+const PATH_A2=['a2_jobs','a2_health','a2_travel','a2g_past','a2_shopping','a2_restaurant','a2g_irr','a2_hobbies','a2_tech','a2g_prescont','a2_feelings','a2_people','a2g_comp','a2_education','a2g_pastcont','a2_nature','a2_house','a2g_future','a2_directions','a2g_quant','a2_clothes','a2g_modal','a2_comm','a2g_pp','a2_test'];
+const PATH_B1=['b1_work','b1_money','b1_crime','b1g_pastperf','b1_media','b1_environment','b1g_ppcont','b1_health','b1_relationships','b1g_usedto','b1_personality','b1_science','b1g_cond1','b1_travel','b1g_passive','b1_education','b1_business','b1g_cond2','b1_entertainment','b1g_reported','b1_feelings','b1g_relative','b1_society','b1g_modalded','b1_test'];
+const LEVEL_DATA={
+  A1:{cats:CATS_A1,gram:GRAMMAR_A1,path:PATH_A1,test:'g_test'},
+  A2:{cats:CATS_A2,gram:GRAMMAR_A2,path:PATH_A2,test:'a2_test'},
+  B1:{cats:CATS_B1,gram:GRAMMAR_B1,path:PATH_B1,test:'b1_test'}
+};
+function buildLevel(lvl){
+  const d=LEVEL_DATA[lvl]||LEVEL_DATA.A1;
+  CATS=d.cats; GRAMMAR=d.gram; PATH=d.path;
+  ALL=[]; CATS.forEach(c=>c.vocab.forEach((v,i)=>ALL.push({id:c.id+':'+i,en:v[0],cz:v[1],cat:c.id,catTitle:c.title})));
+  BYID={}; ALL.forEach(w=>BYID[w.id]=w);
+  GMAP={}; GRAMMAR.forEach(g=>GMAP[g.id]=g);
+  CI={}; CATS.forEach((c,i)=>CI[c.id]=i);
+  FINAL={id:d.test,title:'Závěrečný test',type:'test'};
+  TMAP={}; CATS.forEach(c=>TMAP[c.id]={type:'vocab',title:c.title,obj:c}); GRAMMAR.forEach(g=>TMAP[g.id]={type:'grammar',title:g.title,obj:g}); TMAP[FINAL.id]={type:'test',title:FINAL.title,obj:FINAL};
+}
+const LOOKAHEAD=3;   // kolik témat dopředu je vidět za dokončenou frontou
+const DONE_EX=2;     // kolik cvičení ≥60 % dokončí téma
+const DONE_PCT=60;
+
+/* ---- profily (lokální, offline) ---- */
+const AVA_COLORS=['#4f46e5','#0ea5e9','#0d9488','#7c3aed','#db2777','#ea580c','#16a34a','#d97706'];
+function loadProfiles(){try{return JSON.parse(localStorage.getItem('anj_profiles'))||[];}catch(e){return[];}}
+function saveProfiles(){try{localStorage.setItem('anj_profiles',JSON.stringify(PROFILES));}catch(e){}scheduleCloudSave();}
+function stateKey(id){return 'anj_state_'+id;}
+function newId(){return 'p'+Date.now().toString(36)+Math.random().toString(36).slice(2,6);}
+let PROFILES=loadProfiles();
+let curProfileId=localStorage.getItem('anj_cur')||null;
+let S={};
+function load(){try{return JSON.parse(localStorage.getItem(stateKey(curProfileId)))||{};}catch(e){return{};}}
+function persist(){if(!curProfileId)return;try{localStorage.setItem(stateKey(curProfileId),JSON.stringify(S));}catch(e){}scheduleCloudSave();}
+function ensureStateDefaults(){
+  S.xp=S.xp||0;S.srs=S.srs||{};
+  S.stats=S.stats||{c:0,w:0,byCat:{},timeMs:0,bestDays:0};
+  S.settings=S.settings||{dir:'en2cz',fill:'easy',theme:'dark',goal:15};
+  if(!S.settings.level)S.settings.level='A1';
+  S.daily=S.daily||{date:'',done:0,ids:[],met:false,streak:0};
+  S.badges=S.badges||[];S.exlog=S.exlog||{};
+}
+
+const $=s=>document.querySelector(s);
+const $$=s=>document.querySelectorAll(s);
+function show(id){['home','catMenu','stats','activity','gate','account'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate')?'none':'flex';window.scrollTo(0,0);}
+function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function distractors(w,key,n){let pool=shuffle(ALL.filter(x=>x.cat===w.cat && x.id!==w.id && x[key]!==w[key]));if(pool.length<n){const extra=shuffle(ALL.filter(x=>x.id!==w.id && x[key]!==w[key] && x.cat!==w.cat));pool=pool.concat(extra);}return pool.slice(0,n);}
+function isGrammar(id){return TMAP[id]&&TMAP[id].type==='grammar';}
+function topicTitle(id){return TMAP[id]?TMAP[id].title:id;}
+function topicExTypes(id){return isGrammar(id)?['gquiz','gfill','theory']:['flash','quiz','fill','listen','dict'];}
+function exlogScores(catId){return topicExTypes(catId).map(t=>S.exlog[catId+':'+t]).filter(Boolean);}
+function hasExlog(catId){return exlogScores(catId).length>0;}
+function worstScore(catId){const s=exlogScores(catId);return s.length?Math.min.apply(null,s.map(e=>e.last)):null;}
+function goodExCount(catId){return exlogScores(catId).filter(e=>e.last>=DONE_PCT).length;}
+function isTopicDone(id){if(TMAP[id]&&TMAP[id].type==='test'){const e=S.exlog[id+':test'];return !!(e&&e.last>=60);}return goodExCount(id)>=DONE_EX;}
+function completedCount(){let n=0;for(const id of PATH){if(isTopicDone(id))n++;else break;}return n;}
+function isUnlocked(id){const i=PATH.indexOf(id);if(TMAP[id]&&TMAP[id].type==='test'){return i>0 && isTopicDone(PATH[i-1]);}return i < completedCount()+LOOKAHEAD;}
+function unlockedWords(){return ALL.filter(w=>isUnlocked(w.cat));}
+function nextToComplete(){const i=completedCount();return i<PATH.length?PATH[i]:null;}
+function showContinue(done,ok,needRelease){
+  const stage=$('#stage');const bar=document.createElement('div');bar.style.marginTop='14px';
+  bar.innerHTML='<button class="btn big" id="nextBtn">Další →</button>';stage.appendChild(bar);
+  let armed=!needRelease, fired=false;
+  function go(){if(fired)return;fired=true;document.removeEventListener('keydown',onKey);document.removeEventListener('keyup',onUp);const b=$('#nextBtn');if(b)b.disabled=true;done(ok);}
+  const onUp=(e)=>{if(e.key==='Enter')armed=true;};
+  const onKey=(e)=>{if(e.key==='Enter'&&armed){e.preventDefault();go();}};
+  $('#nextBtn').onclick=go;
+  document.addEventListener('keyup',onUp);
+  document.addEventListener('keydown',onKey);
+}
+function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);}
+function norm(s){return s.toLowerCase().replace(/[^a-z]/g,'');}
+function dateStr(d){return new Date(d).toISOString().slice(0,10);}
+function relTime(ts){const s=(Date.now()-ts)/1000;if(s<60)return 'právě teď';const m=Math.floor(s/60);if(m<60)return 'před '+m+' min';const h=Math.floor(m/60);if(h<24)return 'před '+h+' h';const d=Math.floor(h/24);return d===1?'včera':'před '+d+' dny';}
+
+let voice=null;
+function pickVoice(){const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}
+if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function speak(t,cb){if(!('speechSynthesis' in window)){cb&&cb();return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.9;if(voice)u.voice=voice;if(cb)u.onend=cb;speechSynthesis.speak(u);}
+
+function srsOf(id){return S.srs[id];}
+function isDue(id){const e=S.srs[id];if(!e)return true;return (e.due||0)<=Date.now();}
+function isNew(id){return !S.srs[id];}
+function grade(id,good){
+  let e=S.srs[id]||{step:-1,reps:0,lapses:0,c:0,w:0,p:false};
+  if(good){e.step=e.step<1?1:Math.min(e.step+1,STEPS.length-1);e.reps++;e.c++;e.p=false;}
+  else{e.step=0;e.lapses++;e.w++;e.p=true;}
+  e.due=Date.now()+STEPS[e.step]*MIN;
+  S.srs[id]=e;
+  const cat=BYID[id]?BYID[id].cat:null;
+  if(good)S.stats.c++;else S.stats.w++;
+  if(cat){S.stats.byCat[cat]=S.stats.byCat[cat]||{c:0,w:0};if(good)S.stats.byCat[cat].c++;else S.stats.byCat[cat].w++;}
+  ensureDaily();
+  if(!S.daily.ids.includes(id)){S.daily.ids.push(id);S.daily.done=S.daily.ids.length;checkDailyMet();}
+  persist();
+}
+function learnedCount(){return ALL.filter(w=>(S.srs[w.id]&&S.srs[w.id].step>=2)).length;}
+function dueWords(){return ALL.filter(w=>isUnlocked(w.cat)&&!isNew(w.id)&&isDue(w.id));}
+function newWords(){return ALL.filter(w=>isUnlocked(w.cat)&&isNew(w.id));}
+function problemWords(){return ALL.filter(w=>isUnlocked(w.cat)&&S.srs[w.id]&&S.srs[w.id].p);}
+
+const XP_PER_LEVEL=200;
+function level(){return Math.floor(S.xp/XP_PER_LEVEL)+1;}
+function levelProgress(){return (S.xp%XP_PER_LEVEL)/XP_PER_LEVEL;}
+function toNext(){return XP_PER_LEVEL-(S.xp%XP_PER_LEVEL);}
+function addXP(n){const before=level();S.xp+=n;persist();updateHeader();if(level()>before){toast('Level '+level()+'! 🎉');if(level()>=5)award('lvl5');}}
+
+function ensureDaily(){
+  const today=dateStr(Date.now());
+  if(S.daily.date!==today){
+    const prev=S.daily.date;
+    const yesterday=dateStr(Date.now()-86400000);
+    if(!(prev===yesterday && S.daily.met)) S.daily.streak=0;
+    S.daily.date=today;S.daily.done=0;S.daily.ids=[];S.daily.met=false;
+    persist();
+  }
+}
+function checkDailyMet(){
+  if(!S.daily.met && S.daily.done>=S.settings.goal){
+    S.daily.met=true;S.daily.streak++;
+    if(S.daily.streak>S.stats.bestDays)S.stats.bestDays=S.daily.streak;
+    persist();toast('Denní cíl splněn! Série '+S.daily.streak+' dní 🔥');
+    if(S.daily.streak>=7)award('days7');
+    updateHeader();renderMission();
+  }
+}
+
+function award(id){if(S.badges.includes(id))return;S.badges.push(id);persist();renderAch();updateHeader();const b=BADGES.find(x=>x.id===id);if(b)toast('Úspěch: '+b.name);}
+function checkMilestones(){const lc=learnedCount();if(lc>=50)award('learn50');if(lc>=150)award('learn150');if(problemWords().length===0 && S.stats.w>0)award('noProblem');}
+
+function updateHeader(){$('#hLevel').textContent=level();$('#hXp').textContent=S.xp;$('#hDays').textContent=S.daily.streak;}
+function renderMission(){
+  ensureDaily();
+  const goal=S.settings.goal,done=Math.min(S.daily.done,goal);
+  $('#ringDone').textContent=S.daily.done;$('#ringGoal').textContent=goal;
+  $('#ring').style.setProperty('--p', Math.round(done/goal*100));
+  $('#mLevel').textContent=level();$('#mXp').textContent=S.xp;
+  $('#mLevelBar').style.width=Math.round(levelProgress()*100)+'%';
+  $('#mToNext').textContent=toNext();
+  $('#mDays').textContent=S.daily.streak;
+}
+function catDueCount(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>!isNew(id)&&isDue(id)).length;}
+function catLearned(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]&&S.srs[id].step>=2).length;}
+function catSeen(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]).length;}
+function renderCats(){
+  $('#totalWords').textContent=ALL.length;
+  $('#learnedWords').textContent=learnedCount();
+  $('#catGrid').innerHTML=PATH.map((id,pi)=>{
+    const t=TMAP[id];
+    if(!isUnlocked(id)){
+      const gate=(TMAP[id].type==='test')?PATH[pi-1]:PATH[pi-LOOKAHEAD];const gateDone=gate?isTopicDone(gate):false;
+      return '<div class="cat locked'+(isGrammar(id)?' gram':'')+'"><span class="lock">🔒</span>'+
+        '<div class="t">'+t.title+'</div>'+
+        '<div class="m">'+(isGrammar(id)?'Gramatika · zamčeno':'Zamčeno')+'</div>'+
+        '<div class="req">'+(gate?'dokonči „'+topicTitle(gate)+'"'+(gateDone?' ✓':''):'pokračuj v cestě')+'</div></div>';
+    }
+    if(TMAP[id].type==='test'){
+      const e=S.exlog[id+':test'],done=isTopicDone(id);
+      return '<button class="cat test" onclick="openTopic(\''+id+'\')">'+(done?'<span class="due done">hotovo ✓</span>':'')+
+        '<div class="t">'+t.title+'</div>'+
+        '<div class="m">'+(e?'nejlepší výsledek: '+e.last+' %':'prověř všechna témata')+'</div>'+
+        '<div class="bar"><div style="width:'+(e?e.last:0)+'%"></div></div></button>';
+    }
+    const seen=hasExlog(id), weak=seen && worstScore(id)!==null && worstScore(id)<DONE_PCT, done=isTopicDone(id);
+    const badge=weak?'<span class="due">k opakování</span>':(done?'<span class="due done">hotovo ✓</span>':'');
+    if(isGrammar(id)){
+      const g=t.obj,prog=Math.min(100,Math.round(goodExCount(id)/DONE_EX*100));
+      return '<button class="cat gram" onclick="openTopic(\''+id+'\')">'+badge+
+        '<div class="t">'+t.title+'</div>'+
+        '<div class="m">Gramatika · '+g.items.length+' cvičení'+(done?' · hotovo':'')+'</div>'+
+        '<div class="bar"><div style="width:'+prog+'%"></div></div></button>';
+    }
+    const c=t.obj,learned=catLearned(c),inprog=catSeen(c)-learned,pct=Math.round(learned/c.vocab.length*100);
+    return '<button class="cat" onclick="openTopic(\''+id+'\')">'+badge+
+      '<div class="t">'+t.title+'</div>'+
+      '<div class="m">naučeno '+learned+' / '+c.vocab.length+((seen&&inprog>0)?' · '+inprog+' rozpracováno':'')+'</div>'+
+      '<div class="bar"><div style="width:'+pct+'%"></div></div></button>';
+  }).join('');
+}
+function renderAch(){$('#ach').innerHTML=BADGES.map(b=>{const on=S.badges.includes(b.id);return '<div class="badge '+(on?'':'locked')+'" title="'+b.desc+'">'+b.icon+' '+b.name+'</div>';}).join('');}
+function renderActions(){
+  const d=dueWords().length,p=problemWords().length;
+  $('#dueCount').textContent=d; $('#probCount').textContent=p;
+  $('#actReview').classList.toggle('disabled', d===0);
+  $('#actProblem').classList.toggle('disabled', p===0);
+}
+let levelChosen=false;
+const A2_UNLOCK_PCT=90;
+const LVL_PREREQ={A2:'g_test',B1:'a2_test'};   // pro odemčení úrovně je potřeba test předchozí úrovně >=90 %
+function levelUnlocked(lvl){const t=LVL_PREREQ[lvl];if(!t)return true;const e=S.exlog[t+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);}
+function updateBrand(){const bl=$('#brandLvl');if(bl)bl.textContent=S.settings.level;const ct=$('#curLvlTag');if(ct)ct.textContent=S.settings.level;}
+function renderLevelPick(){
+  [['A2','a2Card','a2go','A1'],['B1','b1Card','b1go','A2']].forEach(function(x){
+    const lvl=x[0],card=$('#'+x[1]),go=$('#'+x[2]),prev=x[3];if(!card||!go)return;
+    const ok=levelUnlocked(lvl),e=S.exlog[LVL_PREREQ[lvl]+':test'];
+    card.classList.toggle('locked',!ok);
+    go.innerHTML = ok ? ('Začít '+lvl+' →') : ('🔒 Odemkni testem '+prev+' na '+A2_UNLOCK_PCT+' %'+(e?' <span style="color:var(--muted)">(teď '+e.last+' %)</span>':''));
+  });
+}
+function chooseLevel(lvl){
+  if(!levelUnlocked(lvl)){toast('Úroveň '+lvl+' se odemkne po zvládnutí předchozího závěrečného testu na '+A2_UNLOCK_PCT+' % 🔒');return;}
+  S.settings.level=lvl;persist();buildLevel(lvl);levelChosen=true;refreshHome();
+}
+function backToLevels(){levelChosen=false;refreshHome();}
+function refreshHome(){
+  updateHeader();renderMission();renderActions();updateBrand();
+  const lp=$('#levelPick'),tv=$('#topicsView');
+  if(levelChosen){lp.classList.add('hidden');tv.classList.remove('hidden');renderCats();renderAch();}
+  else{tv.classList.add('hidden');lp.classList.remove('hidden');renderLevelPick();}
+}
+function goHome(){if(window.speechSynthesis)speechSynthesis.cancel();stopRec();refreshHome();show('home');}
+
+function initSeg(segId,key,after){
+  const seg=$('#'+segId);
+  function paint(){seg.querySelectorAll('button').forEach(b=>b.classList.toggle('on',b.dataset.v==String(S.settings[key])));}
+  seg.querySelectorAll('button').forEach(b=>b.onclick=()=>{S.settings[key]=(key==='goal')?parseInt(b.dataset.v):b.dataset.v;persist();paint();after&&after();});
+  paint();
+}
+
+function applyTheme(){document.documentElement.setAttribute('data-theme',(S.settings&&S.settings.theme)||'dark');}
+$('#themeBtn').onclick=()=>{S.settings.theme=S.settings.theme==='dark'?'light':'dark';persist();applyTheme();};
+
+let curCat=null, curGram=null, currentTopicId=null;
+function exStatHtml(id,type){
+  const e=S.exlog[id+':'+type];
+  if(!e)return '<div class="exstat"><span class="d"></span>Nevyzkoušeno</div>';
+  const cls=e.last>=80?'done':e.last>=50?'mid':'low';
+  return '<div class="exstat '+cls+'"><span class="d"></span>Naposledy '+e.last+' % · '+relTime(e.ts)+(e.done>1?' · '+e.done+'×':'')+'</div>';
+}
+function buildVocabMenu(){
+  const id=curCat.id;
+  let defs=[['flash','▤','i1','Slovíčka','Kartičky · Umím / Neumím'],['quiz','?','i2','Kvíz','Výběr překladu'],['fill','✎','i3','Doplň větu','Výběr nebo psaní'],['listen','♪','i4','Poslech','Přehraje se jednou'],['dict','✍','i5','Diktát','Poslechni a napiš']];
+  if(SR)defs.push(['pron','🎙','i6','Mluvení','Bonus · nehodnotí se']);
+  $('#modeBox').innerHTML=defs.map(d=>'<button class="mode" onclick="startCat(\''+d[0]+'\')"><div class="mt"><span class="ic '+d[2]+'">'+d[1]+'</span> '+d[3]+'</div><small>'+d[4]+'</small>'+exStatHtml(id,d[0])+'</button>').join('');
+}
+function buildGrammarMenu(){
+  const id=curGram.id;
+  const defs=[['theory','📖','i2','Teorie','Vysvětlení + příklady'],['gquiz','?','i1','Kvíz','Vyber správný tvar'],['gfill','✎','i3','Doplň','Napiš správný tvar']];
+  $('#modeBox').innerHTML=defs.map(d=>{
+    const st=d[0]==='theory'
+      ? (S.exlog[id+':theory']?'<div class="exstat done"><span class="d"></span>Přečteno ✓</div>':'<div class="exstat"><span class="d"></span>Nepřečteno</div>')
+      : exStatHtml(id,d[0]);
+    return '<button class="mode" onclick="startGrammar(\''+d[0]+'\')"><div class="mt"><span class="ic '+d[2]+'">'+d[1]+'</span> '+d[3]+'</div><small>'+d[4]+'</small>'+st+'</button>';
+  }).join('');
+}
+function openTopic(id){
+  if(!isUnlocked(id)){toast('Nejdřív dokonči předchozí témata 🔒');return;}
+  currentTopicId=id;const t=TMAP[id];$('#cmTitle').textContent=t.title;
+  if(t.type==='test'){
+    curGram=null;curCat=null;const e=S.exlog[FINAL.id+':test'];
+    $('#cmSub').textContent='Prověř všechna témata najednou'+(e?' · nejlepší '+e.last+' %':'');
+    $('#modeBox').innerHTML='<button class="mode" style="grid-column:1/-1" onclick="startTest()"><div class="mt"><span class="ic" style="background:#f7b500">🎓</span> Spustit test</div><small>30 otázek napříč slovíčky i gramatikou · na 60 % ho dokončíš</small>'+(e?'<div class="exstat done"><span class="d"></span>Nejlepší '+e.last+' %</div>':'<div class="exstat"><span class="d"></span>Nevyzkoušeno</div>')+'</button>';
+    show('catMenu');return;
+  }
+  if(t.type==='grammar'){
+    curGram=t.obj;curCat=null;
+    $('#cmSub').textContent='Gramatika · '+(isTopicDone(id)?'dokončeno ✓':'přečti teorii a zvládni kvíz na '+DONE_PCT+' %+');
+    buildGrammarMenu();
+  }else{
+    curCat=t.obj;curGram=null;const g=goodExCount(id);
+    $('#cmSub').textContent=t.obj.vocab.length+' slov · '+(isTopicDone(id)?'téma dokončeno ✓':'dokonči '+DONE_EX+' cvičení na '+DONE_PCT+' %+ ('+g+'/'+DONE_EX+')');
+    buildVocabMenu();
+  }
+  show('catMenu');
+}
+
+let sess=null;
+function pickDir(){const d=S.settings.dir;return d==='mix'?(Math.random()<.5?'en2cz':'cz2en'):d;}
+function buildCards(words,opts){
+  opts=opts||{};
+  return words.map(w=>{
+    let type=opts.type;
+    if(!type){
+      const pool=['quiz','flash','listen'];
+      if(pickDir()==='cz2en')pool.push('type');
+      type=pool[Math.floor(Math.random()*pool.length)];
+    }
+    return {word:w, type, dir: opts.dir||pickDir()};
+  });
+}
+function startSession(cards, meta){
+  if(!cards.length){toast('Nic k procvičení.');return;}
+  sess={queue:shuffle(cards), total:cards.length, done:0, correct:0, meta:meta||{}, lastTs:Date.now(), timeLimit:meta&&meta.timeLimit, startTs:Date.now()};
+  $('#sessTag').style.display=meta&&meta.tag?'inline-block':'none';
+  if(meta&&meta.tag)$('#sessTag').textContent=meta.tag;
+  show('activity');
+  nextCard();
+}
+function nextCard(){
+  if(!sess)return;
+  if(sess.timeLimit && Date.now()-sess.startTs>sess.timeLimit){return finishSession();}
+  if(sess.queue.length===0)return finishSession();
+  const card=sess.queue.shift();
+  $('#counter').textContent='Hotovo '+sess.done+' · zbývá '+sess.queue.length+(sess.timeLimit?'  ·  ⏱':'');
+  setProg(sess.done, sess.done+sess.queue.length+1);
+  const done=(good)=>afterAnswer(card,good);
+  if(card.type==='flash')exFlash(card,done);
+  else if(card.type==='quiz')exChoice(card,done);
+  else if(card.type==='listen')exListen(card,done);
+  else if(card.type==='fill')exFill(card,done);
+  else if(card.type==='type')exType(card,done);
+  else if(card.type==='dict')exDict(card,done);
+  else if(card.type==='pron')exPron(card,done);
+  else if(card.type==='gquiz')exGQuiz(card,done);
+  else if(card.type==='gfill')exGFill(card,done);
+}
+function afterAnswer(card,good){
+  const dt=Math.min(Date.now()-sess.lastTs,60000);S.stats.timeMs+=dt;sess.lastTs=Date.now();
+  if(card.type==='pron'){ if(good){sess.correct++;addXP(card.xp||8);} sess.done++;checkMilestones();nextCard();return; }
+  if(card.word && card.word.id) grade(card.word.id, good);
+  if(good){sess.correct++;addXP(card.xp||10);}
+  else{const pos=Math.min(4,sess.queue.length);sess.queue.splice(pos,0,card);}
+  sess.done++;
+  checkMilestones();
+  nextCard();
+}
+function setProg(d,t){$('#prog').style.width=(t?Math.round(d/t*100):0)+'%';}
+function finishSession(){
+  if(window.speechSynthesis)speechSynthesis.cancel();stopRec();
+  award('first');
+  const total=sess.done, correct=sess.correct, pct=total?Math.round(correct/total*100):0;
+  if(sess.meta.cat && sess.meta.type) recordExlog(sess.meta.cat, sess.meta.type, pct);
+  const secs=Math.round((Date.now()-sess.startTs)/1000);
+  const stars=pct===100?'★★★':pct>=66?'★★':pct>=33?'★':'☆';
+  $('#sessTag').style.display='none';$('#counter').textContent='';setProg(1,1);
+  $('#stage').innerHTML='<div class="result"><div class="stars">'+stars+'</div><div class="score">'+pct+'%</div>'+
+    '<div class="rowstat"><div><b>'+correct+'/'+total+'</b>správně</div><div><b>'+secs+'s</b>čas</div><div><b>'+S.daily.done+'/'+S.settings.goal+'</b>denní cíl</div></div>'+
+    '<button class="btn big" onclick="goHome()">Domů</button></div>';
+  sess=null;persist();
+}
+function quitSession(){sess=null;if(window.speechSynthesis)speechSynthesis.cancel();stopRec();goHome();}
+function recordExlog(cat,type,pct){
+  const beforeC=completedCount();
+  const k=cat+':'+type;const p=S.exlog[k]||{done:0};S.exlog[k]={done:p.done+1,last:pct,ts:Date.now()};
+  const afterC=completedCount();persist();
+  if(afterC>beforeC){for(let idx=beforeC+LOOKAHEAD; idx<=afterC+LOOKAHEAD-1 && idx<PATH.length; idx++){(function(t){setTimeout(()=>toast('Nové téma odemčeno: '+t+' 🔓'),500);})(topicTitle(PATH[idx]));}}
+}
+/* ---- gramatika: teorie + cvičení ---- */
+function startGrammar(type){
+  const g=curGram;
+  if(type==='theory')return showTheory(g);
+  const cards=g.items.map((it,i)=>({gitem:it, word:{id:g.id+'#'+i}, type:(type==='gfill'?'gfill':'gquiz'), xp:type==='gfill'?14:10}));
+  startSession(cards,{tag:g.title+' · '+(type==='gfill'?'doplň':'kvíz'), cat:g.id, type:type});
+}
+function startTest(){
+  const vocabPick=shuffle(ALL).slice(0,18).map(w=>({word:w,type:'quiz',dir:pickDir(),xp:10}));
+  const gramItems=[];GRAMMAR.forEach(g=>g.items.forEach((it,i)=>gramItems.push({gitem:it,word:{id:g.id+'#'+i},type:'gquiz',xp:10})));
+  const gramPick=shuffle(gramItems).slice(0,12);
+  const cards=shuffle(vocabPick.concat(gramPick));
+  startSession(cards,{tag:'Závěrečný test', cat:FINAL.id, type:'test'});
+}
+function showTheory(g){
+  show('activity');
+  $('#sessTag').style.display='inline-block';$('#sessTag').textContent=g.title+' · teorie';
+  $('#counter').textContent='';setProg(1,1);
+  let tbl='';
+  if(g.table){tbl='<table class="gtab">'+g.table.map((row,ri)=>'<tr>'+row.map(c=>ri===0?'<th>'+c+'</th>':'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table>';}
+  const exHtml=g.items.slice(0,3).map(it=>'<div class="exs"><span>'+it[0].replace('___','<b>'+it[1]+'</b>')+'</span><em>'+it[3]+'</em></div>').join('');
+  $('#stage').innerHTML='<div class="theory"><p class="theorytext">'+g.theory+'</p>'+tbl+
+    '<div class="sec-label">Příklady</div><div class="exlist" style="max-width:none">'+exHtml+'</div>'+
+    '<button class="btn big" id="thok" style="margin-top:18px">Rozumím ✓</button></div>';
+  $('#thok').onclick=()=>{addXP(5);recordExlog(g.id,'theory',100);toast('Teorie přečtena · +5');openTopic(g.id);};
+}
+function exGQuiz(card,done){
+  const q=card.gitem[0],a=card.gitem[1],opts=card.gitem[2],cz=card.gitem[3];
+  const options=shuffle(opts.slice());
+  $('#stage').innerHTML='<div class="tag" style="display:inline-block">gramatika</div>'+
+    '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
+    '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
+  $('#opts').innerHTML=options.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o+'</button>').join('');
+  $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
+    const ok=options[k]===a;
+    $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(options[j]===a)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
+    const fb=$('#fb'),full=q.replace('___',a);
+    if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}
+    speak(full);
+    showContinue(done,ok);
+  });
+}
+function exGFill(card,done){
+  const q=card.gitem[0],a=card.gitem[1],cz=card.gitem[3];
+  $('#stage').innerHTML='<div class="tag" style="display:inline-block">gramatika</div>'+
+    '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
+    '<div class="typerow"><input class="tinput" id="ti" placeholder="napiš správný tvar" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
+  const inp=$('#ti');inp.focus();
+  const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(a);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb'),full=q.replace('___',a);if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}speak(full);showContinue(done,ok,true);};
+  $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+}
+
+function startCat(type){
+  const words=curCat.vocab.map((v,i)=>BYID[curCat.id+':'+i]);
+  if(type==='fill'){
+    const cards=curCat.sentences.map(s=>({sent:s, word:findWordByEn(curCat,s[1]), type:'fill', dir:'en2cz', xp:S.settings.fill==='hard'?15:8}));
+    return startSession(cards,{tag:curCat.title+' · doplň větu', cat:curCat.id, type:'fill'});
+  }
+  const dir=type==='pron'||type==='dict'?'en2cz':pickDir();
+  const cards=words.map(w=>({word:w,type,dir, xp: type==='dict'?15:(type==='pron'?12:10)}));
+  startSession(cards,{tag:curCat.title, cat:curCat.id, type:type});
+}
+function findWordByEn(cat,en){const i=cat.vocab.findIndex(v=>norm(v[0])===norm(en));return i>=0?BYID[cat.id+':'+i]:null;}
+function startDaily(){
+  ensureDaily();
+  const need=Math.max(S.settings.goal - S.daily.done, 5);
+  let pool=dueWords().concat(shuffle(newWords())).slice(0,Math.max(need,10));
+  if(pool.length<8)pool=shuffle(unlockedWords()).slice(0,12);
+  startSession(buildCards(pool,{}),{tag:'Dnešní mise'});
+}
+function startReview(){const w=dueWords();if(!w.length)return toast('Teď není co opakovat 👌');startSession(buildCards(shuffle(w).slice(0,20),{}),{tag:'Opakování'});}
+function startProblem(){const w=problemWords();if(!w.length)return toast('Žádná problémová slova 🎉');startSession(buildCards(w,{}),{tag:'Problémová slova'});}
+function startMixed(){startSession(buildCards(shuffle(unlockedWords()).slice(0,20),{}),{tag:'Zamíchat vše'});}
+function start5min(){startSession(buildCards(shuffle(unlockedWords()),{}),{tag:'5 minut', timeLimit:5*60000});}
+$('#startDaily').onclick=startDaily;
+
+function exFlash(card,done){
+  const w=card.word, showEn=card.dir!=='cz2en';
+  const front=showEn?w.en:w.cz, back=showEn?w.cz:w.en;
+  const ex=EXAMPLES[norm(w.en)];
+  const exHtml=ex?'<div class="exlist">'+ex.slice(0,2).map(e=>'<div class="exs"><span>'+e[0]+'</span><em>'+e[1]+'</em></div>').join('')+'</div>':'';
+  $('#stage').innerHTML=
+    '<div class="flash" id="flash"><div class="flash-inner">'+
+      '<div class="face front"><div class="word">'+front+'</div>'+
+      (showEn?'<button class="speak" id="spk">♪ Výslovnost</button>':'')+
+      '<div class="sub">klikni pro překlad</div></div>'+
+      '<div class="face back-face"><div class="word">'+back+'</div><div class="sub" style="color:var(--muted)">'+front+'</div>'+exHtml+'</div>'+
+    '</div></div>'+
+    '<div class="knowbtns"><button class="kno" id="bno">✕ Neumím</button><button class="kyes" id="byes">✓ Umím</button></div>';
+  const f=$('#flash');f.onclick=()=>f.classList.toggle('flip');
+  if($('#spk'))$('#spk').onclick=(e)=>{e.stopPropagation();speak(w.en);};
+  $('#bno').onclick=()=>done(false);
+  $('#byes').onclick=()=>done(true);
+  if(showEn)setTimeout(()=>speak(w.en),150);
+}
+function exChoice(card,done){
+  const w=card.word, en2cz=card.dir!=='cz2en';
+  const prompt=en2cz?w.en:w.cz;
+  const key=en2cz?'cz':'en';
+  const distract=distractors(w,key,3);
+  const opts=shuffle([w,...distract]);
+  $('#stage').innerHTML='<div class="qword">'+prompt+'</div>'+
+    '<p class="qsub">'+(en2cz?'Vyber český překlad':'Vyber anglicky')+' '+(en2cz?'<button class="speak" id="spk" style="background:var(--surface2);color:var(--ink);border:1px solid var(--line)">♪</button>':'')+'</p>'+
+    '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
+  if($('#spk'))$('#spk').onclick=()=>speak(w.en);
+  $('#opts').innerHTML=opts.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o[key]+'</button>').join('');
+  $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
+    const ok=opts[k].id===w.id;
+    $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(opts[j].id===w.id)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
+    const fb=$('#fb');
+    if(ok){fb.textContent='Správně';fb.className='feedback ok';}
+    else{fb.textContent='Správně: '+w[key];fb.className='feedback bad';}
+    if(en2cz)speak(w.en);
+    showContinue(done,ok);
+  });
+}
+function exListen(card,done){
+  const w=card.word;
+  const distract=distractors(w,'en',3);
+  const opts=shuffle([w,...distract]);
+  $('#stage').innerHTML='<p class="qsub">Poslechni a vyber slovo (přehraje se jen jednou)</p>'+
+    '<button class="bigspeak playing" id="big">♪</button>'+
+    '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
+  const big=$('#big');
+  big.onclick=()=>toast('Přehraje se jen jednou — poslouchej pozorně 🙂');
+  setTimeout(()=>speak(w.en,()=>big.classList.remove('playing')),250);
+  $('#opts').innerHTML=opts.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o.en+'</button>').join('');
+  $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
+    const ok=opts[k].id===w.id;
+    $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(opts[j].id===w.id)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
+    const fb=$('#fb');
+    if(ok){fb.textContent='Správně · '+w.en+' = '+w.cz;fb.className='feedback ok';}
+    else{fb.textContent='Bylo to: '+w.en+' ('+w.cz+')';fb.className='feedback bad';}
+    showContinue(done,ok);
+  });
+}
+function exFill(card,done){
+  const t=card.sent[0], a=card.sent[1], cz=card.sent[2];
+  const hard=S.settings.fill==='hard';
+  $('#stage').innerHTML='<div class="sentence">'+t.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
+    (hard
+      ? '<div class="typerow"><input class="tinput" id="ti" placeholder="napiš chybějící slovo" autocomplete="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>'
+      : '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>');
+  const finish=(ok)=>{const fb=$('#fb');const full=t.replace('___',a);if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}speak(full);showContinue(done,ok,hard);};
+  if(hard){
+    const inp=$('#ti');inp.focus();
+    const go=()=>{if(inp.disabled)return;inp.disabled=true;const ok=norm(inp.value)===norm(a);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';$('#chk').disabled=true;finish(ok);};
+    $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+  }else{
+    const catId=(card.word&&card.word.cat)||(curCat&&curCat.id);
+    const pool=[...new Set(ALL.filter(x=>x.cat===catId).map(x=>x.en.toLowerCase().split(' ')[0]).concat([a.toLowerCase()]))];
+    const opts=shuffle([a,...shuffle(pool.filter(x=>x!==a.toLowerCase())).slice(0,3)]);
+    $('#opts').innerHTML=opts.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o+'</button>').join('');
+    $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{const ok=norm(opts[k])===norm(a);$$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(norm(opts[j])===norm(a))b.classList.add('correct');else if(j===k)b.classList.add('wrong');});finish(ok);});
+  }
+}
+function exType(card,done){
+  const w=card.word;
+  $('#stage').innerHTML='<div class="qword">'+w.cz+'</div><p class="qsub">Napiš anglicky</p>'+
+    '<div class="typerow"><input class="tinput" id="ti" placeholder="anglicky…" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
+  const inp=$('#ti');inp.focus();
+  const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent='Správně · '+w.en;fb.className='feedback ok';}else{fb.textContent='Správně: '+w.en;fb.className='feedback bad';}speak(w.en);showContinue(done,ok,true);};
+  $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+}
+function exDict(card,done){
+  const w=card.word;
+  $('#stage').innerHTML='<p class="qsub">Poslechni a napiš, co jsi slyšel/a (jen jednou)</p>'+
+    '<button class="bigspeak playing" id="big">♪</button>'+
+    '<div class="typerow"><input class="tinput" id="ti" placeholder="napiš anglicky…" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
+  const big=$('#big');big.onclick=()=>toast('Přehraje se jen jednou 🙂');
+  setTimeout(()=>speak(w.en,()=>big.classList.remove('playing')),250);
+  const inp=$('#ti');inp.focus();
+  const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent='Správně · '+w.en+' = '+w.cz;fb.className='feedback ok';}else{fb.textContent='Správně: '+w.en+' ('+w.cz+')';fb.className='feedback bad';}speak(w.en);showContinue(done,ok,true);};
+  $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
+}
+const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
+let rec=null;
+function stopRec(){try{if(rec){rec.onresult=null;rec.onerror=null;rec.onend=null;rec.stop();rec=null;}}catch(e){}}
+function exPron(card,done){
+  const w=card.word;
+  if(!SR){$('#stage').innerHTML='<div class="note">Rozpoznávání řeči tvůj prohlížeč nepodporuje. Vyzkoušej Chrome nebo Edge.</div>'+
+    '<button class="btn big ghost" id="pnext">Další →</button>';$('#pnext').onclick=()=>done(false);return;}
+  let recognized=false;
+  $('#stage').innerHTML='<p class="qsub">Mluvení na zkoušku — řekni slovo a uvidíš, jestli ti appka rozumí. <b>Není to známka z výslovnosti</b>, jen cvičení. 🙂</p>'+
+    '<div class="qword">'+w.en+'</div>'+
+    '<div style="text-align:center"><button class="speak" id="spk" style="background:var(--surface2);color:var(--ink);border:1px solid var(--line);margin-bottom:14px">♪ Poslechni vzor</button></div>'+
+    '<button class="micbtn" id="mic">🎙</button><p class="qsub" id="hint">Klikni na mikrofon a zkus slovo říct</p><div class="feedback" id="fb"></div>'+
+    '<div style="text-align:center;margin-top:10px"><button class="btn big ghost" id="pnext">Další →</button></div>';
+  $('#spk').onclick=()=>speak(w.en);
+  $('#pnext').onclick=()=>done(recognized);
+  $('#mic').onclick=()=>{
+    stopRec();rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=3;
+    $('#mic').classList.add('rec');$('#hint').textContent='Poslouchám…';
+    rec.onresult=(ev)=>{
+      let heard='';for(let i=0;i<ev.results[0].length;i++){heard+=' '+ev.results[0][i].transcript;}
+      const target=norm(w.en);const ok=norm(heard).includes(target)||target.includes(norm(ev.results[0][0].transcript));
+      const fb=$('#fb');
+      if(ok){recognized=true;fb.textContent='Super, appka ti rozuměla! Slyšela: „'+ev.results[0][0].transcript+'" 👍';fb.className='feedback ok';$('#hint').textContent='Můžeš zkusit znovu, nebo pokračovat dál.';setTimeout(()=>done(true),1300);}
+      else{fb.textContent='Nerozpoznala jsem to úplně (slyšela „'+ev.results[0][0].transcript+'"). Nevadí — zkus to klidně znovu.';fb.className='feedback bad';$('#hint').textContent='Zkus to znovu, nebo pokračuj tlačítkem Další.';}
+      $('#mic').classList.remove('rec');
+    };
+    rec.onerror=()=>{$('#mic').classList.remove('rec');$('#hint').textContent='Mikrofon se nepodařilo použít — můžeš pokračovat dál.';};
+    rec.onend=()=>{$('#mic').classList.remove('rec');};
+    try{rec.start();}catch(e){}
+  };
+}
+
+function openStats(){
+  const tot=S.stats.c+S.stats.w, acc=tot?Math.round(S.stats.c/tot*100):0;
+  const mins=Math.round(S.stats.timeMs/60000);
+  $('#statGrid').innerHTML=[
+    ['Naučená slova',learnedCount()+' / '+ALL.length],
+    ['Úspěšnost',acc+' %'],
+    ['Level',level()],
+    ['Nejlepší série',S.stats.bestDays+' dní'],
+    ['Dnešní pokrok',S.daily.done+' / '+S.settings.goal],
+    ['Problémová slova',problemWords().length],
+    ['Celkem odpovědí',tot],
+    ['Čas učení',mins+' min']
+  ].map(x=>'<div class="stat"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>').join('');
+  const rows=CATS.map(c=>{const s=S.stats.byCat[c.id];const t=s?s.c+s.w:0;const a=t?Math.round(s.c/t*100):null;return {title:c.title,a,t};}).filter(r=>r.t>0).sort((x,y)=>x.a-y.a).slice(0,6);
+  $('#weakList').innerHTML=rows.length?rows.map(r=>'<div class="row"><span>'+r.title+'</span><span class="pct" style="color:'+(r.a>=70?'var(--ok)':r.a>=40?'var(--warn)':'var(--bad)')+'">'+r.a+' %</span></div>').join(''):'<p class="lead">Zatím žádná data — začni procvičovat.</p>';
+  show('stats');
+}
+function resetProgress(){if(confirm('Opravdu vymazat veškerý postup tohoto profilu?')){try{localStorage.removeItem(stateKey(curProfileId));}catch(e){}S={};ensureStateDefaults();persist();ensureDaily();refreshHome();show('home');toast('Postup profilu vymazán');}}
+
+/* ---- profilové obrazovky ---- */
+function openProfiles(){renderProfiles();show('gate');}
+function renderProfiles(){
+  const list=PROFILES.map(p=>{
+    const initial=(p.name.trim()[0]||'?').toUpperCase();
+    let lvl='Level 1';try{const st=JSON.parse(localStorage.getItem(stateKey(p.id))||'{}');lvl='Level '+(Math.floor((st.xp||0)/200)+1);}catch(e){}
+    return '<div class="pf" onclick="pickProfile(\''+p.id+'\')">'+
+      '<span class="pdel" onclick="event.stopPropagation();delProfile(\''+p.id+'\')">✕</span>'+
+      '<div class="pav" style="background:'+p.color+'">'+initial+(p.pin?'<span class="plock">🔒</span>':'')+'</div>'+
+      '<div class="pn">'+p.name+'</div><div class="pl">'+lvl+'</div></div>';
+  }).join('');
+  $('#gate').innerHTML='<h2 style="text-align:center">Kdo se učí?</h2>'+
+    '<p class="lead" style="text-align:center">Vyber svůj profil nebo vytvoř nový.</p>'+
+    '<div class="pfgrid">'+list+
+    '<div class="pf add" onclick="createProfileUI()"><div class="pav">＋</div><div class="pn">Nový profil</div></div></div>';
+}
+function createProfileUI(){
+  $('#gate').innerHTML='<button class="back" onclick="openProfiles()">← Zpět</button><h2>Nový profil</h2>'+
+    '<p class="lead">Zadej jméno. PIN je nepovinný (4 číslice, chrání profil).</p>'+
+    '<div class="typerow"><input class="tinput" id="pfName" placeholder="jméno" maxlength="20" autocomplete="off"></div>'+
+    '<div class="typerow" style="margin-top:10px"><input class="tinput" id="pfPin" placeholder="PIN (nepovinné)" inputmode="numeric" maxlength="4" autocomplete="off"></div>'+
+    '<div style="margin-top:14px"><button class="btn big" id="pfCreate">Vytvořit profil</button></div>';
+  $('#pfCreate').onclick=createProfile;
+  setTimeout(()=>{try{$('#pfName').focus();}catch(e){}},50);
+}
+function createProfile(){
+  const name=(($('#pfName').value)||'').trim();if(!name)return toast('Zadej jméno');
+  const pin=(($('#pfPin').value)||'').replace(/\D/g,'').slice(0,4);
+  const p={id:newId(),name,color:AVA_COLORS[PROFILES.length%AVA_COLORS.length],pin};
+  PROFILES.push(p);saveProfiles();selectProfile(p.id);
+}
+function pickProfile(id){
+  const p=PROFILES.find(x=>x.id===id);if(!p)return;
+  if(p.pin){const v=prompt('PIN pro '+p.name+':');if(v===null)return;if(v.replace(/\D/g,'')!==p.pin)return toast('Špatný PIN');}
+  selectProfile(id);
+}
+function delProfile(id){
+  const p=PROFILES.find(x=>x.id===id);if(!p)return;
+  if(!confirm('Smazat profil „'+p.name+'" i jeho postup?'))return;
+  PROFILES=PROFILES.filter(x=>x.id!==id);saveProfiles();
+  try{localStorage.removeItem(stateKey(id));}catch(e){}
+  if(curProfileId===id){curProfileId=null;try{localStorage.removeItem('anj_cur');}catch(e){}}
+  renderProfiles();
+}
+function selectProfile(id){
+  curProfileId=id;try{localStorage.setItem('anj_cur',id);}catch(e){}
+  S=load();ensureStateDefaults();buildLevel(S.settings.level);persist();
+  const p=PROFILES.find(x=>x.id===id);
+  $('#whoBtn').textContent=p?(p.name.trim()[0]||'?').toUpperCase():'?';
+  applyTheme();ensureDaily();
+  initSeg('segDir','dir');initSeg('segFill','fill');initSeg('segGoal','goal',renderMission);
+  levelChosen=false;refreshHome();show('home');
+}
+function migrateOld(){
+  try{const old=localStorage.getItem('anj_a1_v2');
+    if(old && !PROFILES.length){
+      const p={id:newId(),name:'Já',color:AVA_COLORS[0],pin:''};
+      PROFILES.push(p);saveProfiles();
+      localStorage.setItem(stateKey(p.id),old);
+      curProfileId=p.id;localStorage.setItem('anj_cur',p.id);
+      localStorage.removeItem('anj_a1_v2');
+    }}catch(e){}
+}
+/* ================= FIREBASE SYNCHRONIZACE ================= */
+/* !!! Sem vlož svůj Firebase config z konzole (Project settings). apiKey je pro klienta bezpečný. */
+const FIREBASE_CONFIG={
+  apiKey:"AIzaSyAAYYkEVxwZvtjNHGh0RwCYg93J2Rqdv0k",
+  authDomain:"selfenglishlessons.firebaseapp.com",
+  projectId:"selfenglishlessons",
+  storageBucket:"selfenglishlessons.firebasestorage.app",
+  messagingSenderId:"324188722820",
+  appId:"1:324188722820:web:9de207cda63986b2a994d1",
+  measurementId:"G-K2SBZ8YFFJ"
+};
+const FIREBASE_READY=!!FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('VLOZ')!==0;
+let fbAuth=null,fbDb=null,fbUser=null,cloudTimer=null,cloudStat='';
+function initFirebase(){
+  if(!FIREBASE_READY || typeof firebase==='undefined')return;
+  try{
+    firebase.initializeApp(FIREBASE_CONFIG);
+    fbAuth=firebase.auth();fbDb=firebase.firestore();
+    fbAuth.onAuthStateChanged(function(u){fbUser=u;onAuthChange();});
+  }catch(e){}
+}
+function gatherLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k=localStorage.key(i);if(k&&k.indexOf('anj_')===0)o[k]=localStorage.getItem(k);}return o;}
+function applyLocal(o){Object.keys(o).forEach(function(k){try{localStorage.setItem(k,o[k]);}catch(e){}});}
+function setCloudStat(s){cloudStat=s;const el=$('#cloudStat');if(el)el.textContent=s;}
+function scheduleCloudSave(){if(!fbUser||!fbDb)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudSave,1500);}
+function cloudSave(){if(!fbUser||!fbDb)return;setCloudStat('Ukládám do cloudu…');fbDb.collection('users').doc(fbUser.uid).set({data:gatherLocal(),updatedAt:Date.now()}).then(function(){setCloudStat('Uloženo '+new Date().toLocaleTimeString());}).catch(function(){setCloudStat('Chyba ukládání (zkontroluj pravidla Firestore)');});}
+function cloudLoad(cb){if(!fbUser||!fbDb){cb&&cb(false);return;}fbDb.collection('users').doc(fbUser.uid).get().then(function(doc){if(doc.exists&&doc.data()&&doc.data().data){applyLocal(doc.data().data);cb&&cb(true);}else{cb&&cb(false);}}).catch(function(){setCloudStat('Chyba načítání');cb&&cb(false);});}
+function onAuthChange(){
+  renderAccount();
+  if(fbUser){
+    cloudLoad(function(had){
+      if(had){reloadFromStorage();setCloudStat('Načteno z cloudu ✓');}
+      else{cloudSave();}
+      renderAccount();
+    });
+  }
+}
+function reloadFromStorage(){
+  PROFILES=loadProfiles();
+  curProfileId=localStorage.getItem('anj_cur')||null;
+  if(curProfileId && PROFILES.find(function(p){return p.id===curProfileId;})){selectProfile(curProfileId);}
+  else{openProfiles();}
+}
+function fbErr(e){const c=(e&&e.code)||'';if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)return 'špatný e-mail nebo heslo';if(c.indexOf('user-not-found')>=0)return 'účet neexistuje';if(c.indexOf('email-already')>=0)return 'e-mail už je použit';if(c.indexOf('weak-password')>=0)return 'slabé heslo (min. 6 znaků)';if(c.indexOf('invalid-email')>=0)return 'neplatný e-mail';return (e&&e.message)||'chyba';}
+function fbRegister(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.createUserWithEmailAndPassword(em,pw).then(function(){toast('Účet vytvořen ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
+function fbLogin(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.signInWithEmailAndPassword(em,pw).then(function(){toast('Přihlášeno ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
+function fbLogout(){if(fbAuth)fbAuth.signOut().then(function(){toast('Odhlášeno');renderAccount();});}
+function openAccount(){renderAccount();show('account');}
+function renderAccount(){
+  const el=$('#account');if(!el)return;
+  let html='<button class="back" onclick="goHome()">← Zpět</button><h2>☁ Účet a synchronizace</h2>';
+  if(!FIREBASE_READY){
+    html+='<div class="note">Synchronizace zatím není nastavená. Do souboru je potřeba jednou vložit tvůj <b>Firebase config</b> (do části FIREBASE_CONFIG v kódu). Je to zdarma a na pár minut — návod máš od Claude.</div>'+
+      '<p class="lead">Bez nastavení appka funguje normálně, jen ukládá postup lokálně na tomto počítači.</p>';
+    el.innerHTML=html;return;
+  }
+  if(fbUser){
+    html+='<p class="lead">Přihlášen jako <b>'+(fbUser.email||'uživatel')+'</b>. Postup se ukládá do cloudu automaticky a načte se na jiném zařízení po přihlášení.</p>'+
+      '<p class="lead" id="cloudStat">'+(cloudStat||'Synchronizováno')+'</p>'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="cloudSave()">Uložit teď</button><button class="btn ghost" onclick="fbLogout()">Odhlásit</button></div>';
+  }else{
+    html+='<p class="lead">Přihlas se, aby se tvůj postup ukládal do cloudu a byl dostupný i na druhém počítači.</p>'+
+      '<div class="typerow"><input class="tinput" id="acEmail" placeholder="e-mail" autocomplete="username"></div>'+
+      '<div class="typerow" style="margin-top:10px"><input class="tinput" id="acPass" type="password" placeholder="heslo (min. 6 znaků)" autocomplete="current-password"></div>'+
+      '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">Přihlásit</button><button class="btn ghost" onclick="fbRegister()">Vytvořit účet</button></div>';
+  }
+  el.innerHTML=html;
+}
+
+function init(){
+  applyTheme();
+  initFirebase();
+  migrateOld();
+  if(!PROFILES.length){createProfileUI();show('gate');return;}
+  if(curProfileId && PROFILES.find(p=>p.id===curProfileId)){selectProfile(curProfileId);}
+  else{openProfiles();}
+}
+init();
+</script>
+</body>
+</html>
