@@ -1350,12 +1350,13 @@ function nextPlacementQ(){
   const q=item.gitem[0],a=item.gitem[1],opts=item.gitem[2],cz=item.gitem[3];
   const options=shuffle(opts.slice());
   $('#stage').innerHTML='<div class="tag" style="display:inline-block">'+item.level+' · '+item.topic+'</div>'+
-    '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
+    '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans" id="czt" style="display:none">'+cz+'</div>'+
     '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
   $('#opts').innerHTML=options.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o+'</button>').join('');
   $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
     const ok=options[k]===a;
     $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(options[j]===a)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
+    const czt=$('#czt');if(czt)czt.style.display='';
     const fb=$('#fb'),full=q.replace('___',a);
     if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}
     speak(full);
@@ -1402,8 +1403,9 @@ function showTheory(g){
 function exGQuiz(card,done){
   const q=card.gitem[0],a=card.gitem[1],opts=card.gitem[2],cz=card.gitem[3];
   const options=shuffle(opts.slice());
+  const hideCz=sess&&sess.meta&&sess.meta.type==='test';   // v testu překlad nenapovídá — ukáže se až po odpovědi
   $('#stage').innerHTML='<div class="tag" style="display:inline-block">gramatika</div>'+
-    '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
+    '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans" id="czt"'+(hideCz?' style="display:none"':'')+'>'+cz+'</div>'+
     '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
   $('#opts').innerHTML=options.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o+'</button>').join('');
   $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
@@ -1411,6 +1413,7 @@ function exGQuiz(card,done){
     $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(options[j]===a)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
     const fb=$('#fb'),full=q.replace('___',a);
     if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}
+    if(hideCz){const c=$('#czt');if(c)c.style.display='';}
     speak(full);
     showContinue(done,ok);
   });
