@@ -1083,7 +1083,13 @@ function fillVoiceSel(){
   sel.value=want;if(sel.selectedIndex<0)sel.value='';
 }
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
-function speak(t,cb){if(!('speechSynthesis' in window)){cb&&cb();return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=(voice&&voice.lang)||'en-GB';u.rate=.9;if(voice)u.voice=voice;if(cb)u.onend=cb;speechSynthesis.speak(u);}
+const SPOKE={started:false};   // sleduje, jestli poslední speak() opravdu začal hrát (mobily blokují autoplay)
+function speak(t,cb){if(!('speechSynthesis' in window)){cb&&cb();return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=(voice&&voice.lang)||'en-GB';u.rate=.9;if(voice)u.voice=voice;SPOKE.started=false;u.onstart=()=>{SPOKE.started=true;};if(cb)u.onend=cb;speechSynthesis.speak(u);}
+/* mobilní prohlížeče povolí řeč až po prvním dotyku — „odemkneme“ ji tichou hláškou */
+let speechPrimed=false;
+function primeSpeech(){if(speechPrimed||!('speechSynthesis' in window))return;speechPrimed=true;try{const u=new SpeechSynthesisUtterance(' ');u.volume=0;speechSynthesis.speak(u);}catch(e){}}
+document.addEventListener('click',primeSpeech,{once:true,capture:true});
+document.addEventListener('touchend',primeSpeech,{once:true,capture:true});
 
 function srsOf(id){return S.srs[id];}
 function isDue(id){const e=S.srs[id];if(!e)return true;return (e.due||0)<=Date.now();}
@@ -1547,7 +1553,7 @@ function exListen(card,done){
     '<button class="bigspeak playing" id="big">♪</button>'+
     '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
   const big=$('#big');
-  big.onclick=()=>toast('Přehraje se jen jednou — poslouchej pozorně 🙂');
+  big.onclick=()=>{if(!SPOKE.started){big.classList.add('playing');speak(w.en,()=>big.classList.remove('playing'));}else toast('Přehraje se jen jednou — poslouchej pozorně 🙂');};
   setTimeout(()=>speak(w.en,()=>big.classList.remove('playing')),250);
   $('#opts').innerHTML=opts.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o.en+'</button>').join('');
   $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
@@ -1592,7 +1598,8 @@ function exDict(card,done){
   $('#stage').innerHTML='<p class="qsub">Poslechni a napiš, co jsi slyšel/a (jen jednou)</p>'+
     '<button class="bigspeak playing" id="big">♪</button>'+
     '<div class="typerow"><input class="tinput" id="ti" placeholder="napiš anglicky…" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
-  const big=$('#big');big.onclick=()=>toast('Přehraje se jen jednou 🙂');
+  const big=$('#big');
+  big.onclick=()=>{if(!SPOKE.started){big.classList.add('playing');speak(w.en,()=>big.classList.remove('playing'));}else toast('Přehraje se jen jednou 🙂');};
   setTimeout(()=>speak(w.en,()=>big.classList.remove('playing')),250);
   const inp=$('#ti');inp.focus();
   const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent='Správně · '+w.en+' = '+w.cz;fb.className='feedback ok';}else{fb.textContent='Správně: '+w.en+' ('+w.cz+')';fb.className='feedback bad';}speak(w.en);showContinue(done,ok,true);};
