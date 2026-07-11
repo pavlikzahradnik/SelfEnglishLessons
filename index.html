@@ -271,6 +271,11 @@
               <div class="seg" id="segFill"><button data-v="easy">Výběr</button><button data-v="hard">Psaní</button></div></div>
             <div class="setline"><span class="setlabel">Denní cíl</span>
               <div class="seg" id="segGoal"><button data-v="10">10</button><button data-v="15">15</button><button data-v="25">25</button></div></div>
+            <div class="setline"><span class="setlabel">Hlas výslovnosti</span>
+              <div style="display:flex;gap:6px">
+                <select id="voiceSel" style="flex:1;min-width:0;padding:8px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);font-size:.8rem"></select>
+                <button id="voiceTest" type="button" title="Přehrát ukázku" style="flex:0 0 auto;width:36px;border:1px solid var(--line);border-radius:8px;background:var(--surface2);color:var(--ink);cursor:pointer;font-size:1rem">♪</button>
+              </div></div>
           </div>
         </div>
       </aside>
@@ -1056,9 +1061,23 @@ function dateStr(d){return new Date(d).toISOString().slice(0,10);}
 function relTime(ts){const s=(Date.now()-ts)/1000;if(s<60)return 'právě teď';const m=Math.floor(s/60);if(m<60)return 'před '+m+' min';const h=Math.floor(m/60);if(h<24)return 'před '+h+' h';const d=Math.floor(h/24);return d===1?'včera':'před '+d+' dny';}
 
 let voice=null;
-function pickVoice(){const vs=speechSynthesis.getVoices();voice=vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;}
+function pickVoice(){
+  const vs=speechSynthesis.getVoices();
+  const want=(typeof S!=='undefined'&&S.settings&&S.settings.voice)||'';
+  voice=(want&&vs.find(v=>v.name===want))||vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;
+  fillVoiceSel();
+}
+function fillVoiceSel(){
+  const sel=$('#voiceSel');if(!sel||!('speechSynthesis' in window))return;
+  const vs=speechSynthesis.getVoices().filter(v=>/^en/i.test(v.lang));
+  if(!vs.length){sel.innerHTML='<option value="">— žádný anglický hlas —</option>';sel.disabled=true;return;}
+  sel.disabled=false;
+  sel.innerHTML='<option value="">Automaticky</option>'+vs.map(v=>'<option value="'+v.name.replace(/"/g,'&quot;')+'">'+v.name.replace(/</g,'&lt;')+' ('+v.lang+')</option>').join('');
+  const want=(typeof S!=='undefined'&&S.settings&&S.settings.voice)||'';
+  sel.value=want;if(sel.selectedIndex<0)sel.value='';
+}
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
-function speak(t,cb){if(!('speechSynthesis' in window)){cb&&cb();return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang='en-GB';u.rate=.9;if(voice)u.voice=voice;if(cb)u.onend=cb;speechSynthesis.speak(u);}
+function speak(t,cb){if(!('speechSynthesis' in window)){cb&&cb();return;}speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(t);u.lang=(voice&&voice.lang)||'en-GB';u.rate=.9;if(voice)u.voice=voice;if(cb)u.onend=cb;speechSynthesis.speak(u);}
 
 function srsOf(id){return S.srs[id];}
 function isDue(id){const e=S.srs[id];if(!e)return true;return (e.due||0)<=Date.now();}
@@ -1670,6 +1689,11 @@ function selectProfile(id){
   const wb=$('#whoBtn');if(wb)wb.textContent=p?(p.name.trim()[0]||'?').toUpperCase():'?';
   applyTheme();ensureDaily();
   initSeg('segDir','dir');initSeg('segFill','fill');initSeg('segGoal','goal',renderMission);
+  fillVoiceSel();
+  const vsel=$('#voiceSel');
+  if(vsel)vsel.onchange=()=>{S.settings.voice=vsel.value;persist();pickVoice();speak('Hello! Nice to meet you.');};
+  const vtest=$('#voiceTest');
+  if(vtest)vtest.onclick=()=>speak('Where is the bear? I can hear with my ear.');
   levelChosen=false;refreshHome();show('home');
 }
 function migrateOld(){
