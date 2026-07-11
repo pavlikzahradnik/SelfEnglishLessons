@@ -369,7 +369,8 @@
 
   <div class="foot">
     Adaptivní opakování (SRS) plánuje každé slovo zvlášť: chyba → za 2 min, správně → za hodinu → den → týden → měsíc. Postup se ukládá v tomto prohlížeči.<br>
-    Nedostupné offline (potřebují server): AI konverzace, AI generované věty, synchronizace mezi zařízeními, obrázky ke slovům.
+    Nedostupné offline (potřebují server): AI konverzace, AI generované věty, synchronizace mezi zařízeními, obrázky ke slovům.<br>
+    <a id="coffeeLink" href="#" target="_blank" rel="noopener" style="display:none;margin-top:12px;background:#FFDD00;color:#0f172a;padding:9px 16px;border-radius:10px;font-weight:700;text-decoration:none;box-shadow:0 4px 14px rgba(0,0,0,.25)">☕ Baví tě appka? Kup mi kafe</a>
   </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -1742,6 +1743,8 @@ const FIREBASE_CONFIG={
   measurementId:"G-K2SBZ8YFFJ"
 };
 const FIREBASE_READY=!!FIREBASE_CONFIG.apiKey && FIREBASE_CONFIG.apiKey.indexOf('VLOZ')!==0;
+/* !!! Sem vlož svůj odkaz z buymeacoffee.com (např. 'https://buymeacoffee.com/pavlik'). Dokud je prázdný, tlačítko se nezobrazuje. */
+const COFFEE_URL='https://buymeacoffee.com/pavlikzahrx';
 let fbAuth=null,fbDb=null,fbUser=null,cloudTimer=null,cloudStat='';
 function initFirebase(){
   if(!FIREBASE_READY || typeof firebase==='undefined')return;
@@ -1834,6 +1837,7 @@ function renderAccount(){
 function init(){
   applyTheme();
   initFirebase();
+  if(COFFEE_URL){const cl=$('#coffeeLink');if(cl){cl.href=COFFEE_URL;cl.style.display='inline-block';}}
   migrateOld();
   ensureDefaultProfile();          /* tiše připraví postup na pozadí */
   /* Není profilová obrazovka – rovnou přihlášení e-mailem.
