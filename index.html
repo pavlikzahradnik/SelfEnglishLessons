@@ -1047,7 +1047,7 @@ function worstScore(catId){const s=exlogScores(catId);return s.length?Math.min.a
 function goodExCount(catId){return exlogScores(catId).filter(e=>e.last>=DONE_PCT).length;}
 function isTopicDone(id){if(TMAP[id]&&TMAP[id].type==='test'){const e=S.exlog[id+':test'];return !!(e&&e.last>=60);}return goodExCount(id)>=DONE_EX;}
 function completedCount(){let n=0;for(const id of PATH){if(isTopicDone(id))n++;else break;}return n;}
-function isUnlocked(id){const i=PATH.indexOf(id);if(TMAP[id]&&TMAP[id].type==='test'){return i>0 && isTopicDone(PATH[i-1]);}return i < completedCount()+LOOKAHEAD;}
+function isUnlocked(id){const i=PATH.indexOf(id);if(TMAP[id]&&TMAP[id].type==='test'){return true;}return i < completedCount()+LOOKAHEAD;}   /* závěrečný test je vždy přístupný — kdo dá 90 %, odemkne si další úroveň bez procházení všech témat */
 function unlockedWords(){return ALL.filter(w=>isUnlocked(w.cat));}
 function nextToComplete(){const i=completedCount();return i<PATH.length?PATH[i]:null;}
 function showContinue(done,ok,needRelease){
