@@ -367,7 +367,7 @@ const MIN=60000;
 /* ===== Jazyky ===== */
 const LANGS={
   en:{label:'Angličtina',flag:'🇬🇧',levels:['A1','A2','B1','B2','C1','C2']},
-  de:{label:'Němčina',flag:'🇩🇪',levels:['A1','A2']}
+  de:{label:'Němčina',flag:'🇩🇪',levels:['A1','A2','B1','B2','C1','C2']}
 };
 const LEVEL_META={
   en:{
@@ -380,7 +380,11 @@ const LEVEL_META={
   },
   de:{
     A1:{t:'Začátečník',d:'Základní slovíčka a gramatika — pozdravy, čísla, rodina, sein/haben, členy der/die/das, 4. pád, modální slovesa, zápor, W-otázky…'},
-    A2:{t:'Mírně pokročilý',d:'Rozšířená slovní zásoba a gramatika — perfektum, préteritum, 3. pád, předložky, stupňování, vedlejší věty, odlučitelné předpony…'}
+    A2:{t:'Mírně pokročilý',d:'Rozšířená slovní zásoba a gramatika — perfektum, préteritum, 3. pád, předložky, stupňování, vedlejší věty, odlučitelné předpony…'},
+    B1:{t:'Středně pokročilý',d:'Složitější gramatika a témata — préteritum, Konjunktiv II, trpný rod, vztažné věty, 2. pád, předminulý čas, nepřímé otázky…'},
+    B2:{t:'Vyšší středně pokročilý',d:'Abstraktní témata a pokročilá gramatika — Konjunktiv II minulý, nepřímá řeč, trpný rod s modály, příčestí, dvojité spojky, idiomy…'},
+    C1:{t:'Pokročilý',d:'Odborná a formální němčina — participiální přívlastky, nominální styl, als ob, funkční slovesné vazby, neosobní pasiv…'},
+    C2:{t:'Téměř rodilý mluvčí',d:'Vytříbený jazyk — modální částice, pokročilé kolokace, formální konektory, elipsa, genitivní vazby, knižní styl…'}
   }
 };
 /* ===== Rozřazovací test (adaptivní) — zatím jen pro angličtinu ===== */
@@ -606,7 +610,7 @@ let levelChosen=false;
 const A2_UNLOCK_PCT=90;
 const LVL_PREREQ_BY_LANG={
   en:{A2:'g_test',B1:'a2_test',B2:'b1_test',C1:'b2_test',C2:'c1_test'},
-  de:{A2:'de_a1_test'}
+  de:{A2:'de_a1_test',B1:'de_a2_test',B2:'de_b1_test',C1:'de_b2_test',C2:'de_c1_test'}
 };   // pro odemčení úrovně je potřeba test předchozí úrovně >=90 %
 function lvlPrereq(lvl){const lang=(S.settings&&S.settings.lang)||'en';return (LVL_PREREQ_BY_LANG[lang]||{})[lvl];}
 function levelUnlocked(lvl){
@@ -663,6 +667,7 @@ function switchLanguage(lang){
     if(remembered && langLevels(lang)[remembered]){
       S.settings.level=remembered;buildLevel(remembered);levelChosen=true;
     }else{
+      buildLevel(LANGS[lang].levels[0]);   /* ať statistiky/denní mise ukazují nový jazyk */
       levelChosen=false;
     }
     persist();refreshHome();
