@@ -367,7 +367,7 @@ const MIN=60000;
 /* ===== Jazyky ===== */
 const LANGS={
   en:{label:'Angličtina',flag:'🇬🇧',levels:['A1','A2','B1','B2','C1','C2']},
-  de:{label:'Němčina',flag:'🇩🇪',levels:['A1']}
+  de:{label:'Němčina',flag:'🇩🇪',levels:['A1','A2']}
 };
 const LEVEL_META={
   en:{
@@ -379,7 +379,8 @@ const LEVEL_META={
     C2:{t:'Téměř rodilý mluvčí',d:'Akademický a literární jazyk — rétorika, nominalizace, hedging, elipsa, pokročilé kolokace a inverze…'}
   },
   de:{
-    A1:{t:'Začátečník',d:'Základní slovíčka a gramatika — pozdravy, čísla, rodina, sein/haben, členy der/die/das, 4. pád, modální slovesa, zápor, W-otázky…'}
+    A1:{t:'Začátečník',d:'Základní slovíčka a gramatika — pozdravy, čísla, rodina, sein/haben, členy der/die/das, 4. pád, modální slovesa, zápor, W-otázky…'},
+    A2:{t:'Mírně pokročilý',d:'Rozšířená slovní zásoba a gramatika — perfektum, préteritum, 3. pád, předložky, stupňování, vedlejší věty, odlučitelné předpony…'}
   }
 };
 /* ===== Rozřazovací test (adaptivní) — zatím jen pro angličtinu ===== */
@@ -603,13 +604,18 @@ function renderActions(){
 }
 let levelChosen=false;
 const A2_UNLOCK_PCT=90;
-const LVL_PREREQ={A2:'g_test',B1:'a2_test',B2:'b1_test',C1:'b2_test',C2:'c1_test'};   // pro odemčení úrovně je potřeba test předchozí úrovně >=90 %
+const LVL_PREREQ_BY_LANG={
+  en:{A2:'g_test',B1:'a2_test',B2:'b1_test',C1:'b2_test',C2:'c1_test'},
+  de:{A2:'de_a1_test'}
+};   // pro odemčení úrovně je potřeba test předchozí úrovně >=90 %
+function lvlPrereq(lvl){const lang=(S.settings&&S.settings.lang)||'en';return (LVL_PREREQ_BY_LANG[lang]||{})[lvl];}
 function levelUnlocked(lvl){
   const lang=(S.settings&&S.settings.lang)||'en';
-  if(lang!=='en')return true;
-  const maxU=S.settings.maxUnlockedLevel;
-  if(maxU && PLC_LEVELS.indexOf(lvl)<=PLC_LEVELS.indexOf(maxU))return true;
-  const t=LVL_PREREQ[lvl];if(!t)return true;const e=S.exlog[t+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
+  if(lang==='en'){
+    const maxU=S.settings.maxUnlockedLevel;
+    if(maxU && PLC_LEVELS.indexOf(lvl)<=PLC_LEVELS.indexOf(maxU))return true;
+  }
+  const t=lvlPrereq(lvl);if(!t)return true;const e=S.exlog[t+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
 }
 function updateBrand(){
   const lang=(S.settings&&S.settings.lang)||'en';
@@ -633,7 +639,7 @@ function renderLevelPick(){
     }
     const m=meta[lvl]||{t:lvl,d:''};
     const ok=levelUnlocked(lvl);
-    const prereqTest=LVL_PREREQ[lvl];const e=prereqTest?S.exlog[prereqTest+':test']:null;
+    const prereqTest=lvlPrereq(lvl);const e=prereqTest?S.exlog[prereqTest+':test']:null;
     const goTxt=ok?('Začít '+lvl+' →'):('🔒 Odemkni testem na '+A2_UNLOCK_PCT+' %'+(e?' <span style="color:var(--muted)">(teď '+e.last+' %)</span>':''));
     return '<button class="lvlcard'+(ok?'':' locked')+'" onclick="chooseLevel(\''+lvl+'\')">'+
       '<div class="lc-badge">'+lvl+'</div><div class="lc-t">'+m.t+'</div><div class="lc-d">'+m.d+'</div>'+
