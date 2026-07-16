@@ -283,7 +283,7 @@
         </div>
         <div class="panel hidden" id="topicsView">
           <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span data-i18n>Témata</span> <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()" data-i18n>← Změnit úroveň</button></h2>
-          <p class="lead">Celkem <b id="totalWords"></b> slov · naučeno <b id="learnedWords">0</b>. Klikni na téma pro výběr cvičení.</p>
+          <p class="lead"><span data-i18n>Celkem</span> <b id="totalWords"></b> <span data-i18n>slov · naučeno</span> <b id="learnedWords">0</b>. <span data-i18n>Klikni na téma pro výběr cvičení.</span></p>
           <div id="catGrid" class="grid"></div>
           <div class="sec-label" data-i18n>Úspěchy</div>
           <div id="ach" class="ach"></div>
@@ -309,15 +309,15 @@
   <div id="stats" class="panel hidden">
     <button class="back" onclick="goHome()">← Zpět</button>
     <h2>Statistiky</h2>
-    <p class="lead">Tvůj celkový pokrok.</p>
+    <p class="lead" data-i18n>Tvůj celkový pokrok.</p>
     <div class="statgrid" id="statGrid"></div>
-    <h3>Nejslabší témata</h3>
+    <h3 data-i18n>Nejslabší témata</h3>
     <div class="weaklist" id="weakList"></div>
-    <div style="margin-top:16px"><button class="btn ghost" onclick="resetProgress()">Vymazat veškerý postup</button></div>
+    <div style="margin-top:16px"><button class="btn ghost" onclick="resetProgress()" data-i18n>Vymazat veškerý postup</button></div>
   </div>
 
   <div id="activity" class="panel hidden">
-    <button class="back" onclick="quitSession()">← Ukončit</button>
+    <button class="back" onclick="quitSession()" data-i18n>← Ukončit</button>
     <div id="sessTag" class="tag" style="display:none"></div>
     <div class="counter" id="counter"></div>
     <div class="progressbar"><div id="prog"></div></div>
@@ -328,8 +328,8 @@
   <div id="account" class="panel hidden"></div>
 
   <div class="foot">
-    Adaptivní opakování (SRS) plánuje každé slovo zvlášť: chyba → za 2 min, správně → za hodinu → den → týden → měsíc. Postup se ukládá v tomto prohlížeči.<br>
-    Nedostupné offline (potřebují server): AI konverzace, AI generované věty, synchronizace mezi zařízeními, obrázky ke slovům.
+    <span data-i18n>Adaptivní opakování (SRS) plánuje každé slovo zvlášť: chyba → za 2 min, správně → za hodinu → den → týden → měsíc. Postup se ukládá v tomto prohlížeči.</span><br>
+    <span data-i18n>Nedostupné offline (potřebují server): AI konverzace, AI generované věty, synchronizace mezi zařízeními, obrázky ke slovům.</span>
   </div>
 </div>
 <div id="toast" class="toast"></div>
@@ -443,7 +443,7 @@ function buildLevel(lvl){
   BYID={}; ALL.forEach(w=>BYID[w.id]=w);
   GMAP={}; GRAMMAR.forEach(g=>GMAP[g.id]=g);
   CI={}; CATS.forEach((c,i)=>CI[c.id]=i);
-  FINAL={id:d.test,title:'Závěrečný test',type:'test'};
+  FINAL={id:d.test,title:tr('Závěrečný test'),type:'test'};
   TMAP={}; CATS.forEach(c=>TMAP[c.id]={type:'vocab',title:c.title,obj:c}); GRAMMAR.forEach(g=>TMAP[g.id]={type:'grammar',title:g.title,obj:g}); TMAP[FINAL.id]={type:'test',title:FINAL.title,obj:FINAL};
 }
 const LOOKAHEAD=3;   // kolik témat dopředu je vidět za dokončenou frontou
@@ -539,7 +539,7 @@ function unlockedWords(){return ALL.filter(w=>isUnlocked(w.cat));}
 function nextToComplete(){const i=completedCount();return i<PATH.length?PATH[i]:null;}
 function showContinue(done,ok,needRelease){
   const stage=$('#stage');const bar=document.createElement('div');bar.style.marginTop='14px';
-  bar.innerHTML='<button class="btn big" id="nextBtn">Další →</button>';stage.appendChild(bar);
+  bar.innerHTML='<button class="btn big" id="nextBtn">'+tr('Další')+' →</button>';stage.appendChild(bar);
   let armed=!needRelease, fired=false;
   function go(){if(fired)return;fired=true;document.removeEventListener('keydown',onKey);document.removeEventListener('keyup',onUp);const b=$('#nextBtn');if(b)b.disabled=true;done(ok);}
   const onUp=(e)=>{if(e.key==='Enter')armed=true;};
@@ -551,7 +551,7 @@ function showContinue(done,ok,needRelease){
 function toast(m){const t=$('#toast');t.textContent=m;t.classList.add('show');clearTimeout(t._t);t._t=setTimeout(()=>t.classList.remove('show'),2400);}
 function norm(s){return s.toLowerCase().replace(/ä/g,'ae').replace(/ö/g,'oe').replace(/ü/g,'ue').replace(/ß/g,'ss').replace(/[^a-z]/g,'');}
 function dateStr(d){return new Date(d).toISOString().slice(0,10);}
-function relTime(ts){const s=(Date.now()-ts)/1000;if(s<60)return 'právě teď';const m=Math.floor(s/60);if(m<60)return 'před '+m+' min';const h=Math.floor(m/60);if(h<24)return 'před '+h+' h';const d=Math.floor(h/24);return d===1?'včera':'před '+d+' dny';}
+function relTime(ts){const s=(Date.now()-ts)/1000;if(s<60)return tr('právě teď');const m=Math.floor(s/60);if(m<60)return tr('před')+' '+m+' '+tr('min');const h=Math.floor(m/60);if(h<24)return tr('před')+' '+h+' h';const d=Math.floor(h/24);return d===1?tr('včera'):tr('před')+' '+d+' '+tr('dny');}
 
 let VOICES={};
 function pickVoice(){
@@ -615,13 +615,13 @@ function checkDailyMet(){
   if(!S.daily.met && S.daily.done>=S.settings.goal){
     S.daily.met=true;S.daily.streak++;
     if(S.daily.streak>S.stats.bestDays)S.stats.bestDays=S.daily.streak;
-    persist();toast('Denní cíl splněn! Série '+S.daily.streak+' dní 🔥');
+    persist();toast(tr('Denní cíl splněn! Série')+' '+S.daily.streak+' '+tr('dní')+' 🔥');
     if(S.daily.streak>=7)award('days7');
     updateHeader();renderMission();
   }
 }
 
-function award(id){if(S.badges.includes(id))return;S.badges.push(id);persist();renderAch();updateHeader();const b=BADGES.find(x=>x.id===id);if(b)toast('Úspěch: '+b.name);}
+function award(id){if(S.badges.includes(id))return;S.badges.push(id);persist();renderAch();updateHeader();const b=BADGES.find(x=>x.id===id);if(b)toast(tr('Úspěch')+': '+tr(b.name));}
 function checkMilestones(){const lc=learnedCount();if(lc>=50)award('learn50');if(lc>=150)award('learn150');if(problemWords().length===0 && S.stats.w>0)award('noProblem');}
 
 function updateHeader(){$('#hLevel').textContent=level();$('#hXp').textContent=S.xp;$('#hDays').textContent=S.daily.streak;}
@@ -647,33 +647,33 @@ function renderCats(){
       const gate=(TMAP[id].type==='test')?PATH[pi-1]:PATH[pi-LOOKAHEAD];const gateDone=gate?isTopicDone(gate):false;
       return '<div class="cat locked'+(isGrammar(id)?' gram':'')+'"><span class="lock">🔒</span>'+
         '<div class="t">'+t.title+'</div>'+
-        '<div class="m">'+(isGrammar(id)?'Gramatika · zamčeno':'Zamčeno')+'</div>'+
-        '<div class="req">'+(gate?'dokonči „'+topicTitle(gate)+'"'+(gateDone?' ✓':''):'pokračuj v cestě')+'</div></div>';
+        '<div class="m">'+(isGrammar(id)?tr('Gramatika')+' · '+tr('zamčeno'):tr('Zamčeno'))+'</div>'+
+        '<div class="req">'+(gate?tr('dokonči')+' „'+topicTitle(gate)+'"'+(gateDone?' ✓':''):tr('pokračuj v cestě'))+'</div></div>';
     }
     if(TMAP[id].type==='test'){
       const e=S.exlog[id+':test'],done=isTopicDone(id);
       return '<button class="cat test" onclick="openTopic(\''+id+'\')">'+(done?'<span class="due done">hotovo ✓</span>':'')+
         '<div class="t">'+t.title+'</div>'+
-        '<div class="m">'+(e?'nejlepší výsledek: '+e.last+' %':'prověř všechna témata')+'</div>'+
+        '<div class="m">'+(e?tr('nejlepší výsledek')+': '+e.last+' %':tr('prověř všechna témata'))+'</div>'+
         '<div class="bar"><div style="width:'+(e?e.last:0)+'%"></div></div></button>';
     }
     const seen=hasExlog(id), weak=seen && worstScore(id)!==null && worstScore(id)<DONE_PCT, done=isTopicDone(id);
-    const badge=weak?'<span class="due">k opakování</span>':(done?'<span class="due done">hotovo ✓</span>':'');
+    const badge=weak?'<span class="due">'+tr('k opakování')+'</span>':(done?'<span class="due done">'+tr('hotovo')+' ✓</span>':'');
     if(isGrammar(id)){
       const g=t.obj,prog=Math.min(100,Math.round(goodExCount(id)/DONE_EX*100));
       return '<button class="cat gram" onclick="openTopic(\''+id+'\')">'+badge+
         '<div class="t">'+t.title+'</div>'+
-        '<div class="m">Gramatika · '+g.items.length+' cvičení'+(done?' · hotovo':'')+'</div>'+
+        '<div class="m">'+tr('Gramatika')+' · '+g.items.length+' '+tr('cvičení')+(done?' · '+tr('hotovo'):'')+'</div>'+
         '<div class="bar"><div style="width:'+prog+'%"></div></div></button>';
     }
     const c=t.obj,learned=catLearned(c),inprog=catSeen(c)-learned,pct=Math.round(learned/c.vocab.length*100);
     return '<button class="cat" onclick="openTopic(\''+id+'\')">'+badge+
       '<div class="t">'+t.title+'</div>'+
-      '<div class="m">naučeno '+learned+' / '+c.vocab.length+((seen&&inprog>0)?' · '+inprog+' rozpracováno':'')+'</div>'+
+      '<div class="m">'+tr('naučeno')+' '+learned+' / '+c.vocab.length+((seen&&inprog>0)?' · '+inprog+' '+tr('rozpracováno'):'')+'</div>'+
       '<div class="bar"><div style="width:'+pct+'%"></div></div></button>';
   }).join('');
 }
-function renderAch(){$('#ach').innerHTML=BADGES.map(b=>{const on=S.badges.includes(b.id);return '<div class="badge '+(on?'':'locked')+'" title="'+b.desc+'">'+b.icon+' '+b.name+'</div>';}).join('');}
+function renderAch(){$('#ach').innerHTML=BADGES.map(b=>{const on=S.badges.includes(b.id);return '<div class="badge '+(on?'':'locked')+'" title="'+tr(b.desc)+'">'+b.icon+' '+tr(b.name)+'</div>';}).join('');}
 function renderActions(){
   const d=dueWords().length,p=problemWords().length;
   $('#dueCount').textContent=d; $('#probCount').textContent=p;
@@ -700,6 +700,7 @@ function updateBrand(){
   const bl=$('#brandLvl');if(bl)bl.textContent=S.settings.level;
   const ct=$('#curLvlTag');if(ct)ct.textContent=S.settings.level;
   const bn=$('#brandLang');if(bn)bn.textContent=tr(LANG_INFO[curTgt()].label);
+  document.title=tr(LANG_INFO[curTgt()].label)+' '+S.settings.level+' — '+tr('adaptivní učení');
   const lb=$('#langBtn');if(lb){
     lb.textContent=LANG_INFO[curTgt()].flag;
     lb.style.display=(tgtLangsFor(curSrc()).length>1)?'':'none';
@@ -814,42 +815,42 @@ $('#themeBtn').onclick=()=>{S.settings.theme=S.settings.theme==='dark'?'light':'
 let curCat=null, curGram=null, currentTopicId=null;
 function exStatHtml(id,type){
   const e=S.exlog[id+':'+type];
-  if(!e)return '<div class="exstat"><span class="d"></span>Nevyzkoušeno</div>';
+  if(!e)return '<div class="exstat"><span class="d"></span>'+tr('Nevyzkoušeno')+'</div>';
   const cls=e.last>=80?'done':e.last>=50?'mid':'low';
-  return '<div class="exstat '+cls+'"><span class="d"></span>Naposledy '+e.last+' % · '+relTime(e.ts)+(e.done>1?' · '+e.done+'×':'')+'</div>';
+  return '<div class="exstat '+cls+'"><span class="d"></span>'+tr('Naposledy')+' '+e.last+' % · '+relTime(e.ts)+(e.done>1?' · '+e.done+'×':'')+'</div>';
 }
 function buildVocabMenu(){
   const id=curCat.id;
-  let defs=[['flash','▤','i1','Slovíčka','Kartičky · Umím / Neumím'],['quiz','?','i2','Kvíz','Výběr překladu'],['fill','✎','i3','Doplň větu','Výběr nebo psaní'],['listen','♪','i4','Poslech','Přehraje se jednou'],['dict','✍','i5','Diktát','Poslechni a napiš']];
-  if(SR)defs.push(['pron','🎙','i6','Mluvení','Bonus · nehodnotí se']);
+  let defs=[['flash','▤','i1',tr('Slovíčka'),tr('Kartičky · Umím / Neumím')],['quiz','?','i2',tr('Kvíz'),tr('Výběr překladu')],['fill','✎','i3',tr('Doplň větu'),tr('Výběr nebo psaní')],['listen','♪','i4',tr('Poslech'),tr('Přehraje se jednou')],['dict','✍','i5',tr('Diktát'),tr('Poslechni a napiš')]];
+  if(SR)defs.push(['pron','🎙','i6',tr('Mluvení'),tr('Bonus · nehodnotí se')]);
   $('#modeBox').innerHTML=defs.map(d=>'<button class="mode" onclick="startCat(\''+d[0]+'\')"><div class="mt"><span class="ic '+d[2]+'">'+d[1]+'</span> '+d[3]+'</div><small>'+d[4]+'</small>'+exStatHtml(id,d[0])+'</button>').join('');
 }
 function buildGrammarMenu(){
   const id=curGram.id;
-  const defs=[['theory','📖','i2','Teorie','Vysvětlení + příklady'],['gquiz','?','i1','Kvíz','Vyber správný tvar'],['gfill','✎','i3','Doplň','Napiš správný tvar']];
+  const defs=[['theory','📖','i2',tr('Teorie'),tr('Vysvětlení + příklady')],['gquiz','?','i1',tr('Kvíz'),tr('Vyber správný tvar')],['gfill','✎','i3',tr('Doplň'),tr('Napiš správný tvar')]];
   $('#modeBox').innerHTML=defs.map(d=>{
     const st=d[0]==='theory'
-      ? (S.exlog[id+':theory']?'<div class="exstat done"><span class="d"></span>Přečteno ✓</div>':'<div class="exstat"><span class="d"></span>Nepřečteno</div>')
+      ? (S.exlog[id+':theory']?'<div class="exstat done"><span class="d"></span>'+tr('Přečteno')+' ✓</div>':'<div class="exstat"><span class="d"></span>'+tr('Nepřečteno')+'</div>')
       : exStatHtml(id,d[0]);
     return '<button class="mode" onclick="startGrammar(\''+d[0]+'\')"><div class="mt"><span class="ic '+d[2]+'">'+d[1]+'</span> '+d[3]+'</div><small>'+d[4]+'</small>'+st+'</button>';
   }).join('');
 }
 function openTopic(id){
-  if(!isUnlocked(id)){toast('Nejdřív dokonči předchozí témata 🔒');return;}
+  if(!isUnlocked(id)){toast(tr('Nejdřív dokonči předchozí témata 🔒'));return;}
   currentTopicId=id;const t=TMAP[id];$('#cmTitle').textContent=t.title;
   if(t.type==='test'){
     curGram=null;curCat=null;const e=S.exlog[FINAL.id+':test'];
-    $('#cmSub').textContent='Prověř všechna témata najednou'+(e?' · nejlepší '+e.last+' %':'');
-    $('#modeBox').innerHTML='<button class="mode" style="grid-column:1/-1" onclick="startTest()"><div class="mt"><span class="ic" style="background:#f7b500">🎓</span> Spustit test</div><small>30 otázek napříč slovíčky i gramatikou · na 60 % ho dokončíš</small>'+(e?'<div class="exstat done"><span class="d"></span>Nejlepší '+e.last+' %</div>':'<div class="exstat"><span class="d"></span>Nevyzkoušeno</div>')+'</button>';
+    $('#cmSub').textContent=tr('Prověř všechna témata najednou')+(e?' · '+tr('nejlepší')+' '+e.last+' %':'');
+    $('#modeBox').innerHTML='<button class="mode" style="grid-column:1/-1" onclick="startTest()"><div class="mt"><span class="ic" style="background:#f7b500">🎓</span> '+tr('Spustit test')+'</div><small>'+tr('30 otázek napříč slovíčky i gramatikou · na 60 % ho dokončíš')+'</small>'+(e?'<div class="exstat done"><span class="d"></span>'+tr('Nejlepší')+' '+e.last+' %</div>':'<div class="exstat"><span class="d"></span>'+tr('Nevyzkoušeno')+'</div>')+'</button>';
     show('catMenu');return;
   }
   if(t.type==='grammar'){
     curGram=t.obj;curCat=null;
-    $('#cmSub').textContent='Gramatika · '+(isTopicDone(id)?'dokončeno ✓':'přečti teorii a zvládni kvíz na '+DONE_PCT+' %+');
+    $('#cmSub').textContent=tr('Gramatika')+' · '+(isTopicDone(id)?tr('dokončeno')+' ✓':tr('přečti teorii a zvládni kvíz na')+' '+DONE_PCT+' %+');
     buildGrammarMenu();
   }else{
     curCat=t.obj;curGram=null;const g=goodExCount(id);
-    $('#cmSub').textContent=t.obj.vocab.length+' slov · '+(isTopicDone(id)?'téma dokončeno ✓':'dokonči '+DONE_EX+' cvičení na '+DONE_PCT+' %+ ('+g+'/'+DONE_EX+')');
+    $('#cmSub').textContent=t.obj.vocab.length+' '+tr('slov')+' · '+(isTopicDone(id)?tr('téma dokončeno')+' ✓':tr('dokonči')+' '+DONE_EX+' '+tr('cvičení na')+' '+DONE_PCT+' %+ ('+g+'/'+DONE_EX+')');
     buildVocabMenu();
   }
   show('catMenu');
@@ -870,7 +871,7 @@ function buildCards(words,opts){
   });
 }
 function startSession(cards, meta){
-  if(!cards.length){toast('Nic k procvičení.');return;}
+  if(!cards.length){toast(tr('Nic k procvičení.'));return;}
   sess={queue:shuffle(cards), total:cards.length, done:0, correct:0, meta:meta||{}, lastTs:Date.now(), timeLimit:meta&&meta.timeLimit, startTs:Date.now()};
   $('#sessTag').style.display=meta&&meta.tag?'inline-block':'none';
   if(meta&&meta.tag)$('#sessTag').textContent=meta.tag;
@@ -882,7 +883,7 @@ function nextCard(){
   if(sess.timeLimit && Date.now()-sess.startTs>sess.timeLimit){return finishSession();}
   if(sess.queue.length===0)return finishSession();
   const card=sess.queue.shift();
-  $('#counter').textContent='Hotovo '+sess.done+' · zbývá '+sess.queue.length+(sess.timeLimit?'  ·  ⏱':'');
+  $('#counter').textContent=tr('Hotovo')+' '+sess.done+' · '+tr('zbývá')+' '+sess.queue.length+(sess.timeLimit?'  ·  ⏱':'');
   setProg(sess.done, sess.done+sess.queue.length+1);
   const done=(good)=>afterAnswer(card,good);
   if(card.type==='flash')exFlash(card,done);
@@ -915,8 +916,8 @@ function finishSession(){
   const stars=pct===100?'★★★':pct>=66?'★★':pct>=33?'★':'☆';
   $('#sessTag').style.display='none';$('#counter').textContent='';setProg(1,1);
   $('#stage').innerHTML='<div class="result"><div class="stars">'+stars+'</div><div class="score">'+pct+'%</div>'+
-    '<div class="rowstat"><div><b>'+correct+'/'+total+'</b>správně</div><div><b>'+secs+'s</b>čas</div><div><b>'+S.daily.done+'/'+S.settings.goal+'</b>denní cíl</div></div>'+
-    '<button class="btn big" onclick="goHome()">Domů</button></div>';
+    '<div class="rowstat"><div><b>'+correct+'/'+total+'</b>'+tr('správně')+'</div><div><b>'+secs+'s</b>'+tr('čas')+'</div><div><b>'+S.daily.done+'/'+S.settings.goal+'</b>'+tr('denní cíl')+'</div></div>'+
+    '<button class="btn big" onclick="goHome()">'+tr('Domů')+'</button></div>';
   sess=null;persist();
 }
 function quitSession(){sess=null;plc=null;if(window.speechSynthesis)speechSynthesis.cancel();stopRec();goHome();}
@@ -924,14 +925,14 @@ function recordExlog(cat,type,pct){
   const beforeC=completedCount();
   const k=cat+':'+type;const p=S.exlog[k]||{done:0};S.exlog[k]={done:p.done+1,last:pct,ts:Date.now()};
   const afterC=completedCount();persist();
-  if(afterC>beforeC){for(let idx=beforeC+LOOKAHEAD; idx<=afterC+LOOKAHEAD-1 && idx<PATH.length; idx++){(function(t){setTimeout(()=>toast('Nové téma odemčeno: '+t+' 🔓'),500);})(topicTitle(PATH[idx]));}}
+  if(afterC>beforeC){for(let idx=beforeC+LOOKAHEAD; idx<=afterC+LOOKAHEAD-1 && idx<PATH.length; idx++){(function(t){setTimeout(()=>toast(tr('Nové téma odemčeno')+': '+t+' 🔓'),500);})(topicTitle(PATH[idx]));}}
 }
 /* ---- gramatika: teorie + cvičení ---- */
 function startGrammar(type){
   const g=curGram;
   if(type==='theory')return showTheory(g);
   const cards=g.items.map((it,i)=>({gitem:it, word:{id:g.id+'#'+i}, type:(type==='gfill'?'gfill':'gquiz'), xp:type==='gfill'?14:10}));
-  startSession(cards,{tag:g.title+' · '+(type==='gfill'?'doplň':'kvíz'), cat:g.id, type:type});
+  startSession(cards,{tag:g.title+' · '+(type==='gfill'?tr('doplň'):tr('kvíz')), cat:g.id, type:type});
 }
 function startTest(){
   const vocabPick=shuffle(ALL).slice(0,18).map(w=>({word:w,type:'quiz',dir:pickDir(),xp:10}));
@@ -950,7 +951,7 @@ function startPlacement(){
     plc={pools, idx:idx0, ability:Math.floor((PLC_LEVELS.length-1)/2), step:1, n:0, history:[], levelStats:{}};
     PLC_LEVELS.forEach(l=>plc.levelStats[l]={c:0,n:0});
     show('activity');
-    $('#sessTag').style.display='inline-block';$('#sessTag').textContent='Rozřazovací test';
+    $('#sessTag').style.display='inline-block';$('#sessTag').textContent=tr('Rozřazovací test');
     nextPlacementQ();
   });
 }
@@ -971,7 +972,7 @@ function nextPlacementQ(){
   const item=plcDrawItem();
   if(!item)return finishPlacement();
   plc.cur=item;
-  $('#counter').textContent='Otázka '+(plc.n+1)+' · odhad úrovně: '+plcCurLevel();
+  $('#counter').textContent=tr('Otázka')+' '+(plc.n+1)+' · '+tr('odhad úrovně')+': '+plcCurLevel();
   setProg(plc.n, Math.max(plc.n+1,15));
   const q=item.gitem[0],a=item.gitem[1],opts=item.gitem[2],cz=item.gitem[3];
   const options=shuffle(opts.slice());
@@ -983,7 +984,7 @@ function nextPlacementQ(){
     const ok=options[k]===a;
     $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(options[j]===a)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
     const fb=$('#fb'),full=q.replace('___',a);
-    if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}
+    if(ok){fb.textContent=tr('Správně');fb.className='feedback ok';}else{fb.textContent=tr('Správně')+': '+full;fb.className='feedback bad';}
     speak(full);
     answerPlacement(ok);
   });
@@ -1005,9 +1006,9 @@ function finishPlacement(){
   const n=plc.n;
   $('#sessTag').style.display='none';$('#counter').textContent='';setProg(1,1);
   $('#stage').innerHTML='<div class="result"><div class="stars">🎯</div><div class="score">'+lvl+'</div>'+
-    '<div class="rowstat"><div><b>'+n+'</b>otázek</div><div><b>'+(PLC_LEVELS.indexOf(lvl)+1)+'/'+PLC_LEVELS.length+'</b>úroveň</div></div>'+
-    '<p class="lead" style="margin-top:10px">Podle tvých odpovědí ti nejlíp sedí úroveň <b>'+lvl+'</b>. Nižší úrovně zůstanou odemčené, kdybys je někdy chtěl projít.</p>'+
-    '<button class="btn big" onclick="applyPlacement(\''+lvl+'\')">Začít na úrovni '+lvl+' →</button></div>';
+    '<div class="rowstat"><div><b>'+n+'</b>'+tr('otázek')+'</div><div><b>'+(PLC_LEVELS.indexOf(lvl)+1)+'/'+PLC_LEVELS.length+'</b>'+tr('úroveň')+'</div></div>'+
+    '<p class="lead" style="margin-top:10px">'+tr('Podle tvých odpovědí ti nejlíp sedí úroveň')+' <b>'+lvl+'</b>. '+tr('Nižší úrovně zůstanou odemčené, kdybys je někdy chtěl projít.')+'</p>'+
+    '<button class="btn big" onclick="applyPlacement(\''+lvl+'\')">'+tr('Začít na úrovni')+' '+lvl+' →</button></div>';
   plc=null;
 }
 function applyPlacement(lvl){
@@ -1028,9 +1029,9 @@ function showTheory(g){
   if(g.table){tbl='<table class="gtab">'+g.table.map((row,ri)=>'<tr>'+row.map(c=>ri===0?'<th>'+c+'</th>':'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table>';}
   const exHtml=g.items.slice(0,3).map(it=>'<div class="exs"><span>'+it[0].replace('___','<b>'+it[1]+'</b>')+'</span><em>'+it[3]+'</em></div>').join('');
   $('#stage').innerHTML='<div class="theory"><p class="theorytext">'+g.theory+'</p>'+tbl+
-    '<div class="sec-label">Příklady</div><div class="exlist" style="max-width:none">'+exHtml+'</div>'+
-    '<button class="btn big" id="thok" style="margin-top:18px">Rozumím ✓</button></div>';
-  $('#thok').onclick=()=>{addXP(5);recordExlog(g.id,'theory',100);toast('Teorie přečtena · +5');openTopic(g.id);};
+    '<div class="sec-label">'+tr('Příklady')+'</div><div class="exlist" style="max-width:none">'+exHtml+'</div>'+
+    '<button class="btn big" id="thok" style="margin-top:18px">'+tr('Rozumím')+' ✓</button></div>';
+  $('#thok').onclick=()=>{addXP(5);recordExlog(g.id,'theory',100);toast(tr('Teorie přečtena · +5'));openTopic(g.id);};
 }
 function exGQuiz(card,done){
   const q=card.gitem[0],a=card.gitem[1],opts=card.gitem[2],cz=card.gitem[3];
@@ -1043,7 +1044,7 @@ function exGQuiz(card,done){
     const ok=options[k]===a;
     $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(options[j]===a)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
     const fb=$('#fb'),full=q.replace('___',a);
-    if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}
+    if(ok){fb.textContent=tr('Správně');fb.className='feedback ok';}else{fb.textContent=tr('Správně')+': '+full;fb.className='feedback bad';}
     speak(full);
     showContinue(done,ok);
   });
@@ -1052,7 +1053,7 @@ function exGFill(card,done){
   const q=card.gitem[0],a=card.gitem[1],cz=card.gitem[3];
   $('#stage').innerHTML='<div class="tag" style="display:inline-block">gramatika</div>'+
     '<div class="sentence">'+q.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
-    '<div class="typerow"><input class="tinput" id="ti" placeholder="napiš správný tvar" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
+    '<div class="typerow"><input class="tinput" id="ti" placeholder="'+tr('napiš správný tvar')+'" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
   const inp=$('#ti');inp.focus();
   const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(a);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb'),full=q.replace('___',a);if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}speak(full);showContinue(done,ok,true);};
   $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
@@ -1062,7 +1063,7 @@ function startCat(type){
   const words=curCat.vocab.map((v,i)=>BYID[curCat.id+':'+i]);
   if(type==='fill'){
     const cards=curCat.sentences.map(s=>({sent:s, word:findWordByEn(curCat,s[1]), type:'fill', dir:'en2cz', xp:S.settings.fill==='hard'?15:8}));
-    return startSession(cards,{tag:curCat.title+' · doplň větu', cat:curCat.id, type:'fill'});
+    return startSession(cards,{tag:curCat.title+' · '+tr('doplň větu'), cat:curCat.id, type:'fill'});
   }
   const dir=type==='pron'||type==='dict'?'en2cz':pickDir();
   const cards=words.map(w=>({word:w,type,dir, xp: type==='dict'?15:(type==='pron'?12:10)}));
@@ -1076,8 +1077,8 @@ function startDaily(){
   if(pool.length<8)pool=shuffle(unlockedWords()).slice(0,12);
   startSession(buildCards(pool,{}),{tag:'Dnešní mise'});
 }
-function startReview(){const w=dueWords();if(!w.length)return toast('Teď není co opakovat 👌');startSession(buildCards(shuffle(w).slice(0,20),{}),{tag:'Opakování'});}
-function startProblem(){const w=problemWords();if(!w.length)return toast('Žádná problémová slova 🎉');startSession(buildCards(w,{}),{tag:'Problémová slova'});}
+function startReview(){const w=dueWords();if(!w.length)return toast(tr('Teď není co opakovat 👌'));startSession(buildCards(shuffle(w).slice(0,20),{}),{tag:'Opakování'});}
+function startProblem(){const w=problemWords();if(!w.length)return toast(tr('Žádná problémová slova 🎉'));startSession(buildCards(w,{}),{tag:'Problémová slova'});}
 function startMixed(){startSession(buildCards(shuffle(unlockedWords()).slice(0,20),{}),{tag:'Zamíchat vše'});}
 function start5min(){startSession(buildCards(shuffle(unlockedWords()),{}),{tag:'5 minut', timeLimit:5*60000});}
 $('#startDaily').onclick=startDaily;
@@ -1090,11 +1091,11 @@ function exFlash(card,done){
   $('#stage').innerHTML=
     '<div class="flash" id="flash"><div class="flash-inner">'+
       '<div class="face front"><div class="word">'+front+'</div>'+
-      (showEn?'<button class="speak" id="spk">♪ Výslovnost</button>':'')+
-      '<div class="sub">klikni pro překlad</div></div>'+
+      (showEn?'<button class="speak" id="spk">♪ '+tr('Výslovnost')+'</button>':'')+
+      '<div class="sub">'+tr('klikni pro překlad')+'</div></div>'+
       '<div class="face back-face"><div class="word">'+back+'</div><div class="sub" style="color:var(--muted)">'+front+'</div>'+exHtml+'</div>'+
     '</div></div>'+
-    '<div class="knowbtns"><button class="kno" id="bno">✕ Neumím</button><button class="kyes" id="byes">✓ Umím</button></div>';
+    '<div class="knowbtns"><button class="kno" id="bno">✕ '+tr('Neumím')+'</button><button class="kyes" id="byes">✓ '+tr('Umím')+'</button></div>';
   const f=$('#flash');f.onclick=()=>f.classList.toggle('flip');
   if($('#spk'))$('#spk').onclick=(e)=>{e.stopPropagation();speak(w.en);};
   $('#bno').onclick=()=>done(false);
@@ -1108,7 +1109,7 @@ function exChoice(card,done){
   const distract=distractors(w,key,3);
   const opts=shuffle([w,...distract]);
   $('#stage').innerHTML='<div class="qword">'+prompt+'</div>'+
-    '<p class="qsub">'+(en2cz?'Vyber český překlad':'Vyber anglicky')+' '+(en2cz?'<button class="speak" id="spk" style="background:var(--surface2);color:var(--ink);border:1px solid var(--line)">♪</button>':'')+'</p>'+
+    '<p class="qsub">'+tr('Vyber překlad')+' '+(en2cz?'<button class="speak" id="spk" style="background:var(--surface2);color:var(--ink);border:1px solid var(--line)">♪</button>':'')+'</p>'+
     '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
   if($('#spk'))$('#spk').onclick=()=>speak(w.en);
   $('#opts').innerHTML=opts.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o[key]+'</button>').join('');
@@ -1126,18 +1127,18 @@ function exListen(card,done){
   const w=card.word;
   const distract=distractors(w,'en',3);
   const opts=shuffle([w,...distract]);
-  $('#stage').innerHTML='<p class="qsub">Poslechni a vyber slovo (přehraje se jen jednou)</p>'+
+  $('#stage').innerHTML='<p class="qsub">'+tr('Poslechni a vyber slovo (přehraje se jen jednou)')+'</p>'+
     '<button class="bigspeak playing" id="big">♪</button>'+
     '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>';
   const big=$('#big');
-  big.onclick=()=>toast('Přehraje se jen jednou — poslouchej pozorně 🙂');
+  big.onclick=()=>toast(tr('Přehraje se jen jednou — poslouchej pozorně 🙂'));
   setTimeout(()=>speak(w.en,()=>big.classList.remove('playing')),250);
   $('#opts').innerHTML=opts.map((o,k)=>'<button class="opt" data-k="'+k+'">'+o.en+'</button>').join('');
   $$('#opts .opt').forEach((btn,k)=>btn.onclick=()=>{
     const ok=opts[k].id===w.id;
     $$('#opts .opt').forEach((b,j)=>{b.disabled=true;if(opts[j].id===w.id)b.classList.add('correct');else if(j===k)b.classList.add('wrong');});
     const fb=$('#fb');
-    if(ok){fb.textContent='Správně · '+w.en+' = '+w.cz;fb.className='feedback ok';}
+    if(ok){fb.textContent=tr('Správně')+' · '+w.en+' = '+w.cz;fb.className='feedback ok';}
     else{fb.textContent='Bylo to: '+w.en+' ('+w.cz+')';fb.className='feedback bad';}
     showContinue(done,ok);
   });
@@ -1147,7 +1148,7 @@ function exFill(card,done){
   const hard=S.settings.fill==='hard';
   $('#stage').innerHTML='<div class="sentence">'+t.replace('___','<span class="blank">?</span>')+'</div><div class="cztrans">'+cz+'</div>'+
     (hard
-      ? '<div class="typerow"><input class="tinput" id="ti" placeholder="napiš chybějící slovo" autocomplete="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>'
+      ? '<div class="typerow"><input class="tinput" id="ti" placeholder="'+tr('napiš chybějící slovo')+'" autocomplete="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>'
       : '<div class="opts" id="opts"></div><div class="feedback" id="fb"></div>');
   const finish=(ok)=>{const fb=$('#fb');const full=t.replace('___',a);if(ok){fb.textContent='Správně';fb.className='feedback ok';}else{fb.textContent='Správně: '+full;fb.className='feedback bad';}speak(full);showContinue(done,ok,hard);};
   if(hard){
@@ -1164,18 +1165,18 @@ function exFill(card,done){
 }
 function exType(card,done){
   const w=card.word;
-  $('#stage').innerHTML='<div class="qword">'+w.cz+'</div><p class="qsub">Napiš anglicky</p>'+
+  $('#stage').innerHTML='<div class="qword">'+w.cz+'</div><p class="qsub">'+tr('Napiš překlad')+'</p>'+
     '<div class="typerow"><input class="tinput" id="ti" placeholder="anglicky…" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
   const inp=$('#ti');inp.focus();
-  const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent='Správně · '+w.en;fb.className='feedback ok';}else{fb.textContent='Správně: '+w.en;fb.className='feedback bad';}speak(w.en);showContinue(done,ok,true);};
+  const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent=tr('Správně')+' · '+w.en;fb.className='feedback ok';}else{fb.textContent=tr('Správně')+': '+w.en;fb.className='feedback bad';}speak(w.en);showContinue(done,ok,true);};
   $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 }
 function exDict(card,done){
   const w=card.word;
-  $('#stage').innerHTML='<p class="qsub">Poslechni a napiš, co jsi slyšel/a (jen jednou)</p>'+
+  $('#stage').innerHTML='<p class="qsub">'+tr('Poslechni a napiš, co jsi slyšel/a (jen jednou)')+'</p>'+
     '<button class="bigspeak playing" id="big">♪</button>'+
-    '<div class="typerow"><input class="tinput" id="ti" placeholder="napiš anglicky…" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
-  const big=$('#big');big.onclick=()=>toast('Přehraje se jen jednou 🙂');
+    '<div class="typerow"><input class="tinput" id="ti" placeholder="'+tr('napiš překlad…')+'" autocomplete="off" autocapitalize="off"><button class="btn" id="chk">OK</button></div><div class="feedback" id="fb"></div>';
+  const big=$('#big');big.onclick=()=>toast(tr('Přehraje se jen jednou 🙂'));
   setTimeout(()=>speak(w.en,()=>big.classList.remove('playing')),250);
   const inp=$('#ti');inp.focus();
   const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent='Správně · '+w.en+' = '+w.cz;fb.className='feedback ok';}else{fb.textContent='Správně: '+w.en+' ('+w.cz+')';fb.className='feedback bad';}speak(w.en);showContinue(done,ok,true);};
@@ -1186,28 +1187,28 @@ let rec=null;
 function stopRec(){try{if(rec){rec.onresult=null;rec.onerror=null;rec.onend=null;rec.stop();rec=null;}}catch(e){}}
 function exPron(card,done){
   const w=card.word;
-  if(!SR){$('#stage').innerHTML='<div class="note">Rozpoznávání řeči tvůj prohlížeč nepodporuje. Vyzkoušej Chrome nebo Edge.</div>'+
-    '<button class="btn big ghost" id="pnext">Další →</button>';$('#pnext').onclick=()=>done(false);return;}
+  if(!SR){$('#stage').innerHTML='<div class="note">'+tr('Rozpoznávání řeči tvůj prohlížeč nepodporuje. Vyzkoušej Chrome nebo Edge.')+'</div>'+
+    '<button class="btn big ghost" id="pnext">'+tr('Další')+' →</button>';$('#pnext').onclick=()=>done(false);return;}
   let recognized=false;
-  $('#stage').innerHTML='<p class="qsub">Mluvení na zkoušku — řekni slovo a uvidíš, jestli ti appka rozumí. <b>Není to známka z výslovnosti</b>, jen cvičení. 🙂</p>'+
+  $('#stage').innerHTML='<p class="qsub">'+tr('Mluvení na zkoušku — řekni slovo a uvidíš, jestli ti appka rozumí.')+' <b>'+tr('Není to známka z výslovnosti')+'</b>, '+tr('jen cvičení.')+' 🙂</p>'+
     '<div class="qword">'+w.en+'</div>'+
-    '<div style="text-align:center"><button class="speak" id="spk" style="background:var(--surface2);color:var(--ink);border:1px solid var(--line);margin-bottom:14px">♪ Poslechni vzor</button></div>'+
-    '<button class="micbtn" id="mic">🎙</button><p class="qsub" id="hint">Klikni na mikrofon a zkus slovo říct</p><div class="feedback" id="fb"></div>'+
-    '<div style="text-align:center;margin-top:10px"><button class="btn big ghost" id="pnext">Další →</button></div>';
+    '<div style="text-align:center"><button class="speak" id="spk" style="background:var(--surface2);color:var(--ink);border:1px solid var(--line);margin-bottom:14px">♪ '+tr('Poslechni vzor')+'</button></div>'+
+    '<button class="micbtn" id="mic">🎙</button><p class="qsub" id="hint">'+tr('Klikni na mikrofon a zkus slovo říct')+'</p><div class="feedback" id="fb"></div>'+
+    '<div style="text-align:center;margin-top:10px"><button class="btn big ghost" id="pnext">'+tr('Další')+' →</button></div>';
   $('#spk').onclick=()=>speak(w.en);
   $('#pnext').onclick=()=>done(recognized);
   $('#mic').onclick=()=>{
     stopRec();rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=3;
-    $('#mic').classList.add('rec');$('#hint').textContent='Poslouchám…';
+    $('#mic').classList.add('rec');$('#hint').textContent=tr('Poslouchám…');
     rec.onresult=(ev)=>{
       let heard='';for(let i=0;i<ev.results[0].length;i++){heard+=' '+ev.results[0][i].transcript;}
       const target=norm(w.en);const ok=norm(heard).includes(target)||target.includes(norm(ev.results[0][0].transcript));
       const fb=$('#fb');
-      if(ok){recognized=true;fb.textContent='Super, appka ti rozuměla! Slyšela: „'+ev.results[0][0].transcript+'" 👍';fb.className='feedback ok';$('#hint').textContent='Můžeš zkusit znovu, nebo pokračovat dál.';setTimeout(()=>done(true),1300);}
-      else{fb.textContent='Nerozpoznala jsem to úplně (slyšela „'+ev.results[0][0].transcript+'"). Nevadí — zkus to klidně znovu.';fb.className='feedback bad';$('#hint').textContent='Zkus to znovu, nebo pokračuj tlačítkem Další.';}
+      if(ok){recognized=true;fb.textContent=tr('Super, appka ti rozuměla! Slyšela:')+' „'+ev.results[0][0].transcript+'" 👍';fb.className='feedback ok';$('#hint').textContent=tr('Můžeš zkusit znovu, nebo pokračovat dál.');setTimeout(()=>done(true),1300);}
+      else{fb.textContent=tr('Nerozpoznala jsem to úplně (slyšela')+' „'+ev.results[0][0].transcript+'"). '+tr('Nevadí — zkus to klidně znovu.');fb.className='feedback bad';$('#hint').textContent=tr('Zkus to znovu, nebo pokračuj tlačítkem Další.');}
       $('#mic').classList.remove('rec');
     };
-    rec.onerror=()=>{$('#mic').classList.remove('rec');$('#hint').textContent='Mikrofon se nepodařilo použít — můžeš pokračovat dál.';};
+    rec.onerror=()=>{$('#mic').classList.remove('rec');$('#hint').textContent=tr('Mikrofon se nepodařilo použít — můžeš pokračovat dál.');};
     rec.onend=()=>{$('#mic').classList.remove('rec');};
     try{rec.start();}catch(e){}
   };
@@ -1217,20 +1218,20 @@ function openStats(){
   const tot=S.stats.c+S.stats.w, acc=tot?Math.round(S.stats.c/tot*100):0;
   const mins=Math.round(S.stats.timeMs/60000);
   $('#statGrid').innerHTML=[
-    ['Naučená slova',learnedCount()+' / '+ALL.length],
-    ['Úspěšnost',acc+' %'],
-    ['Level',level()],
-    ['Nejlepší série',S.stats.bestDays+' dní'],
-    ['Dnešní pokrok',S.daily.done+' / '+S.settings.goal],
-    ['Problémová slova',problemWords().length],
-    ['Celkem odpovědí',tot],
-    ['Čas učení',mins+' min']
+    [tr('Naučená slova'),learnedCount()+' / '+ALL.length],
+    [tr('Úspěšnost'),acc+' %'],
+    [tr('Level'),level()],
+    [tr('Nejlepší série'),S.stats.bestDays+' '+tr('dní')],
+    [tr('Dnešní pokrok'),S.daily.done+' / '+S.settings.goal],
+    [tr('Problémová slova'),problemWords().length],
+    [tr('Celkem odpovědí'),tot],
+    [tr('Čas učení'),mins+' min']
   ].map(x=>'<div class="stat"><div class="n">'+x[1]+'</div><div class="l">'+x[0]+'</div></div>').join('');
   const rows=CATS.map(c=>{const s=S.stats.byCat[c.id];const t=s?s.c+s.w:0;const a=t?Math.round(s.c/t*100):null;return {title:c.title,a,t};}).filter(r=>r.t>0).sort((x,y)=>x.a-y.a).slice(0,6);
-  $('#weakList').innerHTML=rows.length?rows.map(r=>'<div class="row"><span>'+r.title+'</span><span class="pct" style="color:'+(r.a>=70?'var(--ok)':r.a>=40?'var(--warn)':'var(--bad)')+'">'+r.a+' %</span></div>').join(''):'<p class="lead">Zatím žádná data — začni procvičovat.</p>';
+  $('#weakList').innerHTML=rows.length?rows.map(r=>'<div class="row"><span>'+r.title+'</span><span class="pct" style="color:'+(r.a>=70?'var(--ok)':r.a>=40?'var(--warn)':'var(--bad)')+'">'+r.a+' %</span></div>').join(''):'<p class="lead">'+tr('Zatím žádná data — začni procvičovat.')+'</p>';
   show('stats');
 }
-function resetProgress(){if(confirm('Opravdu vymazat veškerý postup tohoto profilu?')){try{localStorage.removeItem(stateKey(curProfileId));}catch(e){}S={};ensureStateDefaults();persist();ensureDaily();refreshHome();show('home');toast('Postup profilu vymazán');}}
+function resetProgress(){if(confirm(tr('Opravdu vymazat veškerý postup tohoto profilu?'))){try{localStorage.removeItem(stateKey(curProfileId));}catch(e){}S={};ensureStateDefaults();persist();ensureDaily();refreshHome();show('home');toast(tr('Postup profilu vymazán'));}}
 
 /* ---- profilové obrazovky ---- */
 function openProfiles(){renderProfiles();show('gate');}
@@ -1243,29 +1244,29 @@ function renderProfiles(){
       '<div class="pav" style="background:'+p.color+'">'+initial+(p.pin?'<span class="plock">🔒</span>':'')+'</div>'+
       '<div class="pn">'+p.name+'</div><div class="pl">'+lvl+'</div></div>';
   }).join('');
-  $('#gate').innerHTML='<h2 style="text-align:center">Kdo se učí?</h2>'+
-    '<p class="lead" style="text-align:center">Vyber svůj profil nebo vytvoř nový.</p>'+
+  $('#gate').innerHTML='<h2 style="text-align:center">'+tr('Kdo se učí?')+'</h2>'+
+    '<p class="lead" style="text-align:center">'+tr('Vyber svůj profil nebo vytvoř nový.')+'</p>'+
     '<div class="pfgrid">'+list+
-    '<div class="pf add" onclick="createProfileUI()"><div class="pav">＋</div><div class="pn">Nový profil</div></div></div>';
+    '<div class="pf add" onclick="createProfileUI()"><div class="pav">＋</div><div class="pn">'+tr('Nový profil')+'</div></div></div>';
 }
 function createProfileUI(){
-  $('#gate').innerHTML='<button class="back" onclick="openProfiles()">← Zpět</button><h2>Nový profil</h2>'+
-    '<p class="lead">Zadej jméno. PIN je nepovinný (4 číslice, chrání profil).</p>'+
-    '<div class="typerow"><input class="tinput" id="pfName" placeholder="jméno" maxlength="20" autocomplete="off"></div>'+
-    '<div class="typerow" style="margin-top:10px"><input class="tinput" id="pfPin" placeholder="PIN (nepovinné)" inputmode="numeric" maxlength="4" autocomplete="off"></div>'+
-    '<div style="margin-top:14px"><button class="btn big" id="pfCreate">Vytvořit profil</button></div>';
+  $('#gate').innerHTML='<button class="back" onclick="openProfiles()">'+tr('← Zpět')+'</button><h2>'+tr('Nový profil')+'</h2>'+
+    '<p class="lead">'+tr('Zadej jméno. PIN je nepovinný (4 číslice, chrání profil).')+'</p>'+
+    '<div class="typerow"><input class="tinput" id="pfName" placeholder="'+tr('jméno')+'" maxlength="20" autocomplete="off"></div>'+
+    '<div class="typerow" style="margin-top:10px"><input class="tinput" id="pfPin" placeholder="'+tr('PIN (nepovinné)')+'" inputmode="numeric" maxlength="4" autocomplete="off"></div>'+
+    '<div style="margin-top:14px"><button class="btn big" id="pfCreate">'+tr('Vytvořit profil')+'</button></div>';
   $('#pfCreate').onclick=createProfile;
   setTimeout(()=>{try{$('#pfName').focus();}catch(e){}},50);
 }
 function createProfile(){
-  const name=(($('#pfName').value)||'').trim();if(!name)return toast('Zadej jméno');
+  const name=(($('#pfName').value)||'').trim();if(!name)return toast(tr('Zadej jméno'));
   const pin=(($('#pfPin').value)||'').replace(/\D/g,'').slice(0,4);
   const p={id:newId(),name,color:AVA_COLORS[PROFILES.length%AVA_COLORS.length],pin};
   PROFILES.push(p);saveProfiles();selectProfile(p.id);
 }
 function pickProfile(id){
   const p=PROFILES.find(x=>x.id===id);if(!p)return;
-  if(p.pin){const v=prompt('PIN pro '+p.name+':');if(v===null)return;if(v.replace(/\D/g,'')!==p.pin)return toast('Špatný PIN');}
+  if(p.pin){const v=prompt('PIN pro '+p.name+':');if(v===null)return;if(v.replace(/\D/g,'')!==p.pin)return toast(tr('Špatný PIN'));}
   selectProfile(id);
 }
 function delProfile(id){
@@ -1340,13 +1341,13 @@ function gatherLocal(){const o={};for(let i=0;i<localStorage.length;i++){const k
 function applyLocal(o){Object.keys(o).forEach(function(k){try{localStorage.setItem(k,o[k]);}catch(e){}});}
 function setCloudStat(s){cloudStat=s;const el=$('#cloudStat');if(el)el.textContent=s;}
 function scheduleCloudSave(){if(!fbUser||!fbDb)return;clearTimeout(cloudTimer);cloudTimer=setTimeout(cloudSave,1500);}
-function cloudSave(){if(!fbUser||!fbDb)return;setCloudStat('Ukládám do cloudu…');fbDb.collection('users').doc(fbUser.uid).set({data:gatherLocal(),updatedAt:Date.now()}).then(function(){setCloudStat('Uloženo '+new Date().toLocaleTimeString());}).catch(function(){setCloudStat('Chyba ukládání (zkontroluj pravidla Firestore)');});}
-function cloudLoad(cb){if(!fbUser||!fbDb){cb&&cb(false);return;}fbDb.collection('users').doc(fbUser.uid).get().then(function(doc){if(doc.exists&&doc.data()&&doc.data().data){applyLocal(doc.data().data);cb&&cb(true);}else{cb&&cb(false);}}).catch(function(){setCloudStat('Chyba načítání');cb&&cb(false);});}
+function cloudSave(){if(!fbUser||!fbDb)return;setCloudStat(tr('Ukládám do cloudu…'));fbDb.collection('users').doc(fbUser.uid).set({data:gatherLocal(),updatedAt:Date.now()}).then(function(){setCloudStat(tr('Uloženo')+' '+new Date().toLocaleTimeString());}).catch(function(){setCloudStat(tr('Chyba ukládání (zkontroluj pravidla Firestore)'));});}
+function cloudLoad(cb){if(!fbUser||!fbDb){cb&&cb(false);return;}fbDb.collection('users').doc(fbUser.uid).get().then(function(doc){if(doc.exists&&doc.data()&&doc.data().data){applyLocal(doc.data().data);cb&&cb(true);}else{cb&&cb(false);}}).catch(function(){setCloudStat(tr('Chyba načítání'));cb&&cb(false);});}
 function onAuthChange(){
   renderAccount();
   if(fbUser){
     cloudLoad(function(had){
-      if(had){reloadFromStorage();setCloudStat('Načteno z cloudu ✓');}
+      if(had){reloadFromStorage();setCloudStat(tr('Načteno z cloudu ✓'));}
       else{cloudSave();}
       renderAccount();
     });
@@ -1356,15 +1357,15 @@ function reloadFromStorage(){
   ensureDefaultProfile();
   goHome();
 }
-function togglePw(id,btn){const el=$('#'+id);if(!el)return;const hidden=el.type==='password';el.type=hidden?'text':'password';if(btn){btn.textContent=hidden?'🙈':'👁';btn.title=hidden?'Skrýt heslo':'Zobrazit heslo';}el.focus();}
+function togglePw(id,btn){const el=$('#'+id);if(!el)return;const hidden=el.type==='password';el.type=hidden?'text':'password';if(btn){btn.textContent=hidden?'🙈':'👁';btn.title=hidden?tr('Skrýt heslo'):tr('Zobrazit heslo');}el.focus();}
 function fbChangePass(){
   if(!fbUser)return;
   const cur=($('#cpCur').value||''),pw=($('#cpNew').value||'');
-  if(!cur)return toast('Zadej současné heslo');
-  if(pw.length<6)return toast('Nové heslo musí mít aspoň 6 znaků');
+  if(!cur)return toast(tr('Zadej současné heslo'));
+  if(pw.length<6)return toast(tr('Nové heslo musí mít aspoň 6 znaků'));
   function doUpdate(){
     fbUser.updatePassword(pw).then(function(){
-      toast('Heslo změněno ✓');
+      toast(tr('Heslo změněno ✓'));
       const a=$('#cpCur'),b=$('#cpNew');if(a)a.value='';if(b)b.value='';
     }).catch(function(e){toast('Chyba: '+fbErr(e));});
   }
@@ -1372,46 +1373,46 @@ function fbChangePass(){
     const cred=firebase.auth.EmailAuthProvider.credential(fbUser.email,cur);
     fbUser.reauthenticateWithCredential(cred).then(doUpdate).catch(function(e){
       const c=(e&&e.code)||'';
-      if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)toast('Současné heslo je špatně');
+      if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)toast(tr('Současné heslo je špatně'));
       else toast('Chyba: '+fbErr(e));
     });
   }catch(e){doUpdate();}
 }
-function fbErr(e){const c=(e&&e.code)||'';if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)return 'špatný e-mail nebo heslo';if(c.indexOf('user-not-found')>=0)return 'účet neexistuje';if(c.indexOf('email-already')>=0)return 'e-mail už je použit';if(c.indexOf('weak-password')>=0)return 'slabé heslo (min. 6 znaků)';if(c.indexOf('invalid-email')>=0)return 'neplatný e-mail';return (e&&e.message)||'chyba';}
-function fbRegister(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.createUserWithEmailAndPassword(em,pw).then(function(){toast('Účet vytvořen ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
-function fbLogin(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast('Vyplň e-mail a heslo');fbAuth.signInWithEmailAndPassword(em,pw).then(function(){toast('Přihlášeno ✓');}).catch(function(e){toast('Chyba: '+fbErr(e));});}
+function fbErr(e){const c=(e&&e.code)||'';if(c.indexOf('wrong-password')>=0||c.indexOf('invalid-cred')>=0)return tr('špatný e-mail nebo heslo');if(c.indexOf('user-not-found')>=0)return tr('účet neexistuje');if(c.indexOf('email-already')>=0)return tr('e-mail už je použit');if(c.indexOf('weak-password')>=0)return tr('slabé heslo (min. 6 znaků)');if(c.indexOf('invalid-email')>=0)return tr('neplatný e-mail');return (e&&e.message)||tr('chyba');}
+function fbRegister(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast(tr('Vyplň e-mail a heslo'));fbAuth.createUserWithEmailAndPassword(em,pw).then(function(){toast(tr('Účet vytvořen ✓'));}).catch(function(e){toast('Chyba: '+fbErr(e));});}
+function fbLogin(){if(!fbAuth)return;const em=($('#acEmail').value||'').trim(),pw=$('#acPass').value||'';if(!em||!pw)return toast(tr('Vyplň e-mail a heslo'));fbAuth.signInWithEmailAndPassword(em,pw).then(function(){toast(tr('Přihlášeno ✓'));}).catch(function(e){toast('Chyba: '+fbErr(e));});}
 function fbResetPass(){
   if(!fbAuth)return;
   const em=($('#acEmail').value||'').trim();
-  if(!em)return toast('Napiš e-mail výše a klikni znovu');
+  if(!em)return toast(tr('Napiš e-mail výše a klikni znovu'));
   fbAuth.sendPasswordResetEmail(em).then(function(){
-    toast('Poslali jsme e-mail pro obnovení hesla ✓');
+    toast(tr('Poslali jsme e-mail pro obnovení hesla ✓'));
   }).catch(function(e){toast('Chyba: '+fbErr(e));});
 }
-function fbLogout(){if(fbAuth)fbAuth.signOut().then(function(){toast('Odhlášeno');renderAccount();});}
+function fbLogout(){if(fbAuth)fbAuth.signOut().then(function(){toast(tr('Odhlášeno'));renderAccount();});}
 function openAccount(){renderAccount();show('account');}
 function renderAccount(){
   const el=$('#account');if(!el)return;
-  let html='<button class="back" onclick="goHome()">← Zpět</button><h2>☁ Účet a synchronizace</h2>';
+  let html='<button class="back" onclick="goHome()">'+tr('← Zpět')+'</button><h2>☁ '+tr('Účet a synchronizace')+'</h2>';
   if(!FIREBASE_READY){
-    html+='<div class="note">Synchronizace zatím není nastavená. Do souboru je potřeba jednou vložit tvůj <b>Firebase config</b> (do části FIREBASE_CONFIG v kódu). Je to zdarma a na pár minut — návod máš od Claude.</div>'+
-      '<p class="lead">Bez nastavení appka funguje normálně, jen ukládá postup lokálně na tomto počítači.</p>';
+    html+='<div class="note">'+tr('Synchronizace zatím není nastavená. Do souboru je potřeba jednou vložit tvůj')+' <b>Firebase config</b> '+tr('(do části FIREBASE_CONFIG v kódu). Je to zdarma a na pár minut.')+'</div>'+
+      '<p class="lead">'+tr('Bez nastavení appka funguje normálně, jen ukládá postup lokálně na tomto počítači.')+'</p>';
     el.innerHTML=html;return;
   }
   if(fbUser){
-    html+='<p class="lead">Přihlášen jako <b>'+(fbUser.email||'uživatel')+'</b>. Postup se ukládá do cloudu automaticky a načte se na jiném zařízení po přihlášení.</p>'+
-      '<p class="lead" id="cloudStat">'+(cloudStat||'Synchronizováno')+'</p>'+
-      '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="cloudSave()">Uložit teď</button><button class="btn ghost" onclick="fbLogout()">Odhlásit</button></div>'+
-      '<div class="setcol" style="max-width:440px"><h3 style="margin-bottom:2px">🔑 Změnit heslo</h3>'+
-      '<div class="typerow" style="margin-top:8px"><div class="pwrap"><input class="tinput" id="cpCur" type="password" placeholder="současné heslo" autocomplete="current-password"><button class="eye" type="button" title="Zobrazit heslo" onclick="togglePw(\'cpCur\',this)">👁</button></div></div>'+
-      '<div class="typerow" style="margin-top:8px"><div class="pwrap"><input class="tinput" id="cpNew" type="password" placeholder="nové heslo (min. 6 znaků)" autocomplete="new-password"><button class="eye" type="button" title="Zobrazit heslo" onclick="togglePw(\'cpNew\',this)">👁</button></div></div>'+
-      '<div style="margin-top:10px"><button class="btn" onclick="fbChangePass()">Uložit nové heslo</button></div></div>';
+    html+='<p class="lead">'+tr('Přihlášen jako')+' <b>'+(fbUser.email||tr('uživatel'))+'</b>. '+tr('Postup se ukládá do cloudu automaticky a načte se na jiném zařízení po přihlášení.')+'</p>'+
+      '<p class="lead" id="cloudStat">'+(cloudStat||tr('Synchronizováno'))+'</p>'+
+      '<div style="display:flex;gap:10px;flex-wrap:wrap"><button class="btn" onclick="cloudSave()">'+tr('Uložit teď')+'</button><button class="btn ghost" onclick="fbLogout()">'+tr('Odhlásit')+'</button></div>'+
+      '<div class="setcol" style="max-width:440px"><h3 style="margin-bottom:2px">🔑 '+tr('Změnit heslo')+'</h3>'+
+      '<div class="typerow" style="margin-top:8px"><div class="pwrap"><input class="tinput" id="cpCur" type="password" placeholder="'+tr('současné heslo')+'" autocomplete="current-password"><button class="eye" type="button" title="'+tr('Zobrazit heslo')+'" onclick="togglePw(\'cpCur\',this)">👁</button></div></div>'+
+      '<div class="typerow" style="margin-top:8px"><div class="pwrap"><input class="tinput" id="cpNew" type="password" placeholder="'+tr('nové heslo (min. 6 znaků)')+'" autocomplete="new-password"><button class="eye" type="button" title="'+tr('Zobrazit heslo')+'" onclick="togglePw(\'cpNew\',this)">👁</button></div></div>'+
+      '<div style="margin-top:10px"><button class="btn" onclick="fbChangePass()">'+tr('Uložit nové heslo')+'</button></div></div>';
   }else{
-    html+='<p class="lead">Přihlas se, aby se tvůj postup ukládal do cloudu a byl dostupný i na druhém počítači.</p>'+
-      '<div class="typerow"><input class="tinput" id="acEmail" placeholder="e-mail" autocomplete="username"></div>'+
-      '<div class="typerow" style="margin-top:10px"><div class="pwrap"><input class="tinput" id="acPass" type="password" placeholder="heslo (min. 6 znaků)" autocomplete="current-password"><button class="eye" type="button" title="Zobrazit heslo" onclick="togglePw(\'acPass\',this)">👁</button></div></div>'+
-      '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">Přihlásit</button><button class="btn ghost" onclick="fbRegister()">Vytvořit účet</button></div>'+
-      '<div style="margin-top:12px"><a href="#" onclick="fbResetPass();return false;" style="color:var(--accent);font-weight:600;text-decoration:none">Zapomněl jsi heslo?</a></div>';
+    html+='<p class="lead">'+tr('Přihlas se, aby se tvůj postup ukládal do cloudu a byl dostupný i na druhém počítači.')+'</p>'+
+      '<div class="typerow"><input class="tinput" id="acEmail" placeholder="'+tr('e-mail')+'" autocomplete="username"></div>'+
+      '<div class="typerow" style="margin-top:10px"><div class="pwrap"><input class="tinput" id="acPass" type="password" placeholder="'+tr('heslo (min. 6 znaků)')+'" autocomplete="current-password"><button class="eye" type="button" title="'+tr('Zobrazit heslo')+'" onclick="togglePw(\'acPass\',this)">👁</button></div></div>'+
+      '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">'+tr('Přihlásit')+'</button><button class="btn ghost" onclick="fbRegister()">'+tr('Vytvořit účet')+'</button></div>'+
+      '<div style="margin-top:12px"><a href="#" onclick="fbResetPass();return false;" style="color:var(--accent);font-weight:600;text-decoration:none">'+tr('Zapomněl jsi heslo?')+'</a></div>';
   }
   el.innerHTML=html;
 }
