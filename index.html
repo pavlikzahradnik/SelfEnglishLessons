@@ -80,6 +80,16 @@
   .seg button{border:none;background:var(--surface2);color:var(--ink);padding:8px 12px;font-weight:600;font-size:.82rem;cursor:pointer}
   .seg button.on{background:var(--accent);color:#fff}
   .setlabel{font-size:.76rem;color:var(--muted);font-weight:600;margin-right:2px}
+  /* --- posuvník (zap/vyp) --- */
+  .swrow{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-top:4px}
+  .swrow .swtxt{font-weight:700;font-size:.95rem}
+  .switch{position:relative;flex:0 0 auto;width:50px;height:28px;border-radius:999px;border:none;cursor:pointer;
+    background:var(--line);transition:background .18s ease;padding:0}
+  .switch:after{content:'';position:absolute;top:3px;left:3px;width:22px;height:22px;border-radius:50%;
+    background:#fff;transition:transform .18s ease;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .switch.on{background:var(--accent)}
+  .switch.on:after{transform:translateX(22px)}
+  .switch:disabled{opacity:.45;cursor:not-allowed}
   .grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
   .cat{text-align:left;border:1px solid var(--line);background:var(--surface2);border-radius:13px;padding:14px 15px;cursor:pointer;transition:.15s;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between;min-height:104px}
   .cat:before{content:"";position:absolute;left:0;top:0;bottom:0;width:5px;background:var(--accent)}
@@ -182,6 +192,18 @@
   @keyframes aidots{0%{content:''}25%{content:'.'}50%{content:'..'}75%{content:'...'}}
   .aiqa{margin-top:12px;padding-top:12px;border-top:1px solid var(--line)}
   .aiq{font-size:.85rem;font-weight:700;color:var(--muted);margin-bottom:5px}
+  /* --- posuvník --- */
+  .swrow{display:flex;align-items:center;gap:12px;margin-top:10px}
+  .swrow .swlbl{font-weight:600;font-size:.95rem}
+  .sw{position:relative;display:inline-block;width:46px;height:26px;flex:none}
+  .sw input{opacity:0;width:0;height:0;position:absolute}
+  .sw .sl{position:absolute;inset:0;background:var(--line);border-radius:26px;cursor:pointer;transition:background .2s}
+  .sw .sl:before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:#fff;border-radius:50%;transition:transform .2s;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+  .sw input:checked + .sl{background:var(--accent)}
+  .sw input:checked + .sl:before{transform:translateX(20px)}
+  .sw input:focus-visible + .sl{outline:2px solid var(--accent);outline-offset:2px}
+  .sw input:disabled + .sl{opacity:.4;cursor:not-allowed}
+  .swrow.locked .swlbl{color:var(--muted)}
   .feedback.ok{color:var(--ok)}.feedback.bad{color:var(--bad)}
   .sentence{font-size:1.2rem;text-align:center;font-weight:600;margin:8px 0;line-height:1.7}
   .sentence .blank{display:inline-block;min-width:64px;border-bottom:2px solid var(--accent);color:var(--accent)}
@@ -485,6 +507,7 @@ function ensureStateDefaults(){
   const freshProfile=!S.settings;
   S.settings=S.settings||{dir:'en2cz',fill:'easy',theme:'dark',goal:15};
   if(!S.settings.level)S.settings.level='A1';
+  if(typeof S.settings.aiOn!=='boolean')S.settings.aiOn=false;   /* AI je vypnutá, dokud si ji uživatel nezapne */
   S.srs=S.srs||{};S.exlog=S.exlog||{};
   /* XP, denní mise, statistiky a odznaky se vedou zvlášť pro každou dvojici.
      Úplně starý (jednojazyčný) postup se jednorázově přesune pod angličtinu. */
@@ -561,7 +584,7 @@ function nextToComplete(){const i=completedCount();return i<PATH.length?PATH[i]:
    Volitelná vrstva. Když AI není nastavená (ai.js, mode:'off'), tlačítko se
    nezobrazí a appka se chová přesně jako dřív. */
 let aiCtx=null;
-function aiAvailable(){return !!(window.AI && window.AI.ready());}
+function aiAvailable(){return !!(S.settings.aiOn && window.AI && window.AI.configured());}
 function aiFmt(s){
   return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
     .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<b>$1</b>');
@@ -1518,27 +1541,41 @@ function renderAccount(){
   }
   html+=aiSettingsHtml();
   el.innerHTML=html;
+  const sw=$('#aiOn');if(sw)sw.onchange=function(){aiToggle(this.checked);};
   const sk=$('#aiKeySave');if(sk)sk.onclick=aiSaveKey;
 }
 function aiSettingsHtml(){
-  if(!window.AI)return '';
-  const m=window.AI.config.mode;
-  let h='<div class="setcol" style="max-width:440px"><h3 style="margin-bottom:2px">🤖 '+tr('AI vysvětlování')+'</h3>';
-  if(m==='off'){
-    h+='<p class="lead">'+tr('Vypnuto. Zapneš ho v souboru ai.js — nastav mode na proxy (doporučeno) nebo key.')+'</p>';
-  }else if(m==='proxy'){
-    h+='<p class="lead">'+(window.AI.ready()?tr('Zapnuto přes vlastní server ✓'):tr('Režim proxy, ale chybí endpoint v ai.js'))+'</p>';
-  }else{
-    h+='<p class="lead">'+tr('Vlož svůj vlastní API klíč. Uloží se jen do tohoto prohlížeče, nikam se neodesílá.')+'</p>'+
+  if(!window.AI || !window.AI.enabled())return '';   /* mode:'off' schová celou sekci */
+  const soon=window.AI.soon();
+  const on=!soon && !!S.settings.aiOn, m=window.AI.config.mode, cfg=window.AI.configured();
+  let h='<div class="setcol" style="max-width:440px"><h3 style="margin-bottom:2px">🤖 '+tr('AI vysvětlování')+
+    (soon?' <span class="lvl" style="background:var(--surface);color:var(--muted)">'+tr('Připravujeme')+'</span>':'')+'</h3>'+
+    '<p class="lead">'+tr('Po špatné odpovědi ti AI vysvětlí, proč je to špatně — a můžeš se doptat.')+'</p>'+
+    '<div class="swrow'+(soon?' locked':'')+'"><label class="sw"><input type="checkbox" id="aiOn"'+(on?' checked':'')+(soon?' disabled':'')+'><span class="sl"></span></label>'+
+    '<span class="swlbl" id="aiOnLbl">'+(soon?tr('Zatím nedostupné'):(on?tr('Zapnuto'):tr('Vypnuto')))+'</span></div>';
+  if(soon)return h+'<p class="lead" style="margin-top:10px">🚧 '+tr('Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.')+'</p></div>';
+  if(on && m==='key'){
+    h+='<p class="lead" style="margin-top:12px">'+tr('Vlož svůj vlastní API klíč. Uloží se jen do tohoto prohlížeče, nikam se neodesílá.')+'</p>'+
       '<div class="typerow" style="margin-top:8px"><div class="pwrap"><input class="tinput" id="aiKey" type="password" placeholder="'+tr('API klíč')+'" autocomplete="off" value="'+(window.AI.userKey()?'\u2022\u2022\u2022\u2022\u2022\u2022\u2022\u2022':'')+'"><button class="eye" type="button" title="'+tr('Zobrazit heslo')+'" onclick="togglePw(\'aiKey\',this)">👁</button></div></div>'+
       '<div style="margin-top:10px"><button class="btn" id="aiKeySave">'+tr('Uložit klíč')+'</button></div>';
+    if(!cfg)h+='<p class="lead" style="color:var(--warn);margin-top:10px">'+tr('Bez klíče se AI tlačítka nezobrazí.')+'</p>';
+  }
+  if(on && m==='proxy'){
+    h+='<p class="lead" style="margin-top:12px'+(cfg?'':';color:var(--warn)')+'">'+
+      (cfg?tr('Zapnuto přes vlastní server ✓'):tr('Režim proxy, ale chybí endpoint v ai.js'))+'</p>';
   }
   return h+'</div>';
+}
+function aiToggle(v){
+  if(window.AI && window.AI.soon())return;   /* v režimu 'soon' se zapnout nedá */
+  S.settings.aiOn=!!v;persist();
+  const l=$('#aiOnLbl');if(l)l.textContent=v?tr('Zapnuto'):tr('Vypnuto');
+  renderAccount();
 }
 function aiSaveKey(){
   const el=$('#aiKey');if(!el)return;
   const v=(el.value||'').trim();
-  if(v.indexOf('\u2022')>=0)return;                  /* nezmenene maskovane pole */
+  if(v.indexOf('\u2022')>=0)return;                  /* nezměněné maskované pole */
   window.AI.setUserKey(v);
   window.AI.cacheClear();
   toast(v?tr('Klíč uložen ✓'):tr('Klíč smazán'));

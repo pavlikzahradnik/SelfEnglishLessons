@@ -255,8 +255,13 @@ window.UI_DATA.de = {
  "Uložit klíč": "Schlüssel speichern",
  "Klíč uložen ✓": "Schlüssel gespeichert ✓",
  "Klíč smazán": "Schlüssel gelöscht",
- "Vypnuto. Zapneš ho v souboru ai.js — nastav mode na proxy (doporučeno) nebo key.": "Aus. Aktiviere es in ai.js — setze mode auf proxy (empfohlen) oder key.",
  "Zapnuto přes vlastní server ✓": "An, über deinen eigenen Server ✓",
  "Režim proxy, ale chybí endpoint v ai.js": "Proxy-Modus, aber der Endpoint fehlt in ai.js",
- "Vlož svůj vlastní API klíč. Uloží se jen do tohoto prohlížeče, nikam se neodesílá.": "Füge deinen eigenen API-Schlüssel ein. Er wird nur in diesem Browser gespeichert und nirgendwohin gesendet."
+ "Vlož svůj vlastní API klíč. Uloží se jen do tohoto prohlížeče, nikam se neodesílá.": "Füge deinen eigenen API-Schlüssel ein. Er wird nur in diesem Browser gespeichert und nirgendwohin gesendet.",
+ "Zapnuto": "An",
+ "Vypnuto": "Aus",
+ "Po špatné odpovědi ti AI vysvětlí, proč je to špatně — a můžeš se doptat.": "Nach einer falschen Antwort erklärt dir die KI, warum sie falsch ist — und du kannst nachfragen.",
+ "Bez klíče se AI tlačítka nezobrazí.": "Ohne Schlüssel erscheinen die KI-Schaltflächen nicht.",
+ "Zatím nedostupné": "Noch nicht verfügbar",
+ "Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.": "Wir arbeiten daran — es ist fertig, wir schalten es frei, sobald die Details stimmen."
 };

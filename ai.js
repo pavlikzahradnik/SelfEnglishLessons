@@ -2,18 +2,18 @@
    Záměrně oddělená od zbytku appky: index.html o poskytovateli nic neví,
    volá jen AI.ask(). Výměna OpenAI ↔ Claude ↔ vlastní backend = změna tady.
 
-   TŘI REŽIMY (AI_CONFIG.mode):
-     'off'    – vypnuto (výchozí). Appka funguje přesně jako dosud, AI tlačítka se nezobrazí.
-     'proxy'  – DOPORUČENO. Requesty jdou na tvůj endpoint, klíč zůstane na serveru.
-                Nastav endpoint níž (např. Cloudflare Worker).
+   ZAP/VYP řeší uživatel posuvníkem v Účtu — tady se nastavuje jen ZPŮSOB PŘIPOJENÍ:
      'key'    – klíč si zadá každý uživatel sám, uloží se jen do jeho prohlížeče.
-                Použitelné pro testování; klíč NIKDY nepatří do tohoto souboru,
-                protože je veřejně čitelný na GitHubu.
+                Dobré na testování. Klíč NIKDY nepatří do tohoto souboru —
+                na GitHubu si ho může přečíst kdokoli.
+     'proxy'  – DOPORUČENO pro ostrý provoz. Requesty jdou na tvůj endpoint
+                (např. Cloudflare Worker) a klíč zůstane na serveru.
+     'off'    – úplné vypnutí i s posuvníkem (kdybys AI nechtěl vůbec nabízet).
 */
 (function () {
   const AI_CONFIG = {
-    mode: 'off',                       // 'off' | 'proxy' | 'key'
-    endpoint: '',                      // pro 'proxy', např. 'https://neco.workers.dev/ai'
+    mode: 'soon',                      // 'soon' | 'proxy' | 'key' | 'off'
+    endpoint: '',                      // SEM vlož adresu svého Workeru, např. 'https://anj-ai.tvujucet.workers.dev'
     provider: 'openai',                // pro 'key': 'openai' | 'anthropic'
     model: 'gpt-4o-mini',              // levný a na tohle bohatě stačí
     maxTokens: 400,
@@ -46,11 +46,18 @@
     try { k ? localStorage.setItem(KEY_LS, k.trim()) : localStorage.removeItem(KEY_LS); } catch (e) {}
   }
 
-  function ready() {
+  /* Je připojení nastavené? (O tom, jestli AI uživatel CHCE, rozhoduje posuvník v appce.) */
+  /* Je AI schopná odeslat požadavek? (Nezávisí na tom, jestli ji uživatel chce —
+     to hlídá posuvník v appce.) Pro 'soon' i 'off' vždy false. */
+  function configured() {
     if (AI_CONFIG.mode === 'proxy') return !!AI_CONFIG.endpoint;
     if (AI_CONFIG.mode === 'key') return !!userKey();
     return false;
   }
+  /* Smí se sekce v Účtu vůbec zobrazit? */
+  function enabled() { return AI_CONFIG.mode !== 'off'; }
+  /* Jen ukázka „připravujeme" — posuvník zamčený, nikam se nevolá. */
+  function soon() { return AI_CONFIG.mode === 'soon'; }
 
   /* ---------- volání ---------- */
   function buildRequest(system, user) {
@@ -99,7 +106,7 @@
   }
 
   function ask(system, user, cacheKey) {
-    if (!ready()) return Promise.reject(new Error('AI není nastavená'));
+    if (!configured()) return Promise.reject(new Error('AI není nastavená'));
     if (cacheKey) {
       const hit = cacheGet(cacheKey);
       if (hit) return Promise.resolve(hit);
@@ -139,7 +146,9 @@
 
   window.AI = {
     config: AI_CONFIG,
-    ready: ready,
+    configured: configured,
+    enabled: enabled,
+    soon: soon,
     ask: ask,
     userKey: userKey,
     setUserKey: setUserKey,
