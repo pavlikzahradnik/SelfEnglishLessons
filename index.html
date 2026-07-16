@@ -584,7 +584,13 @@ function nextToComplete(){const i=completedCount();return i<PATH.length?PATH[i]:
    Volitelná vrstva. Když AI není nastavená (ai.js, mode:'off'), tlačítko se
    nezobrazí a appka se chová přesně jako dřív. */
 let aiCtx=null;
-function aiAvailable(){return !!(S.settings.aiOn && window.AI && window.AI.configured());}
+/* ai.js se nahrává jako samostatný soubor, takže může být starší než index.html.
+   Voláme ho proto vždy přes tuhle pojistku — chybějící funkce nesmí nic shodit. */
+function aiCall(fn,dflt){
+  try{ return (window.AI && typeof window.AI[fn]==='function') ? window.AI[fn]() : dflt; }
+  catch(e){ return dflt; }
+}
+function aiAvailable(){return !!(S.settings.aiOn && aiCall('configured',false));}
 function aiFmt(s){
   return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
     .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<b>$1</b>');
@@ -648,7 +654,7 @@ function aiFollowUp(){
   aiRun('The learner asks: "'+q+'". Answer that question.','#'+id);
 }
 function aiAddButton(ok){
-  if(!aiAvailable()||!aiCtx)return;
+  try{ if(!aiAvailable()||!aiCtx)return; }catch(e){ return; }
   const stage=$('#stage');
   const b=document.createElement('button');
   b.className='aibtn';b.id='aiExplainBtn';
@@ -1539,15 +1545,17 @@ function renderAccount(){
       '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">'+tr('Přihlásit')+'</button><button class="btn ghost" onclick="fbRegister()">'+tr('Vytvořit účet')+'</button></div>'+
       '<div style="margin-top:12px"><a href="#" onclick="fbResetPass();return false;" style="color:var(--accent);font-weight:600;text-decoration:none">'+tr('Zapomněl jsi heslo?')+'</a></div>';
   }
-  html+=aiSettingsHtml();
+  try{ html+=aiSettingsHtml(); }catch(e){ console.warn('AI sekce přeskočena:',e.message); }
   el.innerHTML=html;
   const sw=$('#aiOn');if(sw)sw.onchange=function(){aiToggle(this.checked);};
   const sk=$('#aiKeySave');if(sk)sk.onclick=aiSaveKey;
 }
 function aiSettingsHtml(){
-  if(!window.AI || !window.AI.enabled())return '';   /* mode:'off' schová celou sekci */
-  const soon=window.AI.soon();
-  const on=!soon && !!S.settings.aiOn, m=window.AI.config.mode, cfg=window.AI.configured();
+  if(!window.AI || !aiCall('enabled',false))return '';   /* mode:'off' nebo chybějící ai.js → sekce se skryje */
+  const soon=aiCall('soon',true);                        /* při pochybnostech radši „Připravujeme" */
+  const on=!soon && !!S.settings.aiOn;
+  const m=(window.AI.config&&window.AI.config.mode)||'soon';
+  const cfg=aiCall('configured',false);
   let h='<div class="setcol" style="max-width:440px"><h3 style="margin-bottom:2px">🤖 '+tr('AI vysvětlování')+
     (soon?' <span class="lvl" style="background:var(--surface);color:var(--muted)">'+tr('Připravujeme')+'</span>':'')+'</h3>'+
     '<p class="lead">'+tr('Po špatné odpovědi ti AI vysvětlí, proč je to špatně — a můžeš se doptat.')+'</p>'+
@@ -1567,7 +1575,7 @@ function aiSettingsHtml(){
   return h+'</div>';
 }
 function aiToggle(v){
-  if(window.AI && window.AI.soon())return;   /* v režimu 'soon' se zapnout nedá */
+  if(aiCall('soon',true))return;   /* v režimu 'soon' se zapnout nedá */
   S.settings.aiOn=!!v;persist();
   const l=$('#aiOnLbl');if(l)l.textContent=v?tr('Zapnuto'):tr('Vypnuto');
   renderAccount();
