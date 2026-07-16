@@ -242,5 +242,21 @@ window.UI_DATA.en = {
  "neplatný e-mail": "invalid email",
  "chyba": "error",
  "Adaptivní opakování (SRS) plánuje každé slovo zvlášť: chyba → za 2 min, správně → za hodinu → den → týden → měsíc. Postup se ukládá v tomto prohlížeči.": "Adaptive review (SRS) schedules each word separately: wrong → in 2 min, right → in an hour → a day → a week → a month. Progress is stored in this browser.",
- "Nedostupné offline (potřebují server): AI konverzace, AI generované věty, synchronizace mezi zařízeními, obrázky ke slovům.": "Unavailable offline (they need a server): AI conversation, AI-generated sentences, cross-device sync, word images."
+ "Nedostupné offline (potřebují server): AI konverzace, AI generované věty, synchronizace mezi zařízeními, obrázky ke slovům.": "Unavailable offline (they need a server): AI conversation, AI-generated sentences, cross-device sync, word images.",
+ "Vysvětlení": "Explanation",
+ "Proč je to špatně?": "Why is this wrong?",
+ "Zeptat se na to": "Ask about this",
+ "Zeptat se": "Ask",
+ "Zeptej se na cokoli k tomuhle…": "Ask anything about this…",
+ "Přemýšlím": "Thinking",
+ "AI se teď nepodařilo zeptat": "Couldn't reach the AI right now",
+ "AI vysvětlování": "AI explanations",
+ "API klíč": "API key",
+ "Uložit klíč": "Save key",
+ "Klíč uložen ✓": "Key saved ✓",
+ "Klíč smazán": "Key deleted",
+ "Vypnuto. Zapneš ho v souboru ai.js — nastav mode na proxy (doporučeno) nebo key.": "Off. Turn it on in ai.js — set mode to proxy (recommended) or key.",
+ "Zapnuto přes vlastní server ✓": "On, via your own server ✓",
+ "Režim proxy, ale chybí endpoint v ai.js": "Proxy mode, but the endpoint is missing in ai.js",
+ "Vlož svůj vlastní API klíč. Uloží se jen do tohoto prohlížeče, nikam se neodesílá.": "Paste your own API key. It is stored only in this browser and sent nowhere else."
 };
