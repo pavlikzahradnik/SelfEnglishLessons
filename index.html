@@ -234,12 +234,13 @@
   <header class="top" id="topbar">
     <div class="brand"><span class="dot"></span><span id="brandLang">Angličtina</span> <span class="lvl" id="brandLvl">A1</span></div>
     <div class="hstats">
-      <div class="chip">Lvl <b id="hLevel">1</b></div>
-      <div class="chip">Body <b id="hXp">0</b></div>
-      <div class="chip">🔥 <b id="hDays">0</b> dní</div>
-      <button class="iconbtn" id="langBtn" title="Přepnout jazyk" onclick="toggleLanguage()">🇬🇧</button>
-      <button class="iconbtn" id="cloudBtn" title="Účet a synchronizace" onclick="openAccount()">☁</button>
-      <button class="iconbtn" id="themeBtn" title="Světlý / tmavý režim">◐</button>
+      <div class="chip"><span data-i18n>Lvl</span> <b id="hLevel">1</b></div>
+      <div class="chip"><span data-i18n>Body</span> <b id="hXp">0</b></div>
+      <div class="chip">🔥 <b id="hDays">0</b> <span data-i18n>dní</span></div>
+      <button class="iconbtn" id="srcBtn" data-i18n-title="Změnit jazyk rozhraní" title="Změnit jazyk rozhraní" onclick="openSrcPick()">🇨🇿</button>
+      <button class="iconbtn" id="langBtn" data-i18n-title="Přepnout jazyk" title="Přepnout jazyk" onclick="toggleLanguage()">🇬🇧</button>
+      <button class="iconbtn" id="cloudBtn" data-i18n-title="Účet a synchronizace" title="Účet a synchronizace" onclick="openAccount()">☁</button>
+      <button class="iconbtn" id="themeBtn" data-i18n-title="Světlý / tmavý režim" title="Světlý / tmavý režim">◐</button>
     </div>
   </header>
 
@@ -248,47 +249,54 @@
       <aside class="side">
         <div class="panel">
           <div class="mission mission-v">
-            <div class="ring" id="ring"><div class="rv"><span id="ringDone">0</span>/<span id="ringGoal">15</span><small>dnešní cíl</small></div></div>
+            <div class="ring" id="ring"><div class="rv"><span id="ringDone">0</span>/<span id="ringGoal">15</span><small data-i18n>dnešní cíl</small></div></div>
             <div class="mtext">
-              <div class="big">Level <span id="mLevel">1</span> · <span id="mXp">0</span> bodů</div>
+              <div class="big"><span data-i18n>Level</span> <span id="mLevel">1</span> · <span id="mXp">0</span> <span data-i18n>bodů</span></div>
               <div class="levelbar"><div id="mLevelBar"></div></div>
-              <div class="as" style="font-size:.78rem;color:var(--muted);margin-top:5px"><span id="mToNext">0</span> b do levelu · série <b id="mDays">0</b> dní</div>
+              <div class="as" style="font-size:.78rem;color:var(--muted);margin-top:5px"><span id="mToNext">0</span> <span data-i18n>b do levelu · série</span> <b id="mDays">0</b> <span data-i18n>dní</span></div>
             </div>
-            <button class="btn" id="startDaily">Dnešní mise ▸</button>
+            <button class="btn" id="startDaily"><span data-i18n>Dnešní mise</span> ▸</button>
           </div>
           <div class="actions actions-v">
-            <button class="act" id="actReview" onclick="startReview()"><div class="at">Opakování <span class="cnt warn" id="dueCount">0</span></div><div class="as">Slova k zopakování (SRS)</div></button>
-            <button class="act" id="actProblem" onclick="startProblem()"><div class="at">Problémová slova <span class="cnt" id="probCount">0</span></div><div class="as">Slova, ve kterých chybuješ</div></button>
-            <button class="act" onclick="startMixed()"><div class="at">Zamíchat vše</div><div class="as">Náhodně napříč tématy</div></button>
-            <button class="act" onclick="start5min()"><div class="at">5 minut denně</div><div class="as">Krátká rychlá lekce</div></button>
-            <button class="act" onclick="openStats()"><div class="at">Statistiky</div><div class="as">Pokrok a slabá témata</div></button>
+            <button class="act" id="actReview" onclick="startReview()"><div class="at"><span data-i18n>Opakování</span> <span class="cnt warn" id="dueCount">0</span></div><div class="as" data-i18n>Slova k zopakování (SRS)</div></button>
+            <button class="act" id="actProblem" onclick="startProblem()"><div class="at"><span data-i18n>Problémová slova</span> <span class="cnt" id="probCount">0</span></div><div class="as" data-i18n>Slova, ve kterých chybuješ</div></button>
+            <button class="act" onclick="startMixed()"><div class="at" data-i18n>Zamíchat vše</div><div class="as" data-i18n>Náhodně napříč tématy</div></button>
+            <button class="act" onclick="start5min()"><div class="at" data-i18n>5 minut denně</div><div class="as" data-i18n>Krátká rychlá lekce</div></button>
+            <button class="act" onclick="openStats()"><div class="at" data-i18n>Statistiky</div><div class="as" data-i18n>Pokrok a slabá témata</div></button>
           </div>
           <div class="setcol">
-            <div class="setline"><span class="setlabel">Směr</span>
-              <div class="seg" id="segDir"><button data-v="en2cz">EN→CZ</button><button data-v="cz2en">CZ→EN</button><button data-v="mix">Mix</button></div></div>
-            <div class="setline"><span class="setlabel">Doplňování</span>
-              <div class="seg" id="segFill"><button data-v="easy">Výběr</button><button data-v="hard">Psaní</button></div></div>
-            <div class="setline"><span class="setlabel">Denní cíl</span>
+            <div class="setline"><span class="setlabel" data-i18n>Směr</span>
+              <div class="seg" id="segDir"><button data-v="en2cz" id="dirT2S">EN→CZ</button><button data-v="cz2en" id="dirS2T">CZ→EN</button><button data-v="mix" data-i18n>Mix</button></div></div>
+            <div class="setline"><span class="setlabel" data-i18n>Doplňování</span>
+              <div class="seg" id="segFill"><button data-v="easy" data-i18n>Výběr</button><button data-v="hard" data-i18n>Psaní</button></div></div>
+            <div class="setline"><span class="setlabel" data-i18n>Denní cíl</span>
               <div class="seg" id="segGoal"><button data-v="10">10</button><button data-v="15">15</button><button data-v="25">25</button></div></div>
           </div>
         </div>
       </aside>
       <section class="maincol">
         <div class="panel" id="levelPick">
-          <h2>Vyber úroveň znalosti</h2>
-          <p class="lead">Na jaké úrovni chceš procvičovat? Každá úroveň má vlastní témata i postup.</p>
-          <button class="btn ghost" style="margin-bottom:16px" id="placementBtn" onclick="startPlacement()">🎯 Nevím, jakou úroveň zvolit — udělat rozřazovací test</button>
+          <h2 data-i18n>Vyber úroveň znalosti</h2>
+          <p class="lead" data-i18n>Na jaké úrovni chceš procvičovat? Každá úroveň má vlastní témata i postup.</p>
+          <button class="btn ghost" style="margin-bottom:16px" id="placementBtn" onclick="startPlacement()"><span data-i18n>🎯 Nevím, jakou úroveň zvolit — udělat rozřazovací test</span></button>
           <div class="lvlpick" id="lvlpickBox"></div>
         </div>
         <div class="panel hidden" id="topicsView">
-          <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap">Témata <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()">← Změnit úroveň</button></h2>
+          <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span data-i18n>Témata</span> <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()" data-i18n>← Změnit úroveň</button></h2>
           <p class="lead">Celkem <b id="totalWords"></b> slov · naučeno <b id="learnedWords">0</b>. Klikni na téma pro výběr cvičení.</p>
           <div id="catGrid" class="grid"></div>
-          <div class="sec-label">Úspěchy</div>
+          <div class="sec-label" data-i18n>Úspěchy</div>
           <div id="ach" class="ach"></div>
         </div>
       </section>
     </div>
+  </div>
+
+  <div id="srcPick" class="panel hidden">
+    <button class="back hidden" id="srcBack" onclick="goHome()" data-i18n>← Zpět</button>
+    <h2 data-i18n>Jakým jazykem mluvíš?</h2>
+    <p class="lead" data-i18n>Zvol jazyk, ve kterém ti bude appka vysvětlovat. Podle něj se nabídnou jazyky, které se můžeš učit.</p>
+    <div class="lvlpick" id="srcPickBox"></div>
   </div>
 
   <div id="catMenu" class="panel hidden">
@@ -331,24 +339,79 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 
-/* ===== Dynamické načítání jazykových balíčků =====
-   Obsah jazyků žije v samostatných souborech (lang-en.js, lang-de.js).
-   Stáhne se vždy jen jazyk, který si uživatel vybere. */
-const LANG_FILES={en:'lang-en.js',de:'lang-de.js'};
+/* ===== Jazyky, dvojice a dynamické načítání =====
+   DŮLEŽITÉ: obsah se vede po DVOJICÍCH zdroj–cíl, ne po jazycích.
+   'cs-en' = "Čech se učí anglicky" (výklad gramatiky je česky).
+   Přidání nové dvojice = nový soubor lang-XX-YY.js + jeden řádek v PAIRS. */
+const ALL_LEVELS=['A1','A2','B1','B2','C1','C2'];
+const LANG_INFO={
+  cs:{label:'Čeština',flag:'🇨🇿',native:'Čeština',tts:'cs-CZ'},
+  en:{label:'Angličtina',flag:'🇬🇧',native:'English',tts:'en-GB'},
+  de:{label:'Němčina',flag:'🇩🇪',native:'Deutsch',tts:'de-DE'}
+};
+const PAIRS={
+  'cs-en':'lang-cs-en.js',
+  'cs-de':'lang-cs-de.js'
+};
+function pairKey(src,tgt){return src+'-'+tgt;}
+function curSrc(){return (S.settings&&S.settings.srcLang)||'cs';}
+function curTgt(){return (S.settings&&S.settings.tgtLang)||'en';}
+function curPair(){return pairKey(curSrc(),curTgt());}
+function srcLangsAvailable(){const o={};Object.keys(PAIRS).forEach(p=>o[p.split('-')[0]]=1);return Object.keys(o);}
+function tgtLangsFor(src){return Object.keys(PAIRS).filter(p=>p.split('-')[0]===src).map(p=>p.split('-')[1]);}
+
 window.LANG_DATA=window.LANG_DATA||{};
 const _langLoading={};
-function loadLangPack(lang,cb){
-  if(window.LANG_DATA[lang]){cb&&cb(true);return;}
-  if(_langLoading[lang]){_langLoading[lang].push(cb);return;}
-  _langLoading[lang]=[cb];
+function loadLangPack(pair,cb){
+  if(!PAIRS[pair]){cb&&cb(false);return;}
+  if(window.LANG_DATA[pair]){cb&&cb(true);return;}
+  if(_langLoading[pair]){_langLoading[pair].push(cb);return;}
+  _langLoading[pair]=[cb];
   const s=document.createElement('script');
-  s.src=LANG_FILES[lang];
-  s.onload=function(){const q=_langLoading[lang]||[];delete _langLoading[lang];q.forEach(f=>f&&f(true));};
-  s.onerror=function(){delete _langLoading[lang];toast('Nepodařilo se načíst jazyk – zkontroluj připojení a zkus to znovu');cb&&cb(false);};
+  s.src=PAIRS[pair];
+  s.onload=function(){const q=_langLoading[pair]||[];delete _langLoading[pair];q.forEach(f=>f&&f(true));};
+  s.onerror=function(){delete _langLoading[pair];toast(tr('Nepodařilo se načíst jazyk – zkontroluj připojení a zkus to znovu'));cb&&cb(false);};
   document.head.appendChild(s);
 }
-function langLevels(lang){return (window.LANG_DATA[lang]&&window.LANG_DATA[lang].levels)||{};}
-function langExamples(){const lang=(S.settings&&S.settings.lang)||'en';return (window.LANG_DATA[lang]&&window.LANG_DATA[lang].examples)||{};}
+function langLevels(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].levels)||{};}
+function langMeta(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].meta)||{};}
+function langExamples(){const p=curPair();return (window.LANG_DATA[p]&&window.LANG_DATA[p].examples)||{};}
+
+/* ===== Překlad rozhraní =====
+   Klíčem je český text, čeština je tedy výchozí a zároveň záloha —
+   chybějící překlad nikdy nerozbije appku, jen zůstane česky.
+   Nový jazyk rozhraní = nový soubor ui-XX.js + řádek v UI_FILES. */
+const UI_FILES={en:'ui-en.js',de:'ui-de.js'};
+window.UI_DATA=window.UI_DATA||{};
+const _uiLoading={};
+function tr(s){const m=window.UI_DATA[curSrc()];return (m&&m[s])||s;}
+/* Přeloží statické prvky označené data-i18n / data-i18n-title.
+   Klíč = původní český text, který v HTML zůstává jako záloha. */
+function applyStaticUI(){
+  $$('[data-i18n]').forEach(function(el){
+    if(!el._i18nKey)el._i18nKey=el.textContent.trim();
+    el.textContent=tr(el._i18nKey);
+  });
+  $$('[data-i18n-title]').forEach(function(el){
+    el.title=tr(el.getAttribute('data-i18n-title'));
+  });
+  /* popisky směru se řídí zvolenou dvojicí, ne napevno EN/CZ */
+  const T=curTgt().toUpperCase(), Sc=curSrc().toUpperCase();
+  const a=$('#dirT2S');if(a)a.textContent=T+'→'+Sc;
+  const b=$('#dirS2T');if(b)b.textContent=Sc+'→'+T;
+  document.documentElement.lang=curSrc();
+}
+function loadUI(lang,cb){
+  if(lang==='cs'||!UI_FILES[lang]){cb&&cb(true);return;}
+  if(window.UI_DATA[lang]){cb&&cb(true);return;}
+  if(_uiLoading[lang]){_uiLoading[lang].push(cb);return;}
+  _uiLoading[lang]=[cb];
+  const s=document.createElement('script');
+  s.src=UI_FILES[lang];
+  s.onload=function(){const q=_uiLoading[lang]||[];delete _uiLoading[lang];q.forEach(f=>f&&f(true));};
+  s.onerror=function(){delete _uiLoading[lang];cb&&cb(true);};   /* bez překladu jede čeština */
+  document.head.appendChild(s);
+}
 
 let CATS, ALL, BYID, GRAMMAR, GMAP, PATH, CI, FINAL, TMAP;
 
@@ -364,39 +427,17 @@ const BADGES=[
 const STEPS=[2, 60, 1440, 10080, 43200];
 const MIN=60000;
 
-/* ===== Jazyky ===== */
-const LANGS={
-  en:{label:'Angličtina',flag:'🇬🇧',levels:['A1','A2','B1','B2','C1','C2']},
-  de:{label:'Němčina',flag:'🇩🇪',levels:['A1','A2','B1','B2','C1','C2']}
-};
-const LEVEL_META={
-  en:{
-    A1:{t:'Začátečník',d:'Základní slovíčka a gramatika — pozdravy, čísla, sloveso to be, přítomný čas, členy…'},
-    A2:{t:'Mírně pokročilý',d:'Rozšířená slovní zásoba a časy — minulý čas, budoucnost, stupňování, předpřítomný čas…'},
-    B1:{t:'Středně pokročilý',d:'Složitější gramatika a témata — předminulý čas, kondicionály, trpný rod, nepřímá řeč, vztažné věty…'},
-    B2:{t:'Vyšší středně pokročilý',d:'Abstraktní témata a pokročilá gramatika — smíšené kondicionály, inverze, gerundium vs. infinitiv, trpný rod s have/get…'},
-    C1:{t:'Pokročilý',d:'Odborná a formální angličtina — leadership, ekonomika, participiální vazby, konjunktiv, formální trpný rod…'},
-    C2:{t:'Téměř rodilý mluvčí',d:'Akademický a literární jazyk — rétorika, nominalizace, hedging, elipsa, pokročilé kolokace a inverze…'}
-  },
-  de:{
-    A1:{t:'Začátečník',d:'Základní slovíčka a gramatika — pozdravy, čísla, rodina, sein/haben, členy der/die/das, 4. pád, modální slovesa, zápor, W-otázky…'},
-    A2:{t:'Mírně pokročilý',d:'Rozšířená slovní zásoba a gramatika — perfektum, préteritum, 3. pád, předložky, stupňování, vedlejší věty, odlučitelné předpony…'},
-    B1:{t:'Středně pokročilý',d:'Složitější gramatika a témata — préteritum, Konjunktiv II, trpný rod, vztažné věty, 2. pád, předminulý čas, nepřímé otázky…'},
-    B2:{t:'Vyšší středně pokročilý',d:'Abstraktní témata a pokročilá gramatika — Konjunktiv II minulý, nepřímá řeč, trpný rod s modály, příčestí, dvojité spojky, idiomy…'},
-    C1:{t:'Pokročilý',d:'Odborná a formální němčina — participiální přívlastky, nominální styl, als ob, funkční slovesné vazby, neosobní pasiv…'},
-    C2:{t:'Téměř rodilý mluvčí',d:'Vytříbený jazyk — modální částice, pokročilé kolokace, formální konektory, elipsa, genitivní vazby, knižní styl…'}
-  }
-};
-/* ===== Rozřazovací test (adaptivní) — zatím jen pro angličtinu ===== */
-const PLC_LEVELS=['A1','A2','B1','B2','C1','C2'];
+/* ===== Rozřazovací test (adaptivní) — funguje pro dvojici, která má všech 6 úrovní ===== */
+const PLC_LEVELS=ALL_LEVELS;
+function placementAvailable(){const lv=langLevels(curPair());return !!(window.LANG_DATA[curPair()]||{}).placement && ALL_LEVELS.every(l=>lv[l]);}
 function plcPool(lvl){
-  const g=(langLevels('en')[lvl]||{}).gram||[];
+  const g=(langLevels(curPair())[lvl]||{}).gram||[];
   const arr=[];g.forEach(gg=>gg.items.forEach((it,i)=>arr.push({level:lvl,topic:gg.title,gitem:it,key:gg.id+'#'+i})));return arr;
 }
 function buildLevel(lvl){
-  const lang=(S.settings&&S.settings.lang)||'en';
-  const d=langLevels(lang)[lvl]||langLevels('en').A1;
-  if(!d){console.warn('Jazykový balíček ještě není načten');return;}
+  const p=curPair();
+  const d=langLevels(p)[lvl];
+  if(!d){console.warn('Jazykový balíček není načten:',p,lvl);return;}
   CATS=d.cats; GRAMMAR=d.gram; PATH=d.path;
   ALL=[]; CATS.forEach(c=>c.vocab.forEach((v,i)=>ALL.push({id:c.id+':'+i,en:v[0],cz:v[1],cat:c.id,catTitle:c.title})));
   BYID={}; ALL.forEach(w=>BYID[w.id]=w);
@@ -421,12 +462,12 @@ let S={};
 function load(){try{return JSON.parse(localStorage.getItem(stateKey(curProfileId)))||{};}catch(e){return{};}}
 function persist(){if(!curProfileId)return;try{localStorage.setItem(stateKey(curProfileId),JSON.stringify(S));}catch(e){}scheduleCloudSave();}
 function ensureStateDefaults(){
+  const freshProfile=!S.settings;
   S.settings=S.settings||{dir:'en2cz',fill:'easy',theme:'dark',goal:15};
-  if(!S.settings.lang)S.settings.lang='en';
   if(!S.settings.level)S.settings.level='A1';
   S.srs=S.srs||{};S.exlog=S.exlog||{};
-  /* XP, denní mise, statistiky a odznaky se vedou zvlášť pro každý jazyk.
-     Starý (jednojazyčný) postup se jednorázově přesune pod angličtinu. */
+  /* XP, denní mise, statistiky a odznaky se vedou zvlášť pro každou dvojici.
+     Úplně starý (jednojazyčný) postup se jednorázově přesune pod angličtinu. */
   if(!S._langs){
     S._langs={};
     S._langs.en={
@@ -437,21 +478,44 @@ function ensureStateDefaults(){
     };
     delete S.xp;delete S.stats;delete S.daily;delete S.badges;
   }
-  function langBucket(){
-    const lang=S.settings.lang||'en';
-    if(!S._langs[lang])S._langs[lang]={xp:0,stats:{c:0,w:0,byCat:{},timeMs:0,bestDays:0},daily:{date:'',done:0,ids:[],met:false,streak:0},badges:[]};
-    return S._langs[lang];
+  /* --- migrace: dřív byl jazyk 'en'/'de', teď dvojice 'cs-en'/'cs-de' --- */
+  if(!S.settings.srcLang){
+    if(!freshProfile || S.settings.lang)S.settings.srcLang='cs';           /* stávající uživatel = Čech */
+    else if(srcLangsAvailable().length===1)S.settings.srcLang=srcLangsAvailable()[0];
   }
-  Object.defineProperty(S,'xp',{get:()=>langBucket().xp,set:v=>{langBucket().xp=v;},configurable:true,enumerable:true});
-  Object.defineProperty(S,'stats',{get:()=>langBucket().stats,set:v=>{langBucket().stats=v;},configurable:true,enumerable:true});
-  Object.defineProperty(S,'daily',{get:()=>langBucket().daily,set:v=>{langBucket().daily=v;},configurable:true,enumerable:true});
-  Object.defineProperty(S,'badges',{get:()=>langBucket().badges,set:v=>{langBucket().badges=v;},configurable:true,enumerable:true});
+  if(S.settings.lang){S.settings.tgtLang=S.settings.tgtLang||S.settings.lang;delete S.settings.lang;}
+  if(S.settings.srcLang&&!S.settings.tgtLang)S.settings.tgtLang=tgtLangsFor(S.settings.srcLang)[0];
+  if(S.settings.levelByLang){
+    S.settings.levelByPair=S.settings.levelByPair||{};
+    Object.keys(S.settings.levelByLang).forEach(function(l){
+      if(!S.settings.levelByPair['cs-'+l])S.settings.levelByPair['cs-'+l]=S.settings.levelByLang[l];
+    });
+    delete S.settings.levelByLang;
+  }
+  if(S.settings.maxUnlockedLevel){
+    S.settings.maxUnlockedByPair=S.settings.maxUnlockedByPair||{};
+    if(!S.settings.maxUnlockedByPair['cs-en'])S.settings.maxUnlockedByPair['cs-en']=S.settings.maxUnlockedLevel;
+    delete S.settings.maxUnlockedLevel;
+  }
+  ['en','de'].forEach(function(l){
+    if(S._langs[l]&&!S._langs['cs-'+l]){S._langs['cs-'+l]=S._langs[l];delete S._langs[l];}
+  });
+  function langBucket(){
+    const p=curPair();
+    if(!S._langs[p])S._langs[p]={xp:0,stats:{c:0,w:0,byCat:{},timeMs:0,bestDays:0},daily:{date:'',done:0,ids:[],met:false,streak:0},badges:[]};
+    return S._langs[p];
+  }
+  /* enumerable:false — hodnoty žijí v S._langs, ať se neukládají (a nesynchronizují) dvakrát */
+  Object.defineProperty(S,'xp',{get:()=>langBucket().xp,set:v=>{langBucket().xp=v;},configurable:true,enumerable:false});
+  Object.defineProperty(S,'stats',{get:()=>langBucket().stats,set:v=>{langBucket().stats=v;},configurable:true,enumerable:false});
+  Object.defineProperty(S,'daily',{get:()=>langBucket().daily,set:v=>{langBucket().daily=v;},configurable:true,enumerable:false});
+  Object.defineProperty(S,'badges',{get:()=>langBucket().badges,set:v=>{langBucket().badges=v;},configurable:true,enumerable:false});
 }
 
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 function clearAuthFields(){['acPass','cpCur','cpNew'].forEach(function(id){const el=$('#'+id);if(el)el.value='';});}
-function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate')?'none':'flex';window.scrollTo(0,0);}
+function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function distractors(w,key,n){let pool=shuffle(ALL.filter(x=>x.cat===w.cat && x.id!==w.id && x[key]!==w[key]));if(pool.length<n){const extra=shuffle(ALL.filter(x=>x.id!==w.id && x[key]!==w[key] && x.cat!==w.cat));pool=pool.concat(extra);}return pool.slice(0,n);}
 function isGrammar(id){return TMAP[id]&&TMAP[id].type==='grammar';}
@@ -485,16 +549,19 @@ function relTime(ts){const s=(Date.now()-ts)/1000;if(s<60)return 'právě teď';
 let VOICES={};
 function pickVoice(){
   const vs=speechSynthesis.getVoices();
-  VOICES.en=vs.find(v=>/en[-_]GB/i.test(v.lang))||vs.find(v=>/en[-_]US/i.test(v.lang))||vs.find(v=>/^en/i.test(v.lang))||null;
-  VOICES.de=vs.find(v=>/de[-_]DE/i.test(v.lang))||vs.find(v=>/^de/i.test(v.lang))||null;
+  Object.keys(LANG_INFO).forEach(function(l){
+    const tag=LANG_INFO[l].tts, base=l;
+    VOICES[l]=vs.find(v=>new RegExp(tag.replace('-','[-_]'),'i').test(v.lang))||
+              vs.find(v=>new RegExp('^'+base,'i').test(v.lang))||null;
+  });
 }
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
-function speak(t,cb){
+function speak(txt,cb){
   if(!('speechSynthesis' in window)){cb&&cb();return;}
   speechSynthesis.cancel();
-  const lang=(S.settings&&S.settings.lang)||'en';
-  const u=new SpeechSynthesisUtterance(t);
-  u.lang=lang==='de'?'de-DE':'en-GB';u.rate=.9;
+  const lang=curTgt();                       /* mluví se vždy v cílovém jazyce */
+  const u=new SpeechSynthesisUtterance(txt);
+  u.lang=(LANG_INFO[lang]||LANG_INFO.en).tts;u.rate=.9;
   const v=VOICES[lang];if(v)u.voice=v;
   if(cb)u.onend=cb;
   speechSynthesis.speak(u);
@@ -608,77 +675,116 @@ function renderActions(){
 }
 let levelChosen=false;
 const A2_UNLOCK_PCT=90;
-const LVL_PREREQ_BY_LANG={
-  en:{A2:'g_test',B1:'a2_test',B2:'b1_test',C1:'b2_test',C2:'c1_test'},
-  de:{A2:'de_a1_test',B1:'de_a2_test',B2:'de_b1_test',C1:'de_b2_test',C2:'de_c1_test'}
-};   // pro odemčení úrovně je potřeba test předchozí úrovně >=90 %
-function lvlPrereq(lvl){const lang=(S.settings&&S.settings.lang)||'en';return (LVL_PREREQ_BY_LANG[lang]||{})[lvl];}
+/* Prerekvizita se odvodí z balíčku: k odemčení úrovně je potřeba
+   závěrečný test nejbližší nižší dostupné úrovně na >=90 %. */
+function lvlPrereq(lvl){
+  const i=ALL_LEVELS.indexOf(lvl);if(i<=0)return null;
+  const lv=langLevels(curPair());
+  for(let j=i-1;j>=0;j--){const prev=lv[ALL_LEVELS[j]];if(prev)return prev.test;}
+  return null;
+}
 function levelUnlocked(lvl){
-  const lang=(S.settings&&S.settings.lang)||'en';
-  if(lang==='en'){
-    const maxU=S.settings.maxUnlockedLevel;
-    if(maxU && PLC_LEVELS.indexOf(lvl)<=PLC_LEVELS.indexOf(maxU))return true;
-  }
-  const t=lvlPrereq(lvl);if(!t)return true;const e=S.exlog[t+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
+  const maxU=(S.settings.maxUnlockedByPair||{})[curPair()];
+  if(maxU && ALL_LEVELS.indexOf(lvl)<=ALL_LEVELS.indexOf(maxU))return true;
+  const pr=lvlPrereq(lvl);if(!pr)return true;
+  const e=S.exlog[pr+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
 }
 function updateBrand(){
-  const lang=(S.settings&&S.settings.lang)||'en';
   const bl=$('#brandLvl');if(bl)bl.textContent=S.settings.level;
   const ct=$('#curLvlTag');if(ct)ct.textContent=S.settings.level;
-  const bn=$('#brandLang');if(bn)bn.textContent=LANGS[lang].label;
-  const lb=$('#langBtn');if(lb)lb.textContent=LANGS[lang].flag;
+  const bn=$('#brandLang');if(bn)bn.textContent=tr(LANG_INFO[curTgt()].label);
+  const lb=$('#langBtn');if(lb){
+    lb.textContent=LANG_INFO[curTgt()].flag;
+    lb.style.display=(tgtLangsFor(curSrc()).length>1)?'':'none';
+  }
+  const sb=$('#srcBtn');if(sb){
+    sb.textContent=LANG_INFO[curSrc()].flag;
+    sb.title=tr('Změnit jazyk rozhraní');
+    sb.style.display=(srcLangsAvailable().length>1)?'':'none';
+  }
 }
 function renderLevelPick(){
-  const lang=(S.settings&&S.settings.lang)||'en';
-  const impl=LANGS[lang].levels;
-  const meta=LEVEL_META[lang];
-  const allLevels=['A1','A2','B1','B2','C1','C2'];
+  const pair=curPair(), lv=langLevels(pair), meta=langMeta(pair);
   const box=$('#lvlpickBox');if(!box)return;
-  box.innerHTML=allLevels.map(function(lvl){
-    if(impl.indexOf(lvl)<0){
+  box.innerHTML=ALL_LEVELS.map(function(lvl){
+    if(!lv[lvl]){
       return '<button class="lvlcard locked" disabled style="opacity:.55;cursor:default">'+
-        '<div class="lc-badge">'+lvl+'</div><div class="lc-t">Připravujeme</div>'+
-        '<div class="lc-d">Tato úroveň pro '+LANGS[lang].label.toLowerCase()+' zatím není k dispozici.</div>'+
-        '<div class="lc-go">🚧 Brzy</div></button>';
+        '<div class="lc-badge">'+lvl+'</div><div class="lc-t">'+tr('Připravujeme')+'</div>'+
+        '<div class="lc-d">'+tr('Tato úroveň zatím není k dispozici.')+'</div>'+
+        '<div class="lc-go">🚧 '+tr('Brzy')+'</div></button>';
     }
     const m=meta[lvl]||{t:lvl,d:''};
     const ok=levelUnlocked(lvl);
-    const prereqTest=lvlPrereq(lvl);const e=prereqTest?S.exlog[prereqTest+':test']:null;
-    const goTxt=ok?('Začít '+lvl+' →'):('🔒 Odemkni testem na '+A2_UNLOCK_PCT+' %'+(e?' <span style="color:var(--muted)">(teď '+e.last+' %)</span>':''));
+    const pr=lvlPrereq(lvl);const e=pr?S.exlog[pr+':test']:null;
+    const goTxt=ok?(tr('Začít')+' '+lvl+' →')
+      :('🔒 '+tr('Odemkni testem na')+' '+A2_UNLOCK_PCT+' %'+(e?' <span style="color:var(--muted)">('+tr('teď')+' '+e.last+' %)</span>':''));
     return '<button class="lvlcard'+(ok?'':' locked')+'" onclick="chooseLevel(\''+lvl+'\')">'+
       '<div class="lc-badge">'+lvl+'</div><div class="lc-t">'+m.t+'</div><div class="lc-d">'+m.d+'</div>'+
       '<div class="lc-go">'+goTxt+'</div></button>';
   }).join('');
-  const plcBtn=$('#placementBtn');if(plcBtn)plcBtn.style.display=(lang==='en')?'':'none';
+  const plcBtn=$('#placementBtn');if(plcBtn)plcBtn.style.display=placementAvailable()?'':'none';
 }
 function chooseLevel(lvl){
-  if(!levelUnlocked(lvl)){toast('Úroveň '+lvl+' se odemkne po zvládnutí předchozího závěrečného testu na '+A2_UNLOCK_PCT+' % 🔒');return;}
+  if(!levelUnlocked(lvl)){toast(tr('Úroveň')+' '+lvl+' '+tr('se odemkne po zvládnutí předchozího závěrečného testu na')+' '+A2_UNLOCK_PCT+' % 🔒');return;}
   S.settings.level=lvl;
-  S.settings.levelByLang=S.settings.levelByLang||{};S.settings.levelByLang[S.settings.lang||'en']=lvl;
+  S.settings.levelByPair=S.settings.levelByPair||{};S.settings.levelByPair[curPair()]=lvl;
   persist();buildLevel(lvl);levelChosen=true;refreshHome();
 }
 function backToLevels(){levelChosen=false;refreshHome();}
-function switchLanguage(lang){
-  if(!LANGS[lang])return;
-  loadLangPack(lang,function(ok){
+/* --- přepnutí cílového jazyka (co se učím) --- */
+function switchTarget(tgt){
+  const p=pairKey(curSrc(),tgt);
+  if(!PAIRS[p])return;
+  loadLangPack(p,function(ok){
     if(!ok)return;
-    S.settings.lang=lang;
-    const remembered=(S.settings.levelByLang||{})[lang];
-    if(remembered && langLevels(lang)[remembered]){
+    S.settings.tgtLang=tgt;
+    const remembered=(S.settings.levelByPair||{})[p];
+    if(remembered && langLevels(p)[remembered]){
       S.settings.level=remembered;buildLevel(remembered);levelChosen=true;
     }else{
-      buildLevel(LANGS[lang].levels[0]);   /* ať statistiky/denní mise ukazují nový jazyk */
-      levelChosen=false;
+      const first=ALL_LEVELS.find(l=>langLevels(p)[l]);
+      S.settings.level=first;buildLevel(first);levelChosen=false;
     }
     persist();refreshHome();
-    toast(LANGS[lang].flag+' Přepnuto na: '+LANGS[lang].label);
+    toast(LANG_INFO[tgt].flag+' '+tr('Přepnuto na')+': '+tr(LANG_INFO[tgt].label));
   });
 }
 function toggleLanguage(){
-  const cur=(S.settings&&S.settings.lang)||'en';
-  const langs=Object.keys(LANGS);
-  const next=langs[(langs.indexOf(cur)+1)%langs.length];
-  switchLanguage(next);
+  const tgts=tgtLangsFor(curSrc());
+  if(tgts.length<2)return;
+  switchTarget(tgts[(tgts.indexOf(curTgt())+1)%tgts.length]);
+}
+/* --- přepnutí zdrojového jazyka (kterým mluvím = jazyk rozhraní) --- */
+function switchSource(src){
+  if(srcLangsAvailable().indexOf(src)<0)return;
+  loadUI(src,function(){
+    S.settings.srcLang=src;
+    const tgts=tgtLangsFor(src);
+    const tgt=(tgts.indexOf(curTgt())>=0)?curTgt():tgts[0];
+    const p=pairKey(src,tgt);
+    loadLangPack(p,function(ok){
+      if(!ok)return;
+      S.settings.tgtLang=tgt;
+      const remembered=(S.settings.levelByPair||{})[p];
+      const lvl=(remembered&&langLevels(p)[remembered])?remembered:ALL_LEVELS.find(l=>langLevels(p)[l]);
+      S.settings.level=lvl;buildLevel(lvl);levelChosen=!!(remembered&&langLevels(p)[remembered]);
+      persist();applyStaticUI();refreshHome();show('home');
+    });
+  });
+}
+function openSrcPick(){
+  const box=$('#srcPickBox');if(!box)return;
+  const bb=$('#srcBack');if(bb)bb.classList.toggle('hidden',!S.settings.srcLang);
+  const tb=$('#topbar');if(tb)tb.style.display=S.settings.srcLang?'flex':'none';
+  box.innerHTML=srcLangsAvailable().map(function(l){
+    const on=(l===curSrc());
+    return '<button class="lvlcard'+(on?'':'')+'" onclick="switchSource(\''+l+'\')">'+
+      '<div class="lc-badge" style="font-size:1.6rem">'+LANG_INFO[l].flag+'</div>'+
+      '<div class="lc-t">'+LANG_INFO[l].native+'</div>'+
+      '<div class="lc-d">'+tgtLangsFor(l).map(x=>LANG_INFO[x].flag+' '+LANG_INFO[x].native).join(' · ')+'</div>'+
+      '<div class="lc-go">'+(on?'✓ '+tr('zvoleno'):tr('Zvolit')+' →')+'</div></button>';
+  }).join('');
+  show('srcPick');
 }
 function refreshHome(){
   updateHeader();renderMission();renderActions();updateBrand();
@@ -830,7 +936,7 @@ function startTest(){
 /* ---- rozřazovací test: adaptivně určí startovní úroveň ---- */
 let plc=null;
 function startPlacement(){
-  loadLangPack('en',function(ok){
+  loadLangPack(curPair(),function(ok){
     if(!ok)return;
     const pools={};PLC_LEVELS.forEach(l=>pools[l]=shuffle(plcPool(l)));
     const idx0={};PLC_LEVELS.forEach(l=>idx0[l]=0);
@@ -898,13 +1004,14 @@ function finishPlacement(){
   plc=null;
 }
 function applyPlacement(lvl){
-  const cur=S.settings.maxUnlockedLevel;
-  if(!cur || PLC_LEVELS.indexOf(lvl)>PLC_LEVELS.indexOf(cur))S.settings.maxUnlockedLevel=lvl;
-  S.settings.lang='en';
+  const p=curPair();
+  S.settings.maxUnlockedByPair=S.settings.maxUnlockedByPair||{};
+  const cur=S.settings.maxUnlockedByPair[p];
+  if(!cur || ALL_LEVELS.indexOf(lvl)>ALL_LEVELS.indexOf(cur))S.settings.maxUnlockedByPair[p]=lvl;
   S.settings.level=lvl;
-  S.settings.levelByLang=S.settings.levelByLang||{};S.settings.levelByLang.en=lvl;
+  S.settings.levelByPair=S.settings.levelByPair||{};S.settings.levelByPair[p]=lvl;
   persist();buildLevel(lvl);levelChosen=true;persist();
-  toast('Nastaveno na úroveň '+lvl+' ✓');refreshHome();
+  toast(tr('Nastaveno na úroveň')+' '+lvl+' ✓');refreshHome();
 }
 function showTheory(g){
   show('activity');
@@ -1168,11 +1275,18 @@ function selectProfile(id){
   const p=PROFILES.find(x=>x.id===id);
   const wb=$('#whoBtn');if(wb)wb.textContent=p?(p.name.trim()[0]||'?').toUpperCase():'?';
   applyTheme();
-  loadLangPack(S.settings.lang||'en',function(ok){
-    if(!ok)return;
-    buildLevel(S.settings.level);persist();ensureDaily();
-    initSeg('segDir','dir');initSeg('segFill','fill');initSeg('segGoal','goal',renderMission);
-    levelChosen=false;refreshHome();show('home');
+  /* Bez zvoleného zdrojového jazyka (a je-li z čeho vybírat) nejdřív výběr. */
+  if(!S.settings.srcLang){initSeg('segDir','dir');initSeg('segFill','fill');initSeg('segGoal','goal',renderMission);openSrcPick();return;}
+  loadUI(S.settings.srcLang,function(){
+    let p=curPair();
+    if(!PAIRS[p]){S.settings.tgtLang=tgtLangsFor(curSrc())[0];p=curPair();}
+    loadLangPack(p,function(ok){
+      if(!ok)return;
+      if(!langLevels(p)[S.settings.level])S.settings.level=ALL_LEVELS.find(l=>langLevels(p)[l]);
+      buildLevel(S.settings.level);persist();ensureDaily();
+      initSeg('segDir','dir');initSeg('segFill','fill');initSeg('segGoal','goal',renderMission);
+      levelChosen=false;applyStaticUI();refreshHome();show('home');
+    });
   });
 }
 function migrateOld(){
