@@ -266,5 +266,8 @@ window.UI_DATA.en = {
  "Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.": "We're working on it — it's ready to go, we'll switch it on once the details are polished.",
  "Témata navíc": "Extra topics",
  "Tematické sady nezávislé na úrovni — otevřené celé, sáhni si po tom, co zrovna potřebuješ.": "Themed sets independent of your level — fully unlocked, dip into whatever you need right now.",
- "témat": "topics"
+ "témat": "topics",
+ "od": "from",
+ "Bude náročnější než tvoje úroveň": "Will be harder than your level",
+ "← Zpět na výběr": "← Back to menu"
 };

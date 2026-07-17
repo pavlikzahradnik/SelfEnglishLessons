@@ -266,5 +266,8 @@ window.UI_DATA.de = {
  "Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.": "Wir arbeiten daran — es ist fertig, wir schalten es frei, sobald die Details stimmen.",
  "Témata navíc": "Zusätzliche Themen",
  "Tematické sady nezávislé na úrovni — otevřené celé, sáhni si po tom, co zrovna potřebuješ.": "Themensets unabhängig vom Niveau — komplett freigeschaltet, greif dir, was du gerade brauchst.",
- "témat": "Themen"
+ "témat": "Themen",
+ "od": "ab",
+ "Bude náročnější než tvoje úroveň": "Wird schwerer als dein Niveau",
+ "← Zpět na výběr": "← Zurück zur Auswahl"
 };

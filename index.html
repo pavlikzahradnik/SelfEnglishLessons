@@ -328,7 +328,7 @@
           </div>
         </div>
         <div class="panel hidden" id="topicsView">
-          <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span data-i18n>Témata</span> <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()" data-i18n>← Změnit úroveň</button></h2>
+          <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span data-i18n>Témata</span> <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()" id="backLvlBtn">← Změnit úroveň</button></h2>
           <p class="lead"><span data-i18n>Celkem</span> <b id="totalWords"></b> <span data-i18n>slov · naučeno</span> <b id="learnedWords">0</b>. <span data-i18n>Klikni na téma pro výběr cvičení.</span></p>
           <div id="catGrid" class="grid"></div>
           <div class="sec-label" data-i18n>Úspěchy</div>
@@ -427,6 +427,15 @@ function langMeta(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].m
    co zrovna potřebuje. Jinak používá úplně stejný engine jako úrovně. */
 function langVerticals(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].verticals)||{};}
 function isVertical(id){return !!langVerticals(curPair())[id];}
+/* Skutečná CEFR úroveň uživatele — vertikála sama úrovní není, tak sáhneme
+   po poslední zvolené (nebo po výsledku rozřazovacího testu). */
+function curCefr(){
+  const l=S.settings.level;
+  if(ALL_LEVELS.indexOf(l)>=0)return l;
+  const c=(S.settings.cefrByPair||{})[curPair()];
+  if(ALL_LEVELS.indexOf(c)>=0)return c;
+  return (S.settings.maxUnlockedByPair||{})[curPair()]||'A1';
+}
 function unitData(id){return langLevels(curPair())[id]||langVerticals(curPair())[id]||null;}
 function langExamples(){const p=curPair();return (window.LANG_DATA[p]&&window.LANG_DATA[p].examples)||{};}
 
@@ -843,6 +852,7 @@ function updateBrand(){
   const badge=v?(v.icon+' '+v.title):u;
   const bl=$('#brandLvl');if(bl)bl.textContent=badge;
   const ct=$('#curLvlTag');if(ct)ct.textContent=badge;
+  const bb=$('#backLvlBtn');if(bb)bb.textContent=v?tr('← Zpět na výběr'):tr('← Změnit úroveň');
   const bn=$('#brandLang');if(bn)bn.textContent=tr(LANG_INFO[curTgt()].label);
   document.title=tr(LANG_INFO[curTgt()].label)+' '+badge+' — '+tr('adaptivní učení');
   const lb=$('#langBtn');if(lb){
@@ -889,18 +899,24 @@ function renderVerticals(){
     const done=v.path.filter(x=>isTopicDone(x)).length;
     const prog=done?('<div class="lc-go" style="color:var(--ok)">'+done+'/'+v.path.length+' ✓</div>')
                    :('<div class="lc-go">'+tr('Začít')+' →</div>');
+    /* Doporučená úroveň je jen vodítko — vertikála se nikdy nezamyká. */
+    const rec=v.level?('<span class="lvl" style="background:var(--surface2);color:var(--muted);margin-left:6px">'+tr('od')+' '+v.level+'</span>'):'';
+    const hard=v.level && ALL_LEVELS.indexOf(v.level)>ALL_LEVELS.indexOf(curCefr());
+    const note=hard?('<div class="lc-d" style="color:var(--warn);margin-top:4px">⚠ '+tr('Bude náročnější než tvoje úroveň')+'</div>'):'';
     return '<button class="lvlcard" onclick="chooseLevel(\''+id+'\')">'+
       '<div class="lc-badge" style="font-size:1.5rem">'+v.icon+'</div>'+
-      '<div class="lc-t">'+v.title+'</div>'+
+      '<div class="lc-t">'+v.title+rec+'</div>'+
       '<div class="lc-d">'+v.desc+'</div>'+
       '<div class="lc-d" style="color:var(--muted);margin-top:4px">'+words+' '+tr('slov')+' · '+v.cats.length+' '+tr('témat')+'</div>'+
-      prog+'</button>';
+      note+prog+'</button>';
   }).join('');
 }
 function chooseLevel(lvl){
   if(!levelUnlocked(lvl)){toast(tr('Úroveň')+' '+lvl+' '+tr('se odemkne po zvládnutí předchozího závěrečného testu na')+' '+A2_UNLOCK_PCT+' % 🔒');return;}
   S.settings.level=lvl;
   S.settings.levelByPair=S.settings.levelByPair||{};S.settings.levelByPair[curPair()]=lvl;
+  /* CEFR úroveň si pamatujeme zvlášť — vertikála ji nesmí přepsat */
+  if(ALL_LEVELS.indexOf(lvl)>=0){S.settings.cefrByPair=S.settings.cefrByPair||{};S.settings.cefrByPair[curPair()]=lvl;}
   persist();buildLevel(lvl);levelChosen=true;refreshHome();
 }
 function backToLevels(){levelChosen=false;refreshHome();}
@@ -1185,6 +1201,7 @@ function applyPlacement(lvl){
   if(!cur || ALL_LEVELS.indexOf(lvl)>ALL_LEVELS.indexOf(cur))S.settings.maxUnlockedByPair[p]=lvl;
   S.settings.level=lvl;
   S.settings.levelByPair=S.settings.levelByPair||{};S.settings.levelByPair[p]=lvl;
+  S.settings.cefrByPair=S.settings.cefrByPair||{};S.settings.cefrByPair[p]=lvl;
   persist();buildLevel(lvl);levelChosen=true;persist();
   toast(tr('Nastaveno na úroveň')+' '+lvl+' ✓');refreshHome();
 }
