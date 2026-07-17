@@ -263,5 +263,8 @@ window.UI_DATA.en = {
  "Po špatné odpovědi ti AI vysvětlí, proč je to špatně — a můžeš se doptat.": "After a wrong answer the AI explains why it's wrong — and you can ask follow-ups.",
  "Bez klíče se AI tlačítka nezobrazí.": "Without a key the AI buttons won't appear.",
  "Zatím nedostupné": "Not available yet",
- "Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.": "We're working on it — it's ready to go, we'll switch it on once the details are polished."
+ "Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.": "We're working on it — it's ready to go, we'll switch it on once the details are polished.",
+ "Témata navíc": "Extra topics",
+ "Tematické sady nezávislé na úrovni — otevřené celé, sáhni si po tom, co zrovna potřebuješ.": "Themed sets independent of your level — fully unlocked, dip into whatever you need right now.",
+ "témat": "topics"
 };

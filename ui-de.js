@@ -263,5 +263,8 @@ window.UI_DATA.de = {
  "Po špatné odpovědi ti AI vysvětlí, proč je to špatně — a můžeš se doptat.": "Nach einer falschen Antwort erklärt dir die KI, warum sie falsch ist — und du kannst nachfragen.",
  "Bez klíče se AI tlačítka nezobrazí.": "Ohne Schlüssel erscheinen die KI-Schaltflächen nicht.",
  "Zatím nedostupné": "Noch nicht verfügbar",
- "Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.": "Wir arbeiten daran — es ist fertig, wir schalten es frei, sobald die Details stimmen."
+ "Pracujeme na tom — máme to připravené, pustíme to, až doladíme detaily.": "Wir arbeiten daran — es ist fertig, wir schalten es frei, sobald die Details stimmen.",
+ "Témata navíc": "Zusätzliche Themen",
+ "Tematické sady nezávislé na úrovni — otevřené celé, sáhni si po tom, co zrovna potřebuješ.": "Themensets unabhängig vom Niveau — komplett freigeschaltet, greif dir, was du gerade brauchst.",
+ "témat": "Themen"
 };

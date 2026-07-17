@@ -321,6 +321,11 @@
           <p class="lead" data-i18n>Na jaké úrovni chceš procvičovat? Každá úroveň má vlastní témata i postup.</p>
           <button class="btn ghost" style="margin-bottom:16px" id="placementBtn" onclick="startPlacement()"><span data-i18n>🎯 Nevím, jakou úroveň zvolit — udělat rozřazovací test</span></button>
           <div class="lvlpick" id="lvlpickBox"></div>
+          <div id="vertWrap" class="hidden">
+            <div class="sec-label" style="margin-top:26px" data-i18n>Témata navíc</div>
+            <p class="lead" style="margin-top:-4px" data-i18n>Tematické sady nezávislé na úrovni — otevřené celé, sáhni si po tom, co zrovna potřebuješ.</p>
+            <div class="lvlpick" id="vertBox"></div>
+          </div>
         </div>
         <div class="panel hidden" id="topicsView">
           <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span data-i18n>Témata</span> <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()" data-i18n>← Změnit úroveň</button></h2>
@@ -417,6 +422,12 @@ function loadLangPack(pair,cb){
 }
 function langLevels(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].levels)||{};}
 function langMeta(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].meta)||{};}
+/* Vertikála = tematická sada (Cestování, IT…). Je to TŘETÍ osa vedle jazyka a úrovně:
+   není v CEFR řetězci, nemá prerekvizitu a je celá otevřená — člověk si sáhne pro to,
+   co zrovna potřebuje. Jinak používá úplně stejný engine jako úrovně. */
+function langVerticals(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].verticals)||{};}
+function isVertical(id){return !!langVerticals(curPair())[id];}
+function unitData(id){return langLevels(curPair())[id]||langVerticals(curPair())[id]||null;}
 function langExamples(){const p=curPair();return (window.LANG_DATA[p]&&window.LANG_DATA[p].examples)||{};}
 
 /* ===== Překlad rozhraní =====
@@ -478,7 +489,7 @@ function plcPool(lvl){
 }
 function buildLevel(lvl){
   const p=curPair();
-  const d=langLevels(p)[lvl];
+  const d=unitData(lvl);
   if(!d){console.warn('Jazykový balíček není načten:',p,lvl);return;}
   CATS=d.cats; GRAMMAR=d.gram; PATH=d.path;
   ALL=[]; CATS.forEach(c=>c.vocab.forEach((v,i)=>ALL.push({id:c.id+':'+i,en:v[0],cz:v[1],cat:c.id,catTitle:c.title})));
@@ -573,6 +584,7 @@ function completedCount(){let n=0;for(const id of PATH){if(isTopicDone(id))n++;e
 /* Úroveň potvrzená rozřazovacím testem je celá otevřená — nemá smysl
    nutit člověka znovu procházet témata popořadě, když už úroveň prokázal. */
 function levelFullyOpen(){
+  if(isVertical(S.settings.level))return true;      /* vertikály se neodemykají postupně */
   const maxU=(S.settings.maxUnlockedByPair||{})[curPair()];
   if(!maxU)return false;
   return ALL_LEVELS.indexOf(S.settings.level)<=ALL_LEVELS.indexOf(maxU);
@@ -813,22 +825,26 @@ const A2_UNLOCK_PCT=90;
 /* Prerekvizita se odvodí z balíčku: k odemčení úrovně je potřeba
    závěrečný test nejbližší nižší dostupné úrovně na >=90 %. */
 function lvlPrereq(lvl){
+  if(isVertical(lvl))return null;                   /* vertikály jsou vždy přístupné */
   const i=ALL_LEVELS.indexOf(lvl);if(i<=0)return null;
   const lv=langLevels(curPair());
   for(let j=i-1;j>=0;j--){const prev=lv[ALL_LEVELS[j]];if(prev)return prev.test;}
   return null;
 }
 function levelUnlocked(lvl){
+  if(isVertical(lvl))return true;
   const maxU=(S.settings.maxUnlockedByPair||{})[curPair()];
   if(maxU && ALL_LEVELS.indexOf(lvl)<=ALL_LEVELS.indexOf(maxU))return true;
   const pr=lvlPrereq(lvl);if(!pr)return true;
   const e=S.exlog[pr+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
 }
 function updateBrand(){
-  const bl=$('#brandLvl');if(bl)bl.textContent=S.settings.level;
-  const ct=$('#curLvlTag');if(ct)ct.textContent=S.settings.level;
+  const u=S.settings.level, v=langVerticals(curPair())[u];
+  const badge=v?(v.icon+' '+v.title):u;
+  const bl=$('#brandLvl');if(bl)bl.textContent=badge;
+  const ct=$('#curLvlTag');if(ct)ct.textContent=badge;
   const bn=$('#brandLang');if(bn)bn.textContent=tr(LANG_INFO[curTgt()].label);
-  document.title=tr(LANG_INFO[curTgt()].label)+' '+S.settings.level+' — '+tr('adaptivní učení');
+  document.title=tr(LANG_INFO[curTgt()].label)+' '+badge+' — '+tr('adaptivní učení');
   const lb=$('#langBtn');if(lb){
     lb.textContent=LANG_INFO[curTgt()].flag;
     lb.style.display=(tgtLangsFor(curSrc()).length>1)?'':'none';
@@ -859,6 +875,27 @@ function renderLevelPick(){
       '<div class="lc-go">'+goTxt+'</div></button>';
   }).join('');
   const plcBtn=$('#placementBtn');if(plcBtn)plcBtn.style.display=placementAvailable()?'':'none';
+  renderVerticals();
+}
+function renderVerticals(){
+  const vs=langVerticals(curPair()), ids=Object.keys(vs);
+  const wrap=$('#vertWrap'), box=$('#vertBox');
+  if(!wrap||!box)return;
+  wrap.classList.toggle('hidden', ids.length===0);
+  if(!ids.length)return;
+  box.innerHTML=ids.map(function(id){
+    const v=vs[id];
+    const words=v.cats.reduce((s,c)=>s+c.vocab.length,0);
+    const done=v.path.filter(x=>isTopicDone(x)).length;
+    const prog=done?('<div class="lc-go" style="color:var(--ok)">'+done+'/'+v.path.length+' ✓</div>')
+                   :('<div class="lc-go">'+tr('Začít')+' →</div>');
+    return '<button class="lvlcard" onclick="chooseLevel(\''+id+'\')">'+
+      '<div class="lc-badge" style="font-size:1.5rem">'+v.icon+'</div>'+
+      '<div class="lc-t">'+v.title+'</div>'+
+      '<div class="lc-d">'+v.desc+'</div>'+
+      '<div class="lc-d" style="color:var(--muted);margin-top:4px">'+words+' '+tr('slov')+' · '+v.cats.length+' '+tr('témat')+'</div>'+
+      prog+'</button>';
+  }).join('');
 }
 function chooseLevel(lvl){
   if(!levelUnlocked(lvl)){toast(tr('Úroveň')+' '+lvl+' '+tr('se odemkne po zvládnutí předchozího závěrečného testu na')+' '+A2_UNLOCK_PCT+' % 🔒');return;}
