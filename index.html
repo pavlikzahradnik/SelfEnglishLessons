@@ -341,7 +341,9 @@
   #topicsView .cat:nth-child(4n+3):after{background:radial-gradient(circle,rgba(139,49,201,.13) 0,rgba(139,49,201,0) 70%)}
   #topicsView .cat:nth-child(4n):after{background:radial-gradient(circle,rgba(224,117,19,.14) 0,rgba(224,117,19,0) 70%)}
   #topicsView .cat .t{display:flex;align-items:center;gap:9px;position:relative;z-index:1}
-  #topicsView .cat .t:before{content:'✦';display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;color:#fff;background:var(--card);font-size:.9rem;box-shadow:0 5px 10px rgba(20,90,180,.22);flex:0 0 auto}
+  #topicsView .cat .t:before{display:none}
+  #topicsView .topic-art{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;color:#fff;background:linear-gradient(135deg,var(--card),#2aa7f4);font-size:1.12rem;line-height:1;box-shadow:0 6px 12px rgba(20,90,180,.22);flex:0 0 auto}
+  #topicsView .topic-art.grammar-art{background:linear-gradient(135deg,#6b42d8,#a336d2)}
   #topicsView .cat .m{position:relative;z-index:1;margin-top:7px}
   #topicsView .cat .due{z-index:2}
   @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
@@ -877,6 +879,11 @@ function renderMission(){
 function catDueCount(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>!isNew(id)&&isDue(id)).length;}
 function catLearned(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]&&S.srs[id].step>=2).length;}
 function catSeen(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]).length;}
+function topicArt(t){
+  if(t.type==='grammar')return '<span class="topic-art grammar-art">&#128214;</span>';
+  const art={greet:'&#128172;',numbers:'&#128290;',colors:'&#127912;',family:'&#128106;',food:'&#127869;',animals:'&#128062;',body:'&#129470;',clothes:'&#128085;',house:'&#127968;',verbs:'&#9889;',adj:'&#10024;',time:'&#128197;',town:'&#127961;',weather:'&#9728;',transport:'&#128652;',a2_jobs:'&#128188;',a2_health:'&#129657;',a2_travel:'&#9992;',a2_shopping:'&#128717;',a2_restaurant:'&#127860;',a2_hobbies:'&#9917;',a2_tech:'&#128187;',a2_feelings:'&#128512;',a2_people:'&#128100;',a2_education:'&#127891;',a2_nature:'&#127807;'};
+  return '<span class="topic-art">'+(art[t.id]||'&#10024;')+'</span>';
+}
 function renderCats(){
   $('#totalWords').textContent=ALL.length;
   $('#learnedWords').textContent=learnedCount();
@@ -885,14 +892,14 @@ function renderCats(){
     if(!isUnlocked(id)){
       const gate=(TMAP[id].type==='test')?PATH[pi-1]:PATH[pi-LOOKAHEAD];const gateDone=gate?isTopicDone(gate):false;
       return '<div class="cat locked'+(isGrammar(id)?' gram':'')+'"><span class="lock">🔒</span>'+
-        '<div class="t">'+t.title+'</div>'+
+        '<div class="t">'+topicArt(t)+t.title+'</div>'+
         '<div class="m">'+(isGrammar(id)?tr('Gramatika')+' · '+tr('zamčeno'):tr('Zamčeno'))+'</div>'+
         '<div class="req">'+(gate?tr('dokonči')+' „'+topicTitle(gate)+'"'+(gateDone?' ✓':''):tr('pokračuj v cestě'))+'</div></div>';
     }
     if(TMAP[id].type==='test'){
       const e=S.exlog[id+':test'],done=isTopicDone(id);
       return '<button class="cat test" onclick="openTopic(\''+id+'\')">'+(done?'<span class="due done">hotovo ✓</span>':'')+
-        '<div class="t">'+t.title+'</div>'+
+        '<div class="t">'+topicArt(t)+t.title+'</div>'+
         '<div class="m">'+(e?tr('nejlepší výsledek')+': '+e.last+' %':tr('prověř všechna témata'))+'</div>'+
         '<div class="bar"><div style="width:'+(e?e.last:0)+'%"></div></div></button>';
     }
@@ -901,13 +908,13 @@ function renderCats(){
     if(isGrammar(id)){
       const g=t.obj,prog=Math.min(100,Math.round(goodExCount(id)/DONE_EX*100));
       return '<button class="cat gram" onclick="openTopic(\''+id+'\')">'+badge+
-        '<div class="t">'+t.title+'</div>'+
+        '<div class="t">'+topicArt(t)+t.title+'</div>'+
         '<div class="m">'+tr('Gramatika')+' · '+g.items.length+' '+tr('cvičení')+(done?' · '+tr('hotovo'):'')+'</div>'+
         '<div class="bar"><div style="width:'+prog+'%"></div></div></button>';
     }
     const c=t.obj,learned=catLearned(c),inprog=catSeen(c)-learned,pct=Math.round(learned/c.vocab.length*100);
     return '<button class="cat" onclick="openTopic(\''+id+'\')">'+badge+
-      '<div class="t">'+t.title+'</div>'+
+      '<div class="t">'+topicArt(t)+t.title+'</div>'+
       '<div class="m">'+tr('naučeno')+' '+learned+' / '+c.vocab.length+((seen&&inprog>0)?' · '+inprog+' '+tr('rozpracováno'):'')+'</div>'+
       '<div class="bar"><div style="width:'+pct+'%"></div></div></button>';
   }).join('');
