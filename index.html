@@ -320,6 +320,20 @@
   #placementBtn{position:static;float:none!important;margin:0!important;white-space:nowrap;flex:0 0 auto}
   #levelPick .lvlpick{grid-template-columns:repeat(6,minmax(0,1fr))}
   @media(max-width:900px){.level-heading{align-items:flex-start;flex-direction:column;gap:8px}.level-heading h2{flex:auto}#placementBtn{display:block;margin:0 0 6px!important;white-space:normal}}
+  /* Topic view: keep its control in the title row and give topic cards more character. */
+  #topicsView h2{width:100%;min-height:40px;margin-bottom:2px}
+  #backLvlBtn{position:static!important;float:none!important;margin:0 0 0 auto!important;white-space:nowrap;border-color:#b9d4f7!important;color:#0757d9!important;background:#f6faff!important;box-shadow:none}
+  #backLvlBtn:hover{background:#e9f3ff!important;border-color:#6aa6ef!important}
+  #topicsView .cat{--card:#1477e8;min-height:150px;background:linear-gradient(145deg,#fff 0%,#fbfdff 100%);border-color:#d9e5f4;box-shadow:0 4px 12px rgba(30,84,157,.06)}
+  #topicsView .cat:before{display:block;width:5px;background:var(--card)}
+  #topicsView .cat .t{color:#123462;font-size:1rem}
+  #topicsView .cat .m{color:#587094}
+  #topicsView .cat .bar{background:#e5edf8}
+  #topicsView .cat .bar>div{background:linear-gradient(90deg,var(--card),#29a3f3)}
+  #topicsView .cat:hover{transform:translateY(-4px);border-color:var(--card);box-shadow:0 12px 22px rgba(20,100,210,.16)}
+  #topicsView .cat:nth-child(4n+2){--card:#12a0ad}
+  #topicsView .cat:nth-child(4n+3){--card:#8b31c9}
+  #topicsView .cat:nth-child(4n){--card:#e07513}
   @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
 </style>
 </head>
