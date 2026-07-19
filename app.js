@@ -270,38 +270,39 @@ function renderCats() {
     }
     pBox.appendChild(card);
   });
-
-  // Vykreslení témat pro aktivní úroveň
+// --- Úprava uvnitř renderCats() ---
   const grid = $('#catGrid');
   grid.innerHTML = '';
   
-  const currentTopics = cefrGroups[activeCefr] || [];
   let totalW = 0, learnedW = 0;
+  const activeLevelData = levels[activeCefr];
 
-  currentTopics.forEach(catId => {
-    const u = levels[catId];
-    const words = u.words || [];
-    totalW += words.length;
-    
-    const learnedInCat = words.filter(w => S.srs[w.id] && S.srs[w.id].step >= 2).length;
-    learnedW += learnedInCat;
-    
-    const pct = words.length ? Math.round((learnedInCat / words.length) * 100) : 0;
-    const dueCount = words.filter(w => !isNew(w.id) && isDue(w.id)).length;
+  if (activeLevelData && activeLevelData.cats) {
+    Object.keys(activeLevelData.cats).forEach(catId => {
+      const u = activeLevelData.cats[catId];
+      const words = u.words || [];
+      totalW += words.length;
+      
+      const learnedInCat = words.filter(w => S.srs[w.id] && S.srs[w.id].step >= 2).length;
+      learnedW += learnedInCat;
+      
+      const pct = words.length ? Math.round((learnedInCat / words.length) * 100) : 0;
+      const dueCount = words.filter(w => !isNew(w.id) && isDue(w.id)).length;
 
-    const el = document.createElement('div');
-    el.className = `cat ${u.type || ''}`;
-    el.innerHTML = `
-      <div>
-        <div class="t">${u.title}</div>
-        <div class="m">${words.length} slov · ${pct}%</div>
-      </div>
-      ${dueCount > 0 ? `<div class="due">${dueCount} k opakování</div>` : ''}
-      <div class="bar"><div style="width:${pct}%"></div></div>
-    `;
-    el.onclick = () => openCategoryMenu(catId, u);
-    grid.appendChild(el);
-  });
+      const el = document.createElement('div');
+      el.className = `cat ${u.type || ''}`;
+      el.innerHTML = `
+        <div>
+          <div class="t">${u.title || catId}</div>
+          <div class="m">${words.length} slov · ${pct}%</div>
+        </div>
+        ${dueCount > 0 ? `<div class="due">${dueCount} k opakování</div>` : ''}
+        <div class="bar"><div style="width:${pct}%"></div></div>
+      `;
+      el.onclick = () => openCategoryMenu(catId, u);
+      grid.appendChild(el);
+    });
+  }
 
   $('#totalWords').textContent = totalW;
   $('#learnedWords').textContent = learnedW;
