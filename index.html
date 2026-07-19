@@ -334,6 +334,16 @@
   #topicsView .cat:nth-child(4n+2){--card:#12a0ad}
   #topicsView .cat:nth-child(4n+3){--card:#8b31c9}
   #topicsView .cat:nth-child(4n){--card:#e07513}
+  #topicsView #catGrid{grid-auto-rows:156px;gap:14px;margin-top:14px}
+  #topicsView .cat{padding:17px 17px 14px 22px;position:relative;overflow:hidden}
+  #topicsView .cat:after{content:'';position:absolute;right:-24px;top:-24px;width:92px;height:92px;border-radius:50%;background:radial-gradient(circle,rgba(20,119,232,.13) 0,rgba(20,119,232,0) 70%);pointer-events:none}
+  #topicsView .cat:nth-child(4n+2):after{background:radial-gradient(circle,rgba(18,160,173,.14) 0,rgba(18,160,173,0) 70%)}
+  #topicsView .cat:nth-child(4n+3):after{background:radial-gradient(circle,rgba(139,49,201,.13) 0,rgba(139,49,201,0) 70%)}
+  #topicsView .cat:nth-child(4n):after{background:radial-gradient(circle,rgba(224,117,19,.14) 0,rgba(224,117,19,0) 70%)}
+  #topicsView .cat .t{display:flex;align-items:center;gap:9px;position:relative;z-index:1}
+  #topicsView .cat .t:before{content:'✦';display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;color:#fff;background:var(--card);font-size:.9rem;box-shadow:0 5px 10px rgba(20,90,180,.22);flex:0 0 auto}
+  #topicsView .cat .m{position:relative;z-index:1;margin-top:7px}
+  #topicsView .cat .due{z-index:2}
   @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
 </style>
 </head>
