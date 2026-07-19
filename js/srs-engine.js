@@ -60,7 +60,19 @@ function curCefr() {
   if (ALL_LEVELS.indexOf(c) >= 0) return c;
   return (S.settings.maxUnlockedByPair || {})[curPair()] || 'A1';
 }
-function unitData(id) { return langLevels(curPair())[id] || langVerticals(curPair())[id] || null; }
+function unitData(id) { 
+  const pair = curPair();
+  const pack = langLevels(pair);
+  
+  // Prohledat úrovně a jejich podkategorie 'cats'
+  for (const lvl in pack) {
+    if (pack[lvl].cats && pack[lvl].cats[id]) {
+      return pack[lvl].cats[id];
+    }
+  }
+  
+  return langVerticals(pair)[id] || null; 
+}
 function langExamples() { const p = curPair(); return (window.LANG_DATA[p] && window.LANG_DATA[p].examples) || {}; }
 
 const BADGES = [
