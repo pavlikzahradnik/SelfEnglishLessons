@@ -508,6 +508,10 @@ function updateBrand(){
   const ct=$('#curLvlTag');if(ct)ct.textContent=badge;
   const bb=$('#backLvlBtn');if(bb)bb.textContent=v?tr('← Zpět na výběr'):tr('← Změnit úroveň');
   const bn=$('#brandLang');if(bn)bn.textContent=tr(LANG_INFO[curTgt()].label);
+  /* velká vlajka v záhlaví + podtitulek se přepínají podle cíleného jazyka */
+  const hd=document.querySelector('header.top');if(hd)hd.classList.toggle('de',curTgt()==='de');
+  const SUBS={en:'Učím se anglicky každý den',de:'Učím se německy každý den'};
+  const bs=document.querySelector('.brand-sub');if(bs&&SUBS[curTgt()])bs.textContent=tr(SUBS[curTgt()]);
   document.title=tr(LANG_INFO[curTgt()].label)+' '+badge+' — '+tr('adaptivní učení');
   const lb=$('#langBtn');if(lb){
     lb.innerHTML=flagChip(curTgt());

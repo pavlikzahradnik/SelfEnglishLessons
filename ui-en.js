@@ -275,5 +275,7 @@ window.UI_DATA.en = {
  "Vyber si hlas, kterým ti appka bude číst slovíčka a věty.": "Choose the voice the app uses to read words and sentences aloud.",
  "Přehrát ukázku": "Play a sample",
  "Hlas uložen ✓": "Voice saved ✓",
- "Nastavení a účet": "Settings & account"
+ "Nastavení a účet": "Settings & account",
+ "Učím se anglicky každý den": "Learning English every day",
+ "Učím se německy každý den": "Learning German every day"
 };

@@ -275,5 +275,7 @@ window.UI_DATA.de = {
  "Vyber si hlas, kterým ti appka bude číst slovíčka a věty.": "Wähle die Stimme, mit der die App Wörter und Sätze vorliest.",
  "Přehrát ukázku": "Beispiel abspielen",
  "Hlas uložen ✓": "Stimme gespeichert ✓",
- "Nastavení a účet": "Einstellungen & Konto"
+ "Nastavení a účet": "Einstellungen & Konto",
+ "Učím se anglicky každý den": "Ich lerne jeden Tag Englisch",
+ "Učím se německy každý den": "Ich lerne jeden Tag Deutsch"
 };

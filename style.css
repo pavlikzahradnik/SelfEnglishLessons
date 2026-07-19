@@ -282,7 +282,6 @@
   header.top{min-height:74px;margin:0;position:relative;color:#fff;flex-wrap:nowrap}
   header.top:after{content:'';position:absolute;inset:0 18% 0 auto;width:42%;opacity:.18;pointer-events:none;background:linear-gradient(135deg,transparent 18%,#a9d3ff 18.4%,transparent 19%) 0 0/110px 100%;}
   .brand{color:#fff;font-size:1.48rem;font-weight:850;letter-spacing:.01em;gap:12px;z-index:1;text-transform:uppercase}
-  .brand:before{content:'🇬🇧';font-size:2.65rem;line-height:1;filter:drop-shadow(0 2px 1px rgba(0,0,0,.2))}
   .brand .dot{display:none}.brand .lvl{display:none}
   .hstats{position:relative;z-index:1;gap:8px}
   .chip,.iconbtn{background:rgba(4,42,112,.36)!important;border:1px solid rgba(255,255,255,.17)!important;color:#fff!important;box-shadow:none}
@@ -300,13 +299,16 @@
   #catGrid{margin-top:16px;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px}.cat{min-height:168px;background:#fff;border-color:#e1e8f2;border-radius:12px;padding:14px}.cat:before{display:none}.cat .t{font-size:.92rem}.cat .m{font-size:.75rem;line-height:1.42}.cat .bar{margin-top:10px}.cat:hover{border-color:#68a7f0;box-shadow:0 8px 16px rgba(30,91,175,.1)}
   .ach{margin-top:8px}.badge{background:#f8fbff;border-color:#dfe8f4}.toast{background:#073a8f}
   @media(max-width:1120px){.lvlpick{grid-template-columns:repeat(3,1fr)}#catGrid{grid-template-columns:repeat(2,1fr)}}
-  @media(max-width:760px){body{padding:0;background:#edf4ff}.wrap{width:100%}header.top{padding:10px;min-height:62px}.brand{font-size:1rem}.brand:before{font-size:1.8rem}.hstats .chip:nth-child(2),.hstats .chip:nth-child(3){display:none}#home{border-radius:0;padding:12px}.dash{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px}.side .panel{border:0}.actions-v{grid-template-columns:repeat(2,1fr)}.maincol .btn.ghost{float:none;margin:4px 0 14px!important;width:100%}.lvlpick,#catGrid{grid-template-columns:1fr}.lvl{min-height:0!important}.maincol h2,.lead{padding-left:0}.maincol h2:before{display:none}}
+  @media(max-width:760px){body{padding:0;background:#edf4ff}.wrap{width:100%}header.top{padding:10px;min-height:62px}.brand{font-size:1rem;padding-left:46px}.brand:before{width:38px;height:26px;top:4px}.hstats .chip:nth-child(2),.hstats .chip:nth-child(3){display:none}#home{border-radius:0;padding:12px}.dash{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px}.side .panel{border:0}.actions-v{grid-template-columns:repeat(2,1fr)}.maincol .btn.ghost{float:none;margin:4px 0 14px!important;width:100%}.lvlpick,#catGrid{grid-template-columns:1fr}.lvl{min-height:0!important}.maincol h2,.lead{padding-left:0}.maincol h2:before{display:none}}
   /* Proportion correction for wide screens */
   .wrap{max-width:none}
   .dash{grid-template-columns:280px 1fr}
   .lvlcard{min-height:292px!important}
   .brand{position:relative;padding-left:58px;min-height:52px;align-items:flex-start;padding-top:8px}
-  .brand:before{content:'';position:absolute;left:0;top:7px;width:48px;height:33px;border-radius:2px;background:linear-gradient(33deg,transparent 42%,#fff 43% 47%,#cf1730 48% 52%,transparent 53% 57%,#fff 58% 62%,transparent 63%),linear-gradient(-33deg,transparent 42%,#fff 43% 47%,#cf1730 48% 52%,transparent 53% 57%,#fff 58% 62%,transparent 63%),linear-gradient(90deg,transparent 38%,#fff 38% 62%,transparent 62%),linear-gradient(0deg,transparent 34%,#fff 34% 66%,transparent 66%),linear-gradient(90deg,transparent 43%,#cf1730 43% 57%,transparent 57%),linear-gradient(0deg,transparent 41%,#cf1730 41% 59%,transparent 59%),#143f88;box-shadow:0 2px 5px rgba(0,0,0,.22)}
+  /* Velká vlajka u názvu jazyka. Přepíná ji třída na <header> (nastavuje updateBrand v app.js):
+     bez třídy = britská, header.top.de = německá. Kreslené SVG/gradient — žádná emoji. */
+  .brand:before{content:'';position:absolute;left:0;top:7px;width:48px;height:33px;border-radius:3px;background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 30%22%3E%3Crect width=%2260%22 height=%2230%22 fill=%22%23012169%22/%3E%3Cpath d=%22M0,0 L60,30 M60,0 L0,30%22 stroke=%22%23fff%22 stroke-width=%226%22/%3E%3Cpath d=%22M0,0 L60,30 M60,0 L0,30%22 stroke=%22%23C8102E%22 stroke-width=%223.6%22/%3E%3Cpath d=%22M30,0 V30 M0,15 H60%22 stroke=%22%23fff%22 stroke-width=%2210%22/%3E%3Cpath d=%22M30,0 V30 M0,15 H60%22 stroke=%22%23C8102E%22 stroke-width=%226%22/%3E%3C/svg%3E") center/cover no-repeat;box-shadow:0 2px 5px rgba(0,0,0,.22)}
+  header.top.de .brand:before{background:linear-gradient(180deg,#000 0 33.4%,#dd0000 33.4% 66.7%,#ffce00 66.7% 100%)}
   .brand-sub{position:absolute;left:58px;top:35px;color:#c7dcff;font-size:.7rem;letter-spacing:0;text-transform:none;font-weight:600;white-space:nowrap}
   /* Keep the level action next to its heading and let the cards use all free space. */
   #levelPick{position:relative;width:100%}
