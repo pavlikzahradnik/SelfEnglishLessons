@@ -269,5 +269,11 @@ window.UI_DATA.de = {
  "témat": "Themen",
  "od": "ab",
  "Bude náročnější než tvoje úroveň": "Wird schwerer als dein Niveau",
- "← Zpět na výběr": "← Zurück zur Auswahl"
+ "← Zpět na výběr": "← Zurück zur Auswahl",
+ "Hlas": "Stimme",
+ "Hlasy se ještě načítají, nebo je tento prohlížeč nemá k dispozici.": "Stimmen werden noch geladen oder sind in diesem Browser nicht verfügbar.",
+ "Vyber si hlas, kterým ti appka bude číst slovíčka a věty.": "Wähle die Stimme, mit der die App Wörter und Sätze vorliest.",
+ "Přehrát ukázku": "Beispiel abspielen",
+ "Hlas uložen ✓": "Stimme gespeichert ✓",
+ "Nastavení a účet": "Einstellungen & Konto"
 };

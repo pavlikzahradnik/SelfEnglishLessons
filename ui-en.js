@@ -269,5 +269,11 @@ window.UI_DATA.en = {
  "témat": "topics",
  "od": "from",
  "Bude náročnější než tvoje úroveň": "Will be harder than your level",
- "← Zpět na výběr": "← Back to menu"
+ "← Zpět na výběr": "← Back to menu",
+ "Hlas": "Voice",
+ "Hlasy se ještě načítají, nebo je tento prohlížeč nemá k dispozici.": "Voices are still loading, or this browser doesn't have any available.",
+ "Vyber si hlas, kterým ti appka bude číst slovíčka a věty.": "Choose the voice the app uses to read words and sentences aloud.",
+ "Přehrát ukázku": "Play a sample",
+ "Hlas uložen ✓": "Voice saved ✓",
+ "Nastavení a účet": "Settings & account"
 };

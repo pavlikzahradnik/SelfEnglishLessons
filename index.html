@@ -49,7 +49,7 @@
   .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;padding:6px 11px;border-radius:8px;font-weight:600;font-size:.8rem;display:flex;gap:6px;align-items:center}
   [data-theme="light"] .chip{background:#fff;border-color:var(--line);color:#334155}
   .chip b{color:#fff}[data-theme="light"] .chip b{color:#0f172a}
-  .iconbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;width:34px;height:34px;border-radius:8px;cursor:pointer;font-size:1rem}
+  .iconbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center}
   [data-theme="light"] .iconbtn{background:#fff;border-color:var(--line);color:#334155}
   .panel{background:var(--surface);border-radius:18px;padding:16px 18px;box-shadow:0 20px 50px rgba(2,6,23,.45);margin-bottom:14px}
   h2{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
@@ -273,14 +273,14 @@
 <body>
 <div class="wrap">
   <header class="top" id="topbar">
-    <div class="brand"><span class="dot"></span><span id="brandLang">Angličtina</span> <span class="lvl" id="brandLvl">A1</span></div>
+    <div class="brand"><span id="brandFlag" style="font-size:1.3rem;line-height:1">🇬🇧</span><span id="brandLang">Angličtina</span> <span class="lvl" id="brandLvl">A1</span></div>
     <div class="hstats">
       <div class="chip"><span data-i18n>Lvl</span> <b id="hLevel">1</b></div>
       <div class="chip"><span data-i18n>Body</span> <b id="hXp">0</b></div>
       <div class="chip">🔥 <b id="hDays">0</b> <span data-i18n>dní</span></div>
       <button class="iconbtn" id="srcBtn" data-i18n-title="Změnit jazyk rozhraní" title="Změnit jazyk rozhraní" onclick="openSrcPick()">🇨🇿</button>
       <button class="iconbtn" id="langBtn" data-i18n-title="Přepnout jazyk" title="Přepnout jazyk" onclick="toggleLanguage()">🇬🇧</button>
-      <button class="iconbtn" id="cloudBtn" data-i18n-title="Účet a synchronizace" title="Účet a synchronizace" onclick="openAccount()">☁</button>
+      <button class="iconbtn" id="cloudBtn" data-i18n-title="Nastavení a účet" title="Nastavení a účet" onclick="openAccount()">⚙️</button>
       <button class="iconbtn" id="themeBtn" data-i18n-title="Světlý / tmavý režim" title="Světlý / tmavý režim">◐</button>
     </div>
   </header>
@@ -710,8 +710,19 @@ function pickVoice(){
     VOICES[l]=vs.find(v=>new RegExp(tag.replace('-','[-_]'),'i').test(v.lang))||
               vs.find(v=>new RegExp('^'+base,'i').test(v.lang))||null;
   });
+  /* uživatelská volba hlasu má přednost před automatickým výběrem */
+  const saved=S&&S.settings&&S.settings.voiceByTgt;
+  if(saved)Object.keys(saved).forEach(function(l){
+    const v=vs.find(x=>x.voiceURI===saved[l]);
+    if(v)VOICES[l]=v;
+  });
 }
 if('speechSynthesis' in window){pickVoice();speechSynthesis.onvoiceschanged=pickVoice;}
+function voiceList(){
+  if(!('speechSynthesis' in window))return [];
+  const prefix=(LANG_INFO[curTgt()]||LANG_INFO.en).tts.split('-')[0];
+  return speechSynthesis.getVoices().filter(v=>v.lang.toLowerCase().startsWith(prefix));
+}
 function speak(txt,cb){
   if(!('speechSynthesis' in window)){cb&&cb();return;}
   speechSynthesis.cancel();
@@ -852,6 +863,7 @@ function updateBrand(){
   const badge=v?(v.icon+' '+v.title):u;
   const bl=$('#brandLvl');if(bl)bl.textContent=badge;
   const ct=$('#curLvlTag');if(ct)ct.textContent=badge;
+  const bf=$('#brandFlag');if(bf)bf.textContent=LANG_INFO[curTgt()].flag;
   const bb=$('#backLvlBtn');if(bb)bb.textContent=v?tr('← Zpět na výběr'):tr('← Změnit úroveň');
   const bn=$('#brandLang');if(bn)bn.textContent=tr(LANG_INFO[curTgt()].label);
   document.title=tr(LANG_INFO[curTgt()].label)+' '+badge+' — '+tr('adaptivní učení');
@@ -1599,10 +1611,41 @@ function renderAccount(){
       '<div style="display:flex;gap:10px;margin-top:14px;flex-wrap:wrap"><button class="btn" onclick="fbLogin()">'+tr('Přihlásit')+'</button><button class="btn ghost" onclick="fbRegister()">'+tr('Vytvořit účet')+'</button></div>'+
       '<div style="margin-top:12px"><a href="#" onclick="fbResetPass();return false;" style="color:var(--accent);font-weight:600;text-decoration:none">'+tr('Zapomněl jsi heslo?')+'</a></div>';
   }
+  try{ html+=voiceSettingsHtml(); }catch(e){ console.warn('Hlas sekce přeskočena:',e.message); }
   try{ html+=aiSettingsHtml(); }catch(e){ console.warn('AI sekce přeskočena:',e.message); }
   el.innerHTML=html;
   const sw=$('#aiOn');if(sw)sw.onchange=function(){aiToggle(this.checked);};
+  const vsel=$('#voiceSel');if(vsel)vsel.onchange=voiceSave;
+  const vtest=$('#voiceTest');if(vtest)vtest.onclick=voiceTest;
   const sk=$('#aiKeySave');if(sk)sk.onclick=aiSaveKey;
+}
+function voiceSettingsHtml(){
+  if(!('speechSynthesis' in window))return '';
+  const list=voiceList();
+  let h='<div class="setcol" style="max-width:440px"><h3 style="margin-bottom:2px">🔊 '+tr('Hlas')+'</h3>';
+  if(!list.length){
+    return h+'<p class="lead">'+tr('Hlasy se ještě načítají, nebo je tento prohlížeč nemá k dispozici.')+'</p></div>';
+  }
+  const savedURI=(S.settings.voiceByTgt||{})[curTgt()];
+  h+='<p class="lead">'+tr('Vyber si hlas, kterým ti appka bude číst slovíčka a věty.')+'</p>'+
+    '<div class="typerow" style="margin-top:8px"><select class="tinput" id="voiceSel">'+
+    list.map((v,i)=>'<option value="'+i+'"'+(v.voiceURI===savedURI?' selected':'')+'>'+v.name+' ('+v.lang+')</option>').join('')+
+    '</select></div>'+
+    '<div style="margin-top:10px"><button class="btn ghost" id="voiceTest">▶ '+tr('Přehrát ukázku')+'</button></div></div>';
+  return h;
+}
+function voiceSave(){
+  const sel=$('#voiceSel');if(!sel)return;
+  const list=voiceList();
+  const v=list[parseInt(sel.value,10)];if(!v)return;
+  S.settings.voiceByTgt=S.settings.voiceByTgt||{};
+  S.settings.voiceByTgt[curTgt()]=v.voiceURI;
+  persist();pickVoice();
+  toast(tr('Hlas uložen ✓'));
+}
+function voiceTest(){
+  const words=(typeof ALL!=='undefined'&&ALL&&ALL.length)?ALL:null;
+  speak(words?words[Math.floor(Math.random()*words.length)].en:'Hello');
 }
 function aiSettingsHtml(){
   if(!window.AI || !aiCall('enabled',false))return '';   /* mode:'off' nebo chybějící ai.js → sekce se skryje */
