@@ -311,6 +311,13 @@
   .brand{position:relative;padding-left:58px;min-height:52px;align-items:flex-start;padding-top:8px}
   .brand:before{content:'';position:absolute;left:0;top:7px;width:48px;height:33px;border-radius:2px;background:linear-gradient(33deg,transparent 42%,#fff 43% 47%,#cf1730 48% 52%,transparent 53% 57%,#fff 58% 62%,transparent 63%),linear-gradient(-33deg,transparent 42%,#fff 43% 47%,#cf1730 48% 52%,transparent 53% 57%,#fff 58% 62%,transparent 63%),linear-gradient(90deg,transparent 38%,#fff 38% 62%,transparent 62%),linear-gradient(0deg,transparent 34%,#fff 34% 66%,transparent 66%),linear-gradient(90deg,transparent 43%,#cf1730 43% 57%,transparent 57%),linear-gradient(0deg,transparent 41%,#cf1730 41% 59%,transparent 59%),#143f88;box-shadow:0 2px 5px rgba(0,0,0,.22)}
   .brand-sub{position:absolute;left:58px;top:35px;color:#c7dcff;font-size:.7rem;letter-spacing:0;text-transform:none;font-weight:600;white-space:nowrap}
+  /* Keep the level action next to its heading and let the cards use all free space. */
+  #levelPick{position:relative;width:100%}
+  .maincol{min-width:0;width:100%}
+  #levelPick .lvlpick{width:100%;max-width:none}
+  #placementBtn{position:absolute;left:280px;top:0;float:none!important;margin:0!important;white-space:nowrap}
+  #levelPick .lvlpick{grid-template-columns:repeat(6,minmax(0,1fr))}
+  @media(max-width:900px){#placementBtn{position:static;display:block;margin:8px 0 14px!important;white-space:normal}}
   @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
 </style>
 </head>
