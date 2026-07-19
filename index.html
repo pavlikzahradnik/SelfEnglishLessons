@@ -304,12 +304,20 @@
   .ach{margin-top:8px}.badge{background:#f8fbff;border-color:#dfe8f4}.toast{background:#073a8f}
   @media(max-width:1120px){.lvlpick{grid-template-columns:repeat(3,1fr)}#catGrid{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:760px){body{padding:0;background:#edf4ff}.wrap{width:100%}header.top{padding:10px;min-height:62px}.brand{font-size:1rem}.brand:before{font-size:1.8rem}.hstats .chip:nth-child(2),.hstats .chip:nth-child(3){display:none}#home{border-radius:0;padding:12px}.dash{grid-template-columns:1fr}.side{border-right:0;border-bottom:1px solid var(--line);padding:0 0 12px}.side .panel{border:0}.actions-v{grid-template-columns:repeat(2,1fr)}.maincol .btn.ghost{float:none;margin:4px 0 14px!important;width:100%}.lvlpick,#catGrid{grid-template-columns:1fr}.lvl{min-height:0!important}.maincol h2,.lead{padding-left:0}.maincol h2:before{display:none}}
+  /* Proportion correction for wide screens */
+  .wrap{max-width:none}
+  .dash{grid-template-columns:280px 1fr}
+  .lvlcard{min-height:292px!important}
+  .brand{position:relative;padding-left:58px;min-height:52px;align-items:flex-start;padding-top:8px}
+  .brand:before{content:'';position:absolute;left:0;top:7px;width:48px;height:33px;border-radius:2px;background:linear-gradient(33deg,transparent 42%,#fff 43% 47%,#cf1730 48% 52%,transparent 53% 57%,#fff 58% 62%,transparent 63%),linear-gradient(-33deg,transparent 42%,#fff 43% 47%,#cf1730 48% 52%,transparent 53% 57%,#fff 58% 62%,transparent 63%),linear-gradient(90deg,transparent 38%,#fff 38% 62%,transparent 62%),linear-gradient(0deg,transparent 34%,#fff 34% 66%,transparent 66%),linear-gradient(90deg,transparent 43%,#cf1730 43% 57%,transparent 57%),linear-gradient(0deg,transparent 41%,#cf1730 41% 59%,transparent 59%),#143f88;box-shadow:0 2px 5px rgba(0,0,0,.22)}
+  .brand-sub{position:absolute;left:58px;top:35px;color:#c7dcff;font-size:.7rem;letter-spacing:0;text-transform:none;font-weight:600;white-space:nowrap}
+  @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top" id="topbar">
-    <div class="brand"><span class="dot"></span><span id="brandLang">Angličtina</span> <span class="lvl" id="brandLvl">A1</span></div>
+    <div class="brand"><span class="dot"></span><span id="brandLang">Angličtina</span><span class="brand-sub">Učím se anglicky každý den</span> <span class="lvl" id="brandLvl">A1</span></div>
     <div class="hstats">
       <div class="chip"><span data-i18n>Lvl</span> <b id="hLevel">1</b></div>
       <div class="chip"><span data-i18n>Body</span> <b id="hXp">0</b></div>
