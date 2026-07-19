@@ -25,10 +25,26 @@ function loadLangPack(pair, cb) {
   if (window.LANG_DATA[pair]) { cb && cb(true); return; }
   if (_langLoading[pair]) { _langLoading[pair].push(cb); return; }
   _langLoading[pair] = [cb];
+  
   const s = document.createElement('script');
-  s.src = pair.startsWith('lang-') ? pair : PAIRS[pair]; // Podpora přímé cesty z data/
-  s.onload = function () { const q = _langLoading[pair] || []; delete _langLoading[pair]; q.forEach(f => f && f(true)); };
-  s.onerror = function () { delete _langLoading[pair]; toast(tr('Nepodařilo se načíst jazyk – zkontroluj připojení a zkus to znovu')); cb && cb(false); };
+  // POJIŠTĚNÍ CESTY: Vezme cestu z PAIRS, a pokud nezačíná na 'data/', tak ji tam přidá
+  let srcPath = PAIRS[pair];
+  if (!srcPath.startsWith('data/')) {
+    srcPath = 'data/' + srcPath;
+  }
+  s.src = srcPath;
+  
+  s.onload = function () { 
+    const q = _langLoading[pair] || []; 
+    delete _langLoading[pair]; 
+    q.forEach(f => f && f(true)); 
+  };
+  s.onerror = function (err) { 
+    delete _langLoading[pair]; 
+    console.error("Chyba načítání souboru:", srcPath, err); // Tohle nám vypíše přesný problém do F12
+    toast(tr('Nepodařilo se načíst jazyk – zkontroluj připojení a zkus to znovu')); 
+    cb && cb(false); 
+  };
   document.head.appendChild(s);
 }
 
