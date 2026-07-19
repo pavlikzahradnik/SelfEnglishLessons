@@ -152,15 +152,49 @@ function rebuildWordIndex() {
   const pack = window.LANG_DATA[curPair()];
   if (!pack) return;
 
-  // Indexace z CEFR úrovní
+  // 1. INDEXACE Z CEFR ÚROVNÍ (Přizpůsobeno pro tvou strukturu cats)
   Object.keys(pack.levels || {}).forEach(lvlId => {
     const u = pack.levels[lvlId];
-    if (u.words) u.words.forEach(w => {
-      w.cat = lvlId;
-      ALL.push(w);
-      BYID[w.id] = w;
-    });
+    
+    // Pokud má úroveň vlastnost 'cats' (jako ve tvém souboru)
+    if (u.cats) {
+      Object.keys(u.cats).forEach(catKey => {
+        const catData = u.cats[catKey];
+        // Uložíme si informaci o CEFR úrovni přímo do témat
+        catData.level = lvlId; 
+        
+        if (catData.words) {
+          catData.words.forEach(w => {
+            w.cat = catKey; // Přiřadíme ID kategorie ke slovíčku
+            w._lvlId = lvlId; // Schováme si úroveň
+            ALL.push(w);
+            BYID[w.id] = w;
+          });
+        }
+      });
+    } 
+    // Záložní varianta, pokud by to bylo napřímo
+    else if (u.words) {
+      u.words.forEach(w => {
+        w.cat = lvlId;
+        ALL.push(w);
+        BYID[w.id] = w;
+      });
+    }
   });
+
+  // 2. INDEXACE Z VERTIKÁL (Témata navíc)
+  Object.keys(pack.verticals || {}).forEach(vId => {
+    const u = pack.verticals[vId];
+    if (u.words) {
+      u.words.forEach(w => {
+        w.cat = vId;
+        ALL.push(w);
+        BYID[w.id] = w;
+      });
+    }
+  });
+}
 
   // Indexace z Vertikál (Témata navíc)
   Object.keys(pack.verticals || {}).forEach(vId => {
