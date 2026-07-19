@@ -315,9 +315,11 @@
   #levelPick{position:relative;width:100%}
   .maincol{min-width:0;width:100%}
   #levelPick .lvlpick{width:100%;max-width:none}
-  #placementBtn{position:absolute;left:280px;top:0;float:none!important;margin:0!important;white-space:nowrap}
+  .level-heading{display:flex;align-items:center;gap:18px;min-height:38px}
+  .level-heading h2{flex:0 0 auto;margin:0}
+  #placementBtn{position:static;float:none!important;margin:0!important;white-space:nowrap;flex:0 0 auto}
   #levelPick .lvlpick{grid-template-columns:repeat(6,minmax(0,1fr))}
-  @media(max-width:900px){#placementBtn{position:static;display:block;margin:8px 0 14px!important;white-space:normal}}
+  @media(max-width:900px){.level-heading{align-items:flex-start;flex-direction:column;gap:8px}.level-heading h2{flex:auto}#placementBtn{display:block;margin:0 0 6px!important;white-space:normal}}
   @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
 </style>
 </head>
@@ -368,9 +370,11 @@
       </aside>
       <section class="maincol">
         <div class="panel" id="levelPick">
-          <h2 data-i18n>Vyber úroveň znalosti</h2>
+          <div class="level-heading">
+            <h2 data-i18n>Vyber úroveň znalosti</h2>
+            <button class="btn ghost" id="placementBtn" onclick="startPlacement()"><span data-i18n>🎯 Nevím, jakou úroveň zvolit — udělat rozřazovací test</span></button>
+          </div>
           <p class="lead" data-i18n>Na jaké úrovni chceš procvičovat? Každá úroveň má vlastní témata i postup.</p>
-          <button class="btn ghost" style="margin-bottom:16px" id="placementBtn" onclick="startPlacement()"><span data-i18n>🎯 Nevím, jakou úroveň zvolit — udělat rozřazovací test</span></button>
           <div class="lvlpick" id="lvlpickBox"></div>
           <div id="vertWrap" class="hidden">
             <div class="sec-label" style="margin-top:26px" data-i18n>Témata navíc</div>
