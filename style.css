@@ -45,12 +45,14 @@
   [data-theme="light"] .chip{background:#fff;border-color:var(--line);color:#334155}
   .chip b{color:#fff}[data-theme="light"] .chip b{color:#0f172a}
   .iconbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;padding:0}
-  .flagchip{display:inline-flex;align-items:center;justify-content:center;width:30px;height:22px;border-radius:5px;font-size:.68rem;font-weight:800;letter-spacing:.01em;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);line-height:1}
-  .flagchip.en{background:#1e3a8a}
-  .flagchip.de{background:linear-gradient(180deg,#1a1a1a 0 33%,#dc2626 33% 66%,#f7b500 66% 100%)}
-  .flagchip.cs{background:linear-gradient(180deg,#fff 0 50%,#d7141a 50% 100%);color:#11457e;text-shadow:none;position:relative;overflow:hidden}
-  .flagchip.cs:before{content:'';position:absolute;left:0;top:0;width:0;height:0;border-style:solid;border-width:11px 13px 11px 0;border-color:transparent #11457e transparent transparent}
-  .flagchip.cs span{position:relative;z-index:1;margin-left:6px}
+  /* Odznaky jazyků = skutečné vlajky kreslené v CSS/SVG (žádná emoji — ta se
+     na některých systémech nezobrazí). Písmenka uvnitř jen pro čtečky. */
+  .flagchip{display:inline-block;width:30px;height:22px;border-radius:4px;overflow:hidden;position:relative;box-shadow:inset 0 0 0 1px rgba(0,0,0,.18);flex:none}
+  .flagchip span{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}  /* text jen pro přístupnost */
+  .flagchip.en{background:url("data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 60 30%22%3E%3Crect width=%2260%22 height=%2230%22 fill=%22%23012169%22/%3E%3Cpath d=%22M0,0 L60,30 M60,0 L0,30%22 stroke=%22%23fff%22 stroke-width=%226%22/%3E%3Cpath d=%22M0,0 L60,30 M60,0 L0,30%22 stroke=%22%23C8102E%22 stroke-width=%223.6%22/%3E%3Cpath d=%22M30,0 V30 M0,15 H60%22 stroke=%22%23fff%22 stroke-width=%2210%22/%3E%3Cpath d=%22M30,0 V30 M0,15 H60%22 stroke=%22%23C8102E%22 stroke-width=%226%22/%3E%3C/svg%3E") center/cover no-repeat}
+  .flagchip.de{background:linear-gradient(180deg,#000 0 33.4%,#dd0000 33.4% 66.7%,#ffce00 66.7% 100%)}
+  .flagchip.cs{background:linear-gradient(180deg,#fff 0 50%,#d7141a 50% 100%)}
+  .flagchip.cs:before{content:'';position:absolute;left:0;top:0;width:0;height:0;border-top:11px solid transparent;border-bottom:11px solid transparent;border-left:15px solid #11457e}
   [data-theme="light"] .iconbtn{background:#fff;border-color:var(--line);color:#334155}
   .panel{background:var(--surface);border-radius:18px;padding:16px 18px;box-shadow:0 20px 50px rgba(2,6,23,.45);margin-bottom:14px}
   h2{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
