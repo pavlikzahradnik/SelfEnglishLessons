@@ -340,10 +340,9 @@
   #topicsView .cat:nth-child(4n+2):after{background:radial-gradient(circle,rgba(18,160,173,.14) 0,rgba(18,160,173,0) 70%)}
   #topicsView .cat:nth-child(4n+3):after{background:radial-gradient(circle,rgba(139,49,201,.13) 0,rgba(139,49,201,0) 70%)}
   #topicsView .cat:nth-child(4n):after{background:radial-gradient(circle,rgba(224,117,19,.14) 0,rgba(224,117,19,0) 70%)}
-  #topicsView .cat .t{display:flex;align-items:center;gap:9px;position:relative;z-index:1}
-  #topicsView .cat .t:before{display:none}
-  #topicsView .topic-art{display:inline-flex;align-items:center;justify-content:center;width:34px;height:34px;border-radius:10px;color:#fff;background:linear-gradient(135deg,var(--card),#2aa7f4);font-size:1.12rem;line-height:1;box-shadow:0 6px 12px rgba(20,90,180,.22);flex:0 0 auto}
-  #topicsView .topic-art.grammar-art{background:linear-gradient(135deg,#6b42d8,#a336d2)}
+  #topicsView .cat .t{display:flex;align-items:center;gap:9px;position:relative;z-index:1;min-height:38px;padding-right:78px}
+  #topicsView .cat .t:before{content:'✦';display:inline-flex;align-items:center;justify-content:center;width:27px;height:27px;border-radius:8px;color:#fff;background:var(--card);font-size:.85rem;box-shadow:0 4px 9px rgba(20,90,180,.2);flex:0 0 auto}
+  #topicsView .topic-art{position:absolute;right:0;top:-8px;width:68px;height:68px;border-radius:12px;background-image:url('assets/topic-sprite.png');background-size:400% 400%;background-position:var(--px) var(--py);background-repeat:no-repeat;filter:drop-shadow(0 5px 5px rgba(22,67,128,.14));pointer-events:none}
   #topicsView .cat .m{position:relative;z-index:1;margin-top:7px}
   #topicsView .cat .due{z-index:2}
   @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
@@ -880,9 +879,10 @@ function catDueCount(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>!isNew(
 function catLearned(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]&&S.srs[id].step>=2).length;}
 function catSeen(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]).length;}
 function topicArt(t){
-  if(t.type==='grammar')return '<span class="topic-art grammar-art">&#128214;</span>';
-  const art={greet:'&#128172;',numbers:'&#128290;',colors:'&#127912;',family:'&#128106;',food:'&#127869;',animals:'&#128062;',body:'&#129470;',clothes:'&#128085;',house:'&#127968;',verbs:'&#9889;',adj:'&#10024;',time:'&#128197;',town:'&#127961;',weather:'&#9728;',transport:'&#128652;',a2_jobs:'&#128188;',a2_health:'&#129657;',a2_travel:'&#9992;',a2_shopping:'&#128717;',a2_restaurant:'&#127860;',a2_hobbies:'&#9917;',a2_tech:'&#128187;',a2_feelings:'&#128512;',a2_people:'&#128100;',a2_education:'&#127891;',a2_nature:'&#127807;'};
-  return '<span class="topic-art">'+(art[t.id]||'&#10024;')+'</span>';
+  /* Positions in the 4×4 custom illustration sheet. Grammar deliberately shares one image. */
+  const pos={greet:'0 0',numbers:'1 0',colors:'2 0',family:'0 1',food:'1 1',animals:'2 1',body:'0 2',house:'1 2',clothes:'3 2',time:'0 3',transport:'1 3',town:'2 3',weather:'0 3',verbs:'1 3',adj:'2 0',a2_jobs:'3 1',a2_health:'0 2',a2_travel:'1 3',a2_shopping:'3 1',a2_restaurant:'1 1',a2_hobbies:'1 3',a2_tech:'2 3',a2_feelings:'0 1',a2_people:'0 1',a2_education:'0 3',a2_nature:'2 3'};
+  const p=t.type==='grammar'?'3 0':(pos[t.id]||'0 0'),a=p.split(' '),shift=['0%','-33.333%','-66.667%','-100%'];
+  return '<span class="topic-art" style="--px:'+shift[a[0]]+';--py:'+shift[a[1]]+'" aria-hidden="true"></span>';
 }
 function renderCats(){
   $('#totalWords').textContent=ALL.length;
