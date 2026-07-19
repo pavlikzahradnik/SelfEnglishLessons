@@ -878,10 +878,10 @@ function renderMission(){
 function catDueCount(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>!isNew(id)&&isDue(id)).length;}
 function catLearned(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]&&S.srs[id].step>=2).length;}
 function catSeen(c){return c.vocab.map((v,i)=>c.id+':'+i).filter(id=>S.srs[id]).length;}
-function topicArt(t){
+function topicArt(t,id){
   /* Positions in the 4×4 custom illustration sheet. Grammar deliberately shares one image. */
   const pos={greet:'0 0',numbers:'1 0',colors:'2 0',family:'0 1',food:'1 1',animals:'2 1',body:'0 2',house:'1 2',clothes:'3 2',time:'0 3',transport:'1 3',town:'2 3',weather:'0 3',verbs:'1 3',adj:'2 0',a2_jobs:'3 1',a2_health:'0 2',a2_travel:'1 3',a2_shopping:'3 1',a2_restaurant:'1 1',a2_hobbies:'1 3',a2_tech:'2 3',a2_feelings:'0 1',a2_people:'0 1',a2_education:'0 3',a2_nature:'2 3'};
-  const p=t.type==='grammar'?'3 0':(pos[t.id]||'0 0'),a=p.split(' '),shift=['0%','-33.333%','-66.667%','-100%'];
+  const p=t.type==='grammar'?'3 0':(pos[id]||'0 0'),a=p.split(' '),shift=['0%','-33.333%','-66.667%','-100%'];
   return '<span class="topic-art" style="--px:'+shift[a[0]]+';--py:'+shift[a[1]]+'" aria-hidden="true"></span>';
 }
 function renderCats(){
@@ -892,14 +892,14 @@ function renderCats(){
     if(!isUnlocked(id)){
       const gate=(TMAP[id].type==='test')?PATH[pi-1]:PATH[pi-LOOKAHEAD];const gateDone=gate?isTopicDone(gate):false;
       return '<div class="cat locked'+(isGrammar(id)?' gram':'')+'"><span class="lock">🔒</span>'+
-        '<div class="t">'+topicArt(t)+t.title+'</div>'+
+        '<div class="t">'+topicArt(t,id)+t.title+'</div>'+
         '<div class="m">'+(isGrammar(id)?tr('Gramatika')+' · '+tr('zamčeno'):tr('Zamčeno'))+'</div>'+
         '<div class="req">'+(gate?tr('dokonči')+' „'+topicTitle(gate)+'"'+(gateDone?' ✓':''):tr('pokračuj v cestě'))+'</div></div>';
     }
     if(TMAP[id].type==='test'){
       const e=S.exlog[id+':test'],done=isTopicDone(id);
       return '<button class="cat test" onclick="openTopic(\''+id+'\')">'+(done?'<span class="due done">hotovo ✓</span>':'')+
-        '<div class="t">'+topicArt(t)+t.title+'</div>'+
+        '<div class="t">'+topicArt(t,id)+t.title+'</div>'+
         '<div class="m">'+(e?tr('nejlepší výsledek')+': '+e.last+' %':tr('prověř všechna témata'))+'</div>'+
         '<div class="bar"><div style="width:'+(e?e.last:0)+'%"></div></div></button>';
     }
@@ -908,13 +908,13 @@ function renderCats(){
     if(isGrammar(id)){
       const g=t.obj,prog=Math.min(100,Math.round(goodExCount(id)/DONE_EX*100));
       return '<button class="cat gram" onclick="openTopic(\''+id+'\')">'+badge+
-        '<div class="t">'+topicArt(t)+t.title+'</div>'+
+        '<div class="t">'+topicArt(t,id)+t.title+'</div>'+
         '<div class="m">'+tr('Gramatika')+' · '+g.items.length+' '+tr('cvičení')+(done?' · '+tr('hotovo'):'')+'</div>'+
         '<div class="bar"><div style="width:'+prog+'%"></div></div></button>';
     }
     const c=t.obj,learned=catLearned(c),inprog=catSeen(c)-learned,pct=Math.round(learned/c.vocab.length*100);
     return '<button class="cat" onclick="openTopic(\''+id+'\')">'+badge+
-      '<div class="t">'+topicArt(t)+t.title+'</div>'+
+      '<div class="t">'+topicArt(t,id)+t.title+'</div>'+
       '<div class="m">'+tr('naučeno')+' '+learned+' / '+c.vocab.length+((seen&&inprog>0)?' · '+inprog+' '+tr('rozpracováno'):'')+'</div>'+
       '<div class="bar"><div style="width:'+pct+'%"></div></div></button>';
   }).join('');
