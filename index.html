@@ -20,8 +20,8 @@
   }
   *{box-sizing:border-box;margin:0;padding:0}
   body{font-family:'Inter','Segoe UI',system-ui,-apple-system,Roboto,sans-serif;color:var(--ink);
-    background:linear-gradient(180deg,var(--bg-a),var(--bg-b));min-height:100vh;padding:14px 14px;-webkit-font-smoothing:antialiased}
-  .wrap{max-width:1440px;margin:0 auto}
+    background:linear-gradient(180deg,var(--bg-a),var(--bg-b));min-height:100vh;padding:14px clamp(14px,3vw,48px);-webkit-font-smoothing:antialiased}
+  .wrap{max-width:1760px;margin:0 auto}
   .dash{display:grid;grid-template-columns:300px 1fr;gap:16px;align-items:stretch}
   .side .panel{margin-bottom:0}
   .maincol .panel{margin-bottom:0;display:flex;flex-direction:column}
@@ -49,7 +49,13 @@
   .chip{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;padding:6px 11px;border-radius:8px;font-weight:600;font-size:.8rem;display:flex;gap:6px;align-items:center}
   [data-theme="light"] .chip{background:#fff;border-color:var(--line);color:#334155}
   .chip b{color:#fff}[data-theme="light"] .chip b{color:#0f172a}
-  .iconbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center}
+  .iconbtn{background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.14);color:#e2e8f0;width:42px;height:42px;border-radius:10px;cursor:pointer;font-size:1.3rem;display:flex;align-items:center;justify-content:center;padding:0}
+  .flagchip{display:inline-flex;align-items:center;justify-content:center;width:30px;height:22px;border-radius:5px;font-size:.68rem;font-weight:800;letter-spacing:.01em;color:#fff;text-shadow:0 1px 1px rgba(0,0,0,.35);line-height:1}
+  .flagchip.en{background:#1e3a8a}
+  .flagchip.de{background:linear-gradient(180deg,#1a1a1a 0 33%,#dc2626 33% 66%,#f7b500 66% 100%)}
+  .flagchip.cs{background:linear-gradient(180deg,#fff 0 50%,#d7141a 50% 100%);color:#11457e;text-shadow:none;position:relative;overflow:hidden}
+  .flagchip.cs:before{content:'';position:absolute;left:0;top:0;width:0;height:0;border-style:solid;border-width:11px 13px 11px 0;border-color:transparent #11457e transparent transparent}
+  .flagchip.cs span{position:relative;z-index:1;margin-left:6px}
   [data-theme="light"] .iconbtn{background:#fff;border-color:var(--line);color:#334155}
   .panel{background:var(--surface);border-radius:18px;padding:16px 18px;box-shadow:0 20px 50px rgba(2,6,23,.45);margin-bottom:14px}
   h2{font-size:1.12rem;font-weight:700;letter-spacing:-.01em}
@@ -273,13 +279,13 @@
 <body>
 <div class="wrap">
   <header class="top" id="topbar">
-    <div class="brand"><span id="brandFlag" style="font-size:1.3rem;line-height:1">🇬🇧</span><span id="brandLang">Angličtina</span> <span class="lvl" id="brandLvl">A1</span></div>
+    <div class="brand"><span class="dot"></span><span id="brandLang">Angličtina</span> <span class="lvl" id="brandLvl">A1</span></div>
     <div class="hstats">
       <div class="chip"><span data-i18n>Lvl</span> <b id="hLevel">1</b></div>
       <div class="chip"><span data-i18n>Body</span> <b id="hXp">0</b></div>
       <div class="chip">🔥 <b id="hDays">0</b> <span data-i18n>dní</span></div>
-      <button class="iconbtn" id="srcBtn" data-i18n-title="Změnit jazyk rozhraní" title="Změnit jazyk rozhraní" onclick="openSrcPick()">🇨🇿</button>
-      <button class="iconbtn" id="langBtn" data-i18n-title="Přepnout jazyk" title="Přepnout jazyk" onclick="toggleLanguage()">🇬🇧</button>
+      <button class="iconbtn" id="srcBtn" data-i18n-title="Změnit jazyk rozhraní" title="Změnit jazyk rozhraní" onclick="openSrcPick()"><span class="flagchip cs"><span>CS</span></span></button>
+      <button class="iconbtn" id="langBtn" data-i18n-title="Přepnout jazyk" title="Přepnout jazyk" onclick="toggleLanguage()"><span class="flagchip en"><span>EN</span></span></button>
       <button class="iconbtn" id="cloudBtn" data-i18n-title="Nastavení a účet" title="Nastavení a účet" onclick="openAccount()">⚙️</button>
       <button class="iconbtn" id="themeBtn" data-i18n-title="Světlý / tmavý režim" title="Světlý / tmavý režim">◐</button>
     </div>
@@ -392,9 +398,9 @@
    Přidání nové dvojice = nový soubor lang-XX-YY.js + jeden řádek v PAIRS. */
 const ALL_LEVELS=['A1','A2','B1','B2','C1','C2'];
 const LANG_INFO={
-  cs:{label:'Čeština',flag:'🇨🇿',native:'Čeština',tts:'cs-CZ'},
-  en:{label:'Angličtina',flag:'🇬🇧',native:'English',tts:'en-GB'},
-  de:{label:'Němčina',flag:'🇩🇪',native:'Deutsch',tts:'de-DE'}
+  cs:{label:'Čeština',native:'Čeština',tts:'cs-CZ'},
+  en:{label:'Angličtina',native:'English',tts:'en-GB'},
+  de:{label:'Němčina',native:'Deutsch',tts:'de-DE'}
 };
 const PAIRS={
   'cs-en':'lang-cs-en.js',
@@ -858,21 +864,21 @@ function levelUnlocked(lvl){
   const pr=lvlPrereq(lvl);if(!pr)return true;
   const e=S.exlog[pr+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
 }
+function flagChip(lang){return '<span class="flagchip '+lang+'"><span>'+lang.toUpperCase()+'</span></span>';}
 function updateBrand(){
   const u=S.settings.level, v=langVerticals(curPair())[u];
   const badge=v?(v.icon+' '+v.title):u;
   const bl=$('#brandLvl');if(bl)bl.textContent=badge;
   const ct=$('#curLvlTag');if(ct)ct.textContent=badge;
-  const bf=$('#brandFlag');if(bf)bf.textContent=LANG_INFO[curTgt()].flag;
   const bb=$('#backLvlBtn');if(bb)bb.textContent=v?tr('← Zpět na výběr'):tr('← Změnit úroveň');
   const bn=$('#brandLang');if(bn)bn.textContent=tr(LANG_INFO[curTgt()].label);
   document.title=tr(LANG_INFO[curTgt()].label)+' '+badge+' — '+tr('adaptivní učení');
   const lb=$('#langBtn');if(lb){
-    lb.textContent=LANG_INFO[curTgt()].flag;
+    lb.innerHTML=flagChip(curTgt());
     lb.style.display=(tgtLangsFor(curSrc()).length>1)?'':'none';
   }
   const sb=$('#srcBtn');if(sb){
-    sb.textContent=LANG_INFO[curSrc()].flag;
+    sb.innerHTML=flagChip(curSrc());
     sb.title=tr('Změnit jazyk rozhraní');
     sb.style.display=(srcLangsAvailable().length>1)?'':'none';
   }
@@ -947,7 +953,7 @@ function switchTarget(tgt){
       S.settings.level=first;buildLevel(first);levelChosen=false;
     }
     persist();refreshHome();
-    toast(LANG_INFO[tgt].flag+' '+tr('Přepnuto na')+': '+tr(LANG_INFO[tgt].label));
+    toast(tr('Přepnuto na')+': '+tr(LANG_INFO[tgt].label));
   });
 }
 function toggleLanguage(){
@@ -980,9 +986,9 @@ function openSrcPick(){
   box.innerHTML=srcLangsAvailable().map(function(l){
     const on=(l===curSrc());
     return '<button class="lvlcard'+(on?'':'')+'" onclick="switchSource(\''+l+'\')">'+
-      '<div class="lc-badge" style="font-size:1.6rem">'+LANG_INFO[l].flag+'</div>'+
+      '<div class="lc-badge">'+flagChip(l)+'</div>'+
       '<div class="lc-t">'+LANG_INFO[l].native+'</div>'+
-      '<div class="lc-d">'+tgtLangsFor(l).map(x=>LANG_INFO[x].flag+' '+LANG_INFO[x].native).join(' · ')+'</div>'+
+      '<div class="lc-d">'+tgtLangsFor(l).map(x=>flagChip(x)+' '+LANG_INFO[x].native).join('&nbsp; ')+'</div>'+
       '<div class="lc-go">'+(on?'✓ '+tr('zvoleno'):tr('Zvolit')+' →')+'</div></button>';
   }).join('');
   show('srcPick');
