@@ -6,8 +6,8 @@ const LANG_INFO = {
   de: { label: 'Němčina', native: 'Deutsch', tts: 'de-DE' }
 };
 const PAIRS = {
-  'cs-en': 'lang-cs-en.js',
-  'cs-de': 'lang-cs-de.js'
+  'cs-en': 'data/lang-cs-en.js',
+  'cs-de': 'data/lang-cs-de.js'
 };
 
 function pairKey(src, tgt) { return src + '-' + tgt; }
