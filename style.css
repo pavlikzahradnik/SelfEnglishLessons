@@ -286,7 +286,8 @@
   .hstats{position:relative;z-index:1;gap:8px}
   .chip,.iconbtn{background:rgba(4,42,112,.36)!important;border:1px solid rgba(255,255,255,.17)!important;color:#fff!important;box-shadow:none}
   .chip{border-radius:9px;padding:8px 11px}.chip b{color:#fff!important}.iconbtn{width:38px;height:38px;border-radius:9px}
-  #home{background:#fff;border-radius:16px;padding:18px;box-shadow:0 20px 45px rgba(25,66,125,.18)}
+  #home,#langGate{background:#fff;border-radius:16px;padding:18px;box-shadow:0 20px 45px rgba(25,66,125,.18)}
+  #langGate{max-width:900px;margin:26px auto;padding:34px 26px}
   .dash{grid-template-columns:260px 1fr;gap:20px}.side{border-right:1px solid var(--line);padding-right:14px}
   .panel{box-shadow:none;border-radius:12px;padding:0;background:transparent}
   .side .panel{padding-bottom:14px;margin-bottom:2px;border-bottom:1px solid var(--line)}
@@ -345,3 +346,14 @@
   #topicsView .cat .m{position:relative;z-index:1;margin-top:7px}
   #topicsView .cat .due{z-index:2}
   @media(max-width:760px){.brand{padding-left:42px;padding-top:9px}.brand:before{width:34px;height:23px;top:10px}.brand-sub{display:none}}
+
+  /* ===== Úvodní volba jazyka ===== */
+  .langgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,270px));gap:16px;justify-content:center;margin-top:20px}
+  .langcard{display:flex;flex-direction:column;align-items:center;gap:11px;padding:30px 18px;border:1px solid var(--line);border-radius:16px;background:var(--surface);cursor:pointer;transition:.15s}
+  .langcard:hover{transform:translateY(-3px);border-color:var(--accent);box-shadow:0 10px 22px rgba(20,80,170,.14)}
+  .langcard .lg-t{font-weight:800;font-size:1.18rem;color:var(--ink)}
+  .langcard .lg-s{font-size:.8rem;color:var(--muted);text-align:center;line-height:1.5}
+  .flagchip.big{width:66px;height:46px;border-radius:8px}
+  .flagchip.big.cs:before{border-top:23px solid transparent;border-bottom:23px solid transparent;border-left:32px solid #11457e}
+  #srcLine .flagchip{vertical-align:middle;margin:0 2px}
+  #srcLine a{color:var(--accent);font-weight:700;text-decoration:none}

@@ -194,7 +194,7 @@ function ensureStateDefaults(){
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 function clearAuthFields(){['acPass','cpCur','cpNew'].forEach(function(id){const el=$('#'+id);if(el)el.value='';});}
-function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
+function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick','langGate'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||id==='langGate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function distractors(w,key,n){let pool=shuffle(ALL.filter(x=>x.cat===w.cat && x.id!==w.id && x[key]!==w[key]));if(pool.length<n){const extra=shuffle(ALL.filter(x=>x.id!==w.id && x[key]!==w[key] && x.cat!==w.cat));pool=pool.concat(extra);}return pool.slice(0,n);}
 function isGrammar(id){return TMAP[id]&&TMAP[id].type==='grammar';}
@@ -594,7 +594,7 @@ function switchTarget(tgt){
       S.settings.level=first;buildLevel(first);
     }
     levelChosen=false;   /* po přepnutí jazyka vždy ukázat výběr úrovní a témat */
-    persist();refreshHome();
+    persist();refreshHome();show('home');
     toast(tr('Přepnuto na')+': '+tr(LANG_INFO[tgt].label));
   });
 }
@@ -641,7 +641,42 @@ function refreshHome(){
   if(levelChosen){lp.classList.add('hidden');tv.classList.remove('hidden');renderCats();renderAch();}
   else{tv.classList.add('hidden');lp.classList.remove('hidden');renderLevelPick();}
 }
-function goHome(){if(window.speechSynthesis)speechSynthesis.cancel();stopRec();refreshHome();show('home');}
+let langGateShown=false;   /* úvodní volba jazyka se ukáže jednou za otevření appky */
+function goHome(){
+  if(window.speechSynthesis)speechSynthesis.cancel();stopRec();
+  if(!langGateShown){openLangGate();return;}
+  refreshHome();show('home');
+}
+function openLangGate(){
+  const tg=tgtLangsFor(curSrc());
+  if(tg.length<2){langGateShown=true;refreshHome();show('home');return;}   /* jediný jazyk = není co vybírat */
+  const grid=$('#langGrid');
+  if(grid)grid.innerHTML=tg.map(function(l){
+    const p=pairKey(curSrc(),l);
+    const b=(S._langs&&S._langs[p])||{};
+    const lvl=(S.settings.levelByPair||{})[p];
+    const vd=(window.LANG_DATA[p]&&window.LANG_DATA[p].verticals)||{};
+    const lvlTxt=lvl?((vd[lvl]&&(vd[lvl].icon+' '+vd[lvl].title))||lvl):null;
+    const st=lvlTxt?(tr('Pokračovat')+' · '+lvlTxt):tr('Začít od výběru úrovně');
+    const xp=b.xp?('<br>'+b.xp+' XP'):'';
+    return '<button class="langcard" onclick="pickTodayLang(\''+l+'\')">'+
+      '<span class="flagchip big '+l+'"><span>'+l.toUpperCase()+'</span></span>'+
+      '<span class="lg-t">'+tr(LANG_INFO[l].label)+'</span>'+
+      '<span class="lg-s">'+st+xp+'</span></button>';
+  }).join('');
+  const sl=$('#srcLine');
+  if(sl){
+    let h=tr('Tvůj hlavní jazyk')+': '+flagChip(curSrc())+' <b>'+tr(LANG_INFO[curSrc()].native)+'</b>';
+    if(srcLangsAvailable().length>1)h+=' &nbsp;·&nbsp; <a href="#" onclick="openSrcPick();return false">'+tr('Změnit')+'</a>';
+    sl.innerHTML=h;
+  }
+  show('langGate');
+}
+function pickTodayLang(l){
+  langGateShown=true;
+  if(l===curTgt()){levelChosen=false;refreshHome();show('home');return;}
+  switchTarget(l);
+}
 
 function initSeg(segId,key,after){
   const seg=$('#'+segId);

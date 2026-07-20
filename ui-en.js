@@ -277,5 +277,11 @@ window.UI_DATA.en = {
  "Hlas uložen ✓": "Voice saved ✓",
  "Nastavení a účet": "Settings & account",
  "Učím se anglicky každý den": "Learning English every day",
- "Učím se německy každý den": "Learning German every day"
+ "Učím se německy každý den": "Learning German every day",
+ "Jaký jazyk se dnes chceš učit?": "Which language do you want to learn today?",
+ "Postup se ti u každého jazyka ukládá zvlášť — můžeš je libovolně střídat.": "Your progress is saved separately for each language — switch between them freely.",
+ "Pokračovat": "Continue",
+ "Začít od výběru úrovně": "Start by choosing a level",
+ "Tvůj hlavní jazyk": "Your main language",
+ "Změnit": "Change"
 };
