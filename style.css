@@ -359,8 +359,30 @@
   #srcLine a{color:var(--accent);font-weight:700;text-decoration:none}
 
   /* ===== Tlačítko návratu na výběr jazyka (uprostřed lišty) ===== */
-  .homelang{display:inline-flex;align-items:center;gap:9px;background:rgba(255,255,255,.16);border:1px solid rgba(255,255,255,.32);
-    color:#fff;font-weight:700;font-size:.86rem;padding:9px 16px;border-radius:11px;cursor:pointer;transition:.15s;z-index:1;white-space:nowrap}
-  .homelang:hover{background:rgba(255,255,255,.26);transform:translateY(-1px)}
-  .homelang .hl-ic{font-size:1.05rem;line-height:1}
+  /* Stejná rodina jako odznaky Lvl/Body v liště: tmavě modré sklo, bílý text.
+     !important kvůli jistotě — designový blok výš stylované chipy přepisuje stejně. */
+  .homelang{display:inline-flex;align-items:center;gap:8px;background:rgba(4,42,112,.36)!important;
+    border:1px solid rgba(255,255,255,.28)!important;color:#fff!important;font-family:inherit;
+    font-weight:700;font-size:.82rem;padding:9px 15px;border-radius:9px;cursor:pointer;transition:.15s;
+    z-index:1;white-space:nowrap;box-shadow:none;appearance:none;-webkit-appearance:none;line-height:1.2}
+  .homelang:hover{background:rgba(9,66,160,.55)!important;border-color:rgba(255,255,255,.5)!important;transform:translateY(-1px)}
+  .homelang .hl-ic{font-size:1rem;line-height:1}
   @media(max-width:900px){.homelang .hl-t{display:none}.homelang{padding:9px 11px}}
+
+  /* ===== Mobil ===== */
+  @media(max-width:760px){
+    #langGate{margin:10px;padding:24px 14px;border-radius:14px}
+    .langgrid{grid-template-columns:1fr;gap:12px}
+    .langcard{flex-direction:row;justify-content:flex-start;text-align:left;padding:16px 14px;gap:14px}
+    .langcard .lg-t{font-size:1.05rem}
+    .langcard .lg-s{text-align:left}
+    .flagchip.big{width:52px;height:36px}
+    .flagchip.big.cs:before{border-top:18px solid transparent;border-bottom:18px solid transparent;border-left:25px solid #11457e}
+    #srcLine{font-size:.8rem}
+    .homelang{order:3}                       /* na úzké liště až na konec */
+    header.top{gap:8px}
+  }
+  @media(max-width:420px){
+    .hstats .chip{padding:6px 8px;font-size:.72rem}
+    .iconbtn{width:36px;height:36px}
+  }
