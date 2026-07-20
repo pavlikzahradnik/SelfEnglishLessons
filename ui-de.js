@@ -283,5 +283,6 @@ window.UI_DATA.de = {
  "Pokračovat": "Weitermachen",
  "Začít od výběru úrovně": "Mit der Niveauwahl beginnen",
  "Tvůj hlavní jazyk": "Deine Hauptsprache",
- "Změnit": "Ändern"
+ "Změnit": "Ändern",
+ "Zpět na výběr jazyka": "Zurück zur Sprachwahl"
 };

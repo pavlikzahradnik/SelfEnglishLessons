@@ -10,12 +10,14 @@
 <div class="wrap">
   <header class="top" id="topbar">
     <div class="brand"><span class="dot"></span><span id="brandLang">Angličtina</span><span class="brand-sub">Učím se anglicky každý den</span> <span class="lvl" id="brandLvl">A1</span></div>
+    <button class="homelang" id="homeLangBtn" onclick="backToLangGate()" data-i18n-title="Zpět na výběr jazyka" title="Zpět na výběr jazyka">
+      <span class="hl-ic">🏠</span><span class="hl-t" data-i18n>Zpět na výběr jazyka</span>
+    </button>
     <div class="hstats">
       <div class="chip"><span data-i18n>Lvl</span> <b id="hLevel">1</b></div>
       <div class="chip"><span data-i18n>Body</span> <b id="hXp">0</b></div>
       <div class="chip">🔥 <b id="hDays">0</b> <span data-i18n>dní</span></div>
       <button class="iconbtn" id="srcBtn" data-i18n-title="Změnit jazyk rozhraní" title="Změnit jazyk rozhraní" onclick="openSrcPick()"><span class="flagchip cs"><span>CS</span></span></button>
-      <button class="iconbtn" id="langBtn" data-i18n-title="Přepnout jazyk" title="Přepnout jazyk" onclick="toggleLanguage()"><span class="flagchip en"><span>EN</span></span></button>
       <button class="iconbtn" id="cloudBtn" data-i18n-title="Nastavení a účet" title="Nastavení a účet" onclick="openAccount()">⚙️</button>
       <button class="iconbtn" id="themeBtn" data-i18n-title="Světlý / tmavý režim" title="Světlý / tmavý režim">◐</button>
     </div>

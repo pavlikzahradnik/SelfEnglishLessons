@@ -283,5 +283,6 @@ window.UI_DATA.en = {
  "Pokračovat": "Continue",
  "Začít od výběru úrovně": "Start by choosing a level",
  "Tvůj hlavní jazyk": "Your main language",
- "Změnit": "Change"
+ "Změnit": "Change",
+ "Zpět na výběr jazyka": "Back to language choice"
 };

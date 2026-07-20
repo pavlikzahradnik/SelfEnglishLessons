@@ -672,6 +672,12 @@ function openLangGate(){
   }
   show('langGate');
 }
+function backToLangGate(){
+  /* Návrat na úvodní „Jaký jazyk se dnes chceš učit?" — bezpečně ukončí i běžící cvičení. */
+  if(window.speechSynthesis)speechSynthesis.cancel();stopRec();sess=null;plc=null;
+  langGateShown=false;
+  openLangGate();
+}
 function pickTodayLang(l){
   langGateShown=true;
   if(l===curTgt()){levelChosen=false;refreshHome();show('home');return;}
