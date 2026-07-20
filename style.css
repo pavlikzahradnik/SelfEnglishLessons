@@ -398,3 +398,12 @@
     #levelPick .lvlpick{grid-template-columns:1fr}
     .lvlcard{min-height:0!important}
   }
+
+  /* ===== Oprava priority č. 2: .dash =====
+     Řádek `.dash{280px 1fr}` níže v souboru přebíjel mobilní `.dash{1fr}`
+     (stejná priorita, pozdější pořadí vyhrává). Tady jsme ještě později my. */
+  @media(max-width:760px){
+    .dash{grid-template-columns:1fr}
+    #topicsView .topic-art{width:54px;height:54px;top:-4px}
+    .cat .t{padding-right:58px}
+  }
