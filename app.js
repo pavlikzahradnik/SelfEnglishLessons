@@ -437,7 +437,8 @@ function topicArt(t,id){
     in_prod:'1 0',in_tools:'1 2',in_mat:'1 0',in_safety:'0 2',in_quality:'2 0',in_maint:'1 2',in_log:'3 1',in_meas:'0 3',
     bs_meet:'0 1',bs_mail:'0 0',bs_pres:'2 0',bs_nego:'0 1',bs_fin:'3 1',bs_sales:'2 3',bs_hr:'0 1',bs_phone:'0 0'
   };
-  const p=t.type==='grammar'?'3 0':(pos[id]||'2 0'),a=p.split(' '),shift=['0%','33.333%','66.667%','100%'];
+  const key=String(id||'').replace(/^de_/,'');   /* německé balíčky mají prefix de_, mapa ikon je společná */
+  const p=t.type==='grammar'?'3 0':(pos[key]||'2 0'),a=p.split(' '),shift=['0%','33.333%','66.667%','100%'];
   return '<span class="topic-art" style="--px:'+shift[a[0]]+';--py:'+shift[a[1]]+'" aria-hidden="true"></span>';
 }
 function renderCats(){
@@ -586,12 +587,13 @@ function switchTarget(tgt){
     if(!ok)return;
     S.settings.tgtLang=tgt;
     const remembered=(S.settings.levelByPair||{})[p];
-    if(remembered && langLevels(p)[remembered]){
-      S.settings.level=remembered;buildLevel(remembered);levelChosen=true;
+    if(remembered && unitData(remembered)){
+      S.settings.level=remembered;buildLevel(remembered);
     }else{
       const first=ALL_LEVELS.find(l=>langLevels(p)[l]);
-      S.settings.level=first;buildLevel(first);levelChosen=false;
+      S.settings.level=first;buildLevel(first);
     }
+    levelChosen=false;   /* po přepnutí jazyka vždy ukázat výběr úrovní a témat */
     persist();refreshHome();
     toast(tr('Přepnuto na')+': '+tr(LANG_INFO[tgt].label));
   });
