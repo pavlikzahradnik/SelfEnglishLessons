@@ -386,3 +386,15 @@
     .hstats .chip{padding:6px 8px;font-size:.72rem}
     .iconbtn{width:36px;height:36px}
   }
+
+  /* ===== Oprava priority pro mobil/tablet =====
+     Pravidlo `#levelPick .lvlpick{repeat(6,…)}` výš má díky ID vyšší prioritu než
+     obecná mobilní pravidla, takže telefon dostával 6 sloupců a karty se překrývaly.
+     Tady ho přebíjíme selektorem se STEJNOU prioritou — a jsme později v souboru. */
+  @media(max-width:1120px){
+    #levelPick .lvlpick{grid-template-columns:repeat(3,1fr)}
+  }
+  @media(max-width:760px){
+    #levelPick .lvlpick{grid-template-columns:1fr}
+    .lvlcard{min-height:0!important}
+  }
