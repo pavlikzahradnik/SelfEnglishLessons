@@ -109,8 +109,26 @@ const MIN=60000;
 const PLC_LEVELS=ALL_LEVELS;
 function placementAvailable(){const lv=langLevels(curPair());return !!(window.LANG_DATA[curPair()]||{}).placement && ALL_LEVELS.every(l=>lv[l]);}
 function plcPool(lvl){
-  const g=(langLevels(curPair())[lvl]||{}).gram||[];
-  const arr=[];g.forEach(gg=>gg.items.forEach((it,i)=>arr.push({level:lvl,topic:gg.title,gitem:it,key:gg.id+'#'+i})));return arr;
+  const u=(langLevels(curPair())[lvl]||{});
+  const arr=[];
+  /* a) gramatika (doplň správný tvar) */
+  (u.gram||[]).forEach(gg=>gg.items.forEach((it,i)=>arr.push({level:lvl,topic:gg.title,gitem:it,key:gg.id+'#'+i})));
+  /* b) slovní zásoba jako otázka: „přelož slovo" se 3 distraktory z JINÝCH slov téže úrovně.
+     Tím se test opře i o slovíčka, ne jen o gramatiku — a je znatelně těžší. */
+  const words=[];(u.cats||[]).forEach(c=>(c.vocab||[]).forEach(v=>words.push(v)));
+  if(words.length>=4){
+    (u.cats||[]).forEach(function(c){
+      (c.vocab||[]).forEach(function(v,i){
+        if(i%2!==0)return;                       /* ne každé slovo, ať pool nenabobtná */
+        const others=shuffle(words.filter(w=>w[0]!==v[0])).slice(0,3).map(w=>w[1]);
+        if(others.length<3)return;
+        const opts=shuffle([v[1]].concat(others));
+        arr.push({level:lvl,topic:c.title,vocab:true,
+          gitem:[v[0],v[1],opts,'? '+tr('Vyber překlad')],key:c.id+'#w'+i});
+      });
+    });
+  }
+  return arr;
 }
 function buildLevel(lvl){
   const p=curPair();
@@ -206,6 +224,20 @@ function worstScore(catId){const s=exlogScores(catId);return s.length?Math.min.a
 function goodExCount(catId){return exlogScores(catId).filter(e=>e.last>=DONE_PCT).length;}
 function isTopicDone(id){if(TMAP[id]&&TMAP[id].type==='test'){const e=S.exlog[id+':test'];return !!(e&&e.last>=60);}return goodExCount(id)>=DONE_EX;}
 function completedCount(){let n=0;for(const id of PATH){if(isTopicDone(id))n++;else break;}return n;}
+/* Úroveň je „hotová", když je splněný její závěrečný test. Funguje i pro úroveň,
+   ve které zrovna nejsem (čte přímo z balíčku, ne z aktuálně načteného PATH). */
+function levelDone(pair,lvl){
+  const u=(langLevels(pair)||{})[lvl];
+  if(!u||!u.test)return false;
+  const e=S.exlog[u.test+':test'];
+  return !!(e&&e.last>=60);
+}
+/* Nejvyšší dokončená úroveň dané dvojice (nebo null). */
+function highestDoneLevel(pair){
+  let out=null;
+  ALL_LEVELS.forEach(function(l){ if(levelDone(pair,l))out=l; });
+  return out;
+}
 /* Úroveň potvrzená rozřazovacím testem je celá otevřená — nemá smysl
    nutit člověka znovu procházet témata popořadě, když už úroveň prokázal. */
 function levelFullyOpen(){
@@ -367,9 +399,27 @@ function grade(id,good){
   persist();
 }
 function learnedCount(){return ALL.filter(w=>(S.srs[w.id]&&S.srs[w.id].step>=2)).length;}
-function dueWords(){return ALL.filter(w=>isUnlocked(w.cat)&&!isNew(w.id)&&isDue(w.id));}
+/* Slova CELÉ dvojice (všechny úrovně i vertikály) — „opakování je matka moudrosti":
+   SRS opakuje vše, co ses kdy naučil, i když jsi mezitím postoupil na vyšší úroveň.
+   Bere se jen to, co má záznam v SRS (co jsi opravdu viděl) — nová slova z jiných
+   úrovní se sem nepletou, ta se učíš až tam. */
+function pairWords(){
+  const p=curPair(), out=[];
+  function addUnit(u){
+    if(!u||!u.cats)return;
+    u.cats.forEach(function(c){
+      (c.vocab||[]).forEach(function(v,i){
+        out.push({id:c.id+':'+i,en:v[0],cz:v[1],cat:c.id,catTitle:c.title});
+      });
+    });
+  }
+  const lv=langLevels(p);Object.keys(lv).forEach(k=>addUnit(lv[k]));
+  const vs=langVerticals(p);Object.keys(vs).forEach(k=>addUnit(vs[k]));
+  return out;
+}
+function dueWords(){return pairWords().filter(w=>!isNew(w.id)&&isDue(w.id));}
 function newWords(){return ALL.filter(w=>isUnlocked(w.cat)&&isNew(w.id));}
-function problemWords(){return ALL.filter(w=>isUnlocked(w.cat)&&S.srs[w.id]&&S.srs[w.id].p);}
+function problemWords(){return pairWords().filter(w=>S.srs[w.id]&&S.srs[w.id].p);}
 
 const XP_PER_LEVEL=200;
 function level(){return Math.floor(S.xp/XP_PER_LEVEL)+1;}
@@ -502,9 +552,22 @@ function levelUnlocked(lvl){
   const e=S.exlog[pr+':test'];return !!(e&&e.last>=A2_UNLOCK_PCT);
 }
 function flagChip(lang){return '<span class="flagchip '+lang+'"><span>'+lang.toUpperCase()+'</span></span>';}
+function cefrRank(l){const i=ALL_LEVELS.indexOf(l);return i<0?-1:i;}
+/* „Tvoje aktuální úroveň" v liště: vyšší z (nejvyšší dokončená úroveň) a
+   (úroveň z rozřazovacího testu). To je reálná úroveň studenta, ne to,
+   co má zrovna otevřené na obrazovce. */
+function myLevel(){
+  const pair=curPair();
+  const done=highestDoneLevel(pair);
+  const test=(S.settings.cefrByPair||{})[pair];
+  let best=null;
+  [done,test].forEach(function(l){ if(cefrRank(l)>cefrRank(best))best=l; });
+  return best;
+}
 function updateBrand(){
   const u=S.settings.level, v=langVerticals(curPair())[u];
-  const badge=v?(v.icon+' '+v.title):u;
+  const ml=myLevel();
+  const badge=v?(v.icon+' '+v.title):(ml||u);
   const bl=$('#brandLvl');if(bl)bl.textContent=badge;
   const ct=$('#curLvlTag');if(ct)ct.textContent=badge;
   const bb=$('#backLvlBtn');if(bb)bb.textContent=v?tr('← Zpět na výběr'):tr('← Změnit úroveň');
@@ -536,10 +599,13 @@ function renderLevelPick(){
     }
     const m=meta[lvl]||{t:lvl,d:''};
     const ok=levelUnlocked(lvl);
+    const done=levelDone(pair,lvl);
     const pr=lvlPrereq(lvl);const e=pr?S.exlog[pr+':test']:null;
-    const goTxt=ok?(tr('Začít')+' '+lvl+' →')
+    const goTxt=done?('<span style="color:var(--ok)">✓ '+tr('Hotovo')+'</span> · '+tr('Procvičovat')+' →')
+      :ok?(tr('Začít')+' '+lvl+' →')
       :('🔒 '+tr('Odemkni testem na')+' '+A2_UNLOCK_PCT+' %'+(e?' <span style="color:var(--muted)">('+tr('teď')+' '+e.last+' %)</span>':''));
-    return '<button class="lvlcard'+(ok?'':' locked')+'" onclick="chooseLevel(\''+lvl+'\')">'+
+    const check=done?'<span class="lc-check" title="'+tr('Úroveň dokončena')+'">✓</span>':'';
+    return '<button class="lvlcard'+(ok?'':' locked')+(done?' done':'')+'" onclick="chooseLevel(\''+lvl+'\')">'+check+
       '<div class="lc-badge">'+lvl+'</div><div class="lc-t">'+m.t+'</div><div class="lc-d">'+m.d+'</div>'+
       '<div class="lc-go">'+goTxt+'</div></button>';
   }).join('');
@@ -846,16 +912,18 @@ function plcDrawItem(){
 }
 function nextPlacementQ(){
   if(!plc)return;
-  if(plc.n>=50)return finishPlacement();
-  if(plc.n>=15){
-    const last6=plc.history.slice(-6).map(h=>h.ability);
-    if(last6.length>=6 && (Math.max.apply(null,last6)-Math.min.apply(null,last6))<=0.55)return finishPlacement();
+  if(plc.n>=60)return finishPlacement();
+  /* Ukončí až po min. 25 otázkách A když je odhad opravdu ustálený
+     (posledních 10 v rozpětí ≤0.5 úrovně). Dřív stačilo 15 a rozpětí 0.55. */
+  if(plc.n>=25){
+    const last10=plc.history.slice(-10).map(h=>h.ability);
+    if(last10.length>=10 && (Math.max.apply(null,last10)-Math.min.apply(null,last10))<=0.5)return finishPlacement();
   }
   const item=plcDrawItem();
   if(!item)return finishPlacement();
   plc.cur=item;
   $('#counter').textContent=tr('Otázka')+' '+(plc.n+1)+' · '+tr('odhad úrovně')+': '+plcCurLevel();
-  setProg(plc.n, Math.max(plc.n+1,15));
+  setProg(plc.n, Math.max(plc.n+1,25));
   const q=item.gitem[0],a=item.gitem[1],opts=item.gitem[2],cz=item.gitem[3];
   const options=shuffle(opts.slice());
   $('#stage').innerHTML='<div class="tag" style="display:inline-block">'+item.level+' · '+item.topic+'</div>'+
@@ -879,14 +947,16 @@ function answerPlacement(ok){
   const qlvl=plc.cur.level;
   const st=plc.levelStats[qlvl];if(st){st.n++;if(ok)st.c++;}
   plc.ability=Math.max(0,Math.min(PLC_LEVELS.length-1, plc.ability + (ok?plc.step:-plc.step)));
-  if(plc.n%5===0)plc.step=Math.max(0.25, plc.step*0.65);
+  if(plc.n%8===0)plc.step=Math.max(0.4, plc.step*0.8);   /* pomalejší doznívání = přesnější zařazení */
   plc.history.push({ok:ok, lvlIdx:Math.floor(plc.ability), ability:plc.ability});
   showContinue(()=>nextPlacementQ(), ok, false, pctx);
 }
 function finishPlacement(){
   if(!plc)return;
+  /* Do úrovně tě zařadí, jen když jsi v ní měl aspoň 3 otázky a ≥75 % správně.
+     Dřív stačilo 2 otázky a 60 % — proto test „přeceňoval". */
   let lvl=PLC_LEVELS[0];
-  PLC_LEVELS.forEach(function(l){const st=plc.levelStats[l];if(st && st.n>=2 && (st.c/st.n)>=0.6)lvl=l;});
+  PLC_LEVELS.forEach(function(l){const st=plc.levelStats[l];if(st && st.n>=3 && (st.c/st.n)>=0.75)lvl=l;});
   const n=plc.n;
   $('#sessTag').style.display='none';$('#counter').textContent='';setProg(1,1);
   $('#stage').innerHTML='<div class="result"><div class="stars">🎯</div><div class="score">'+lvl+'</div>'+

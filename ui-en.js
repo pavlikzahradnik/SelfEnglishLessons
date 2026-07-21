@@ -284,5 +284,7 @@ window.UI_DATA.en = {
  "Začít od výběru úrovně": "Start by choosing a level",
  "Tvůj hlavní jazyk": "Your main language",
  "Změnit": "Change",
- "Zpět na výběr jazyka": "Back to language choice"
+ "Zpět na výběr jazyka": "Back to language choice",
+ "Procvičovat": "Practise",
+ "Úroveň dokončena": "Level completed"
 };
