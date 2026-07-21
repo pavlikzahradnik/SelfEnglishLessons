@@ -936,7 +936,15 @@ function finishSession(){
     '<button class="btn big ghost" onclick="goHome()">'+tr('Výběr témat')+'</button></div></div>';
   sess=null;persist();
 }
-function quitSession(){sess=null;plc=null;if(window.speechSynthesis)speechSynthesis.cancel();stopRec();goHome();}
+function quitSession(){
+  const wasPlacement=!!plc;
+  sess=null;plc=null;
+  if(window.speechSynthesis)speechSynthesis.cancel();stopRec();
+  /* Rozřazovací test nepatří do žádného tématu → domů.
+     Jinak se vrať do tématu, ze kterého jsme přišli (ne až na výběr témat). */
+  if(!wasPlacement && currentTopicId&&TMAP[currentTopicId])reopenTopic();
+  else goHome();
+}
 function recordExlog(cat,type,pct){
   const beforeC=completedCount();
   const k=cat+':'+type;const p=S.exlog[k]||{done:0};S.exlog[k]={done:p.done+1,last:pct,ts:Date.now()};
