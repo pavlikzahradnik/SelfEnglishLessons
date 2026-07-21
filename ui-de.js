@@ -311,5 +311,18 @@ window.UI_DATA.de = {
  "Dokonči úrovně B1 i B2": "Schließe B1 und B2 ab",
  "5000 bodů": "5000 Punkte",
  "Nasbírej 5000 bodů": "Sammle 5000 Punkte",
- "30 otázek napříč slovíčky i gramatikou · na": "30 Fragen aus Wortschatz und Grammatik ·"
+ "30 otázek napříč slovíčky i gramatikou · na": "30 Fragen aus Wortschatz und Grammatik ·",
+ "Příběhy ke čtení": "Geschichten zum Lesen",
+ "Krátké příběhy — čti a poslouchej zároveň, pak si ověř porozumění pár otázkami.": "Kurze Geschichten — lies und höre gleichzeitig, dann prüfe dein Verständnis mit ein paar Fragen.",
+ "Číst": "Lesen",
+ "vět": "Sätze",
+ "Přehrát celé": "Alles abspielen",
+ "Zastavit": "Stopp",
+ "Zobrazit překlad": "Übersetzung zeigen",
+ "Skrýt překlad": "Übersetzung ausblenden",
+ "Otázky na porozumění": "Verständnisfragen",
+ "Zpět na příběh": "Zurück zur Geschichte",
+ "Přehrávání není v tomto prohlížeči dostupné.": "Wiedergabe ist in diesem Browser nicht verfügbar.",
+ "Příběh se nepodařilo načíst": "Die Geschichte konnte nicht geladen werden",
+ "K tomuto příběhu nejsou otázky.": "Diese Geschichte hat keine Fragen."
 };

@@ -60,6 +60,22 @@ function langExamples(){const p=curPair();return (window.LANG_DATA[p]&&window.LA
    chybějící překlad nikdy nerozbije appku, jen zůstane česky.
    Nový jazyk rozhraní = nový soubor ui-XX.js + řádek v UI_FILES. */
 const UI_FILES={en:'ui-en.js',de:'ui-de.js'};
+/* Příběhy jsou volitelný extra soubor per dvojice. Když chybí, sekce se prostě
+   neukáže — appka bez nich funguje normálně (žádný crash). */
+const STORY_FILES={'cs-en':'stories-cs-en.js'};
+const _storyLoading={};
+function loadStories(pair,cb){
+  if(!STORY_FILES[pair]){cb&&cb(false);return;}
+  if(window.LANG_DATA[pair]&&window.LANG_DATA[pair].stories){cb&&cb(true);return;}
+  if(_storyLoading[pair]){_storyLoading[pair].push(cb);return;}
+  _storyLoading[pair]=[cb];
+  const s=document.createElement('script');
+  s.src=STORY_FILES[pair];
+  s.onload=function(){const q=_storyLoading[pair]||[];delete _storyLoading[pair];q.forEach(f=>f&&f(true));};
+  s.onerror=function(){delete _storyLoading[pair];cb&&cb(false);};   /* bez příběhů appka jede dál */
+  document.head.appendChild(s);
+}
+function langStories(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].stories)||[];}
 window.UI_DATA=window.UI_DATA||{};
 const _uiLoading={};
 function tr(s){const m=window.UI_DATA[curSrc()];return (m&&m[s])||s;}
@@ -227,7 +243,7 @@ function ensureStateDefaults(){
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 function clearAuthFields(){['acPass','cpCur','cpNew'].forEach(function(id){const el=$('#'+id);if(el)el.value='';});}
-function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick','langGate'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||id==='langGate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
+function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick','langGate','story'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||id==='langGate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function distractors(w,key,n){let pool=shuffle(ALL.filter(x=>x.cat===w.cat && x.id!==w.id && x[key]!==w[key]));if(pool.length<n){const extra=shuffle(ALL.filter(x=>x.id!==w.id && x[key]!==w[key] && x.cat!==w.cat));pool=pool.concat(extra);}return pool.slice(0,n);}
 function isGrammar(id){return TMAP[id]&&TMAP[id].type==='grammar';}
@@ -656,7 +672,37 @@ function renderLevelPick(){
   }).join('');
   const plcBtn=$('#placementBtn');if(plcBtn)plcBtn.style.display=placementAvailable()?'':'none';
   renderVerticals();
+  renderStories();
 }
+function renderStories(){
+  const wrap=$('#storyWrap'), box=$('#storyBox');
+  if(!wrap||!box)return;
+  const pair=curPair();
+  /* Líné načtení: když soubor s příběhy ještě není, natáhni ho a překresli.
+     Když chybí (nenahraný / jiná dvojice), sekce zůstane skrytá — appka jede dál. */
+  if(STORY_FILES[pair] && !(window.LANG_DATA[pair]&&window.LANG_DATA[pair].stories)){
+    wrap.classList.add('hidden');
+    loadStories(pair,function(ok){ if(ok)renderStories(); });
+    return;
+  }
+  const list=langStories(pair);
+  wrap.classList.toggle('hidden', list.length===0);
+  if(!list.length)return;
+  box.innerHTML=list.map(function(s){
+    const rd=(S.storyRead&&S.storyRead[s.id]);            // dřív přečtený?
+    const best=(S.storyScore&&S.storyScore[s.id]);        // nejlepší výsledek kvízu
+    const badge='<span class="lvl" style="background:var(--surface2);color:var(--muted);margin-left:6px">'+s.level+'</span>';
+    const stat=best!=null?('<div class="lc-go" style="color:var(--ok)">'+best+' % ✓</div>')
+              :(rd?'<div class="lc-go" style="color:var(--muted)">'+tr('Přečteno')+'</div>':'<div class="lc-go">'+tr('Číst')+' →</div>');
+    return '<button class="lvlcard" onclick="openStory(\''+s.id+'\')">'+
+      '<div class="lc-badge" style="font-size:1.4rem">📖</div>'+
+      '<div class="lc-t">'+storyTitle(s)+badge+'</div>'+
+      '<div class="lc-d">'+s.sents.length+' '+tr('vět')+' · '+s.q.length+' '+tr('otázek')+'</div>'+
+      stat+'</button>';
+  }).join('');
+}
+/* Nadpis příběhu: v datech je „Ráno / Morning" — vezmi českou část pro rozhraní. */
+function storyTitle(s){return String(s.title).split('/')[0].trim();}
 function renderVerticals(){
   const vs=langVerticals(curPair()), ids=Object.keys(vs);
   const wrap=$('#vertWrap'), box=$('#vertBox');
@@ -827,6 +873,99 @@ function buildGrammarMenu(){
       : exStatHtml(id,d[0]);
     return '<button class="mode" onclick="startGrammar(\''+d[0]+'\')"><div class="mt"><span class="ic '+d[2]+'">'+d[1]+'</span> '+d[3]+'</div><small>'+d[4]+'</small>'+st+'</button>';
   }).join('');
+}
+/* ===== Čtečka příběhů: čti + poslouchej + otázky na porozumění ===== */
+let curStory=null, storyPlaying=false;
+function findStory(id){return langStories(curPair()).find(s=>s.id===id)||null;}
+function openStory(id){
+  const s=findStory(id);if(!s){toast(tr('Příběh se nepodařilo načíst'));return;}
+  curStory=s;storyPlaying=false;
+  $('#storyTitle').textContent=storyTitle(s)+'  ('+s.level+')';
+  const back=$('#storyBack');if(back)back.onclick=function(){stopStory();levelChosen=true;refreshHome();};
+  renderStoryText();
+  show('story');
+}
+function stopStory(){storyPlaying=false;if(window.speechSynthesis)speechSynthesis.cancel();}
+function renderStoryText(){
+  const s=curStory;if(!s)return;
+  let showCz=!!(S.settings&&S.settings.storyCz);
+  const lines=s.sents.map(function(p,i){
+    const cz=showCz?'<div class="st-cz">'+p[1]+'</div>':'';
+    return '<div class="st-line" id="stl'+i+'" onclick="playFrom('+i+')"><div class="st-en">'+p[0]+'</div>'+cz+'</div>';
+  }).join('');
+  $('#storyBody').innerHTML=
+    '<div class="st-ctrl">'+
+      '<button class="btn big" id="stPlay">▶ '+tr('Přehrát celé')+'</button>'+
+      '<button class="btn big ghost" id="stCz">'+(showCz?tr('Skrýt překlad'):tr('Zobrazit překlad'))+'</button>'+
+    '</div>'+
+    '<div class="st-text">'+lines+'</div>'+
+    '<div style="text-align:center;margin-top:18px"><button class="btn big" id="stQuiz">'+tr('Otázky na porozumění')+' →</button></div>';
+  $('#stPlay').onclick=function(){storyPlaying?stopStory():playFrom(0);};
+  $('#stCz').onclick=function(){S.settings.storyCz=!showCz;persist();renderStoryText();};
+  $('#stQuiz').onclick=startStoryQuiz;
+}
+function highlightLine(i){
+  const all=document.querySelectorAll('.st-line');
+  if(all&&all.forEach)all.forEach(function(el){el.classList.remove('on');});
+  const cur=$('#stl'+i);if(cur){cur.classList.add('on');if(cur.scrollIntoView)cur.scrollIntoView({block:'center',behavior:'smooth'});}
+}
+function playFrom(idx){
+  const s=curStory;if(!s)return;
+  if(!('speechSynthesis' in window)){toast(tr('Přehrávání není v tomto prohlížeči dostupné.'));return;}
+  stopStory();storyPlaying=true;
+  const btn=$('#stPlay');if(btn)btn.textContent='⏸ '+tr('Zastavit');
+  let i=idx;
+  function next(){
+    if(!storyPlaying||i>=s.sents.length){storyPlaying=false;const b=$('#stPlay');if(b)b.textContent='▶ '+tr('Přehrát celé');highlightLine(-1);return;}
+    highlightLine(i);
+    speak(s.sents[i][0], function(){ if(storyPlaying){i++;setTimeout(next,350);} });
+  }
+  next();
+}
+/* ---- kvíz na porozumění ---- */
+let storyQuiz=null;
+function startStoryQuiz(){
+  stopStory();
+  const s=curStory;if(!s||!s.q||!s.q.length){toast(tr('K tomuto příběhu nejsou otázky.'));return;}
+  storyQuiz={i:0,correct:0};
+  renderStoryQuestion();
+}
+function renderStoryQuestion(){
+  const s=curStory,qz=storyQuiz;if(!s||!qz)return;
+  if(qz.i>=s.q.length)return finishStoryQuiz();
+  const q=s.q[qz.i];
+  const opts=q[1].map(function(o,k){return '<button class="opt" onclick="answerStory('+k+')">'+o+'</button>';}).join('');
+  $('#storyBody').innerHTML=
+    '<p class="lead">'+tr('Otázka')+' '+(qz.i+1)+' / '+s.q.length+'</p>'+
+    '<div class="qword" style="font-size:1.25rem;margin-bottom:16px">'+q[0]+'</div>'+
+    '<div class="opts" id="stOpts">'+opts+'</div>'+
+    '<div class="feedback" id="stFb"></div>';
+}
+function answerStory(k){
+  const s=curStory,qz=storyQuiz;if(!s||!qz)return;
+  const q=s.q[qz.i], correct=q[2];
+  const box=$('#stOpts');if(box){const bs=box.querySelectorAll('button');if(bs&&bs.forEach)bs.forEach(function(b,idx){b.disabled=true;if(idx===correct)b.classList.add('good');else if(idx===k)b.classList.add('bad');});}
+  const fb=$('#stFb');
+  if(k===correct){qz.correct++;if(fb){fb.textContent=tr('Správně');fb.className='feedback ok';}}
+  else if(fb){fb.textContent=tr('Správně')+': '+q[1][correct];fb.className='feedback bad';}
+  setTimeout(function(){qz.i++;renderStoryQuestion();},1400);
+}
+function finishStoryQuiz(){
+  const s=curStory,qz=storyQuiz;if(!s||!qz)return;
+  const pct=Math.round(qz.correct/s.q.length*100);
+  S.storyRead=S.storyRead||{};S.storyRead[s.id]=1;
+  S.storyScore=S.storyScore||{};
+  if(S.storyScore[s.id]==null||pct>S.storyScore[s.id])S.storyScore[s.id]=pct;
+  if(qz.correct>0)addXP(qz.correct*5);
+  persist();
+  const stars=pct===100?'★★★':pct>=66?'★★':pct>=33?'★':'☆';
+  $('#storyBody').innerHTML='<div class="result"><div class="stars">'+stars+'</div><div class="score">'+pct+'%</div>'+
+    '<div class="rowstat"><div><b>'+qz.correct+'/'+s.q.length+'</b>'+tr('správně')+'</div></div>'+
+    '<div class="resbtns">'+
+    '<button class="btn big" onclick="openStory(\''+s.id+'\')">← '+tr('Zpět na příběh')+'</button>'+
+    '<button class="btn big ghost" onclick="stopStory();levelChosen=true;refreshHome();">'+tr('Hotovo')+'</button>'+
+    '</div></div>';
+  storyQuiz=null;
 }
 function reopenTopic(){
   if(currentTopicId&&TMAP[currentTopicId])openTopic(currentTopicId);

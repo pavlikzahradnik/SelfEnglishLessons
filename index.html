@@ -66,6 +66,11 @@
             <p class="lead" style="margin-top:-4px" data-i18n>Tematické sady nezávislé na úrovni — otevřené celé, sáhni si po tom, co zrovna potřebuješ.</p>
             <div class="lvlpick" id="vertBox"></div>
           </div>
+          <div id="storyWrap" class="hidden">
+            <div class="sec-label" style="margin-top:26px" data-i18n>Příběhy ke čtení</div>
+            <p class="lead" style="margin-top:-4px" data-i18n>Krátké příběhy — čti a poslouchej zároveň, pak si ověř porozumění pár otázkami.</p>
+            <div class="lvlpick" id="storyBox"></div>
+          </div>
         </div>
         <div class="panel hidden" id="topicsView">
           <h2 style="display:flex;align-items:center;gap:12px;flex-wrap:wrap"><span data-i18n>Témata</span> <span class="lvl" id="curLvlTag" style="background:var(--accent);color:#fff"></span><button class="btn ghost" style="margin-left:auto;padding:7px 12px;font-size:.82rem" onclick="backToLevels()" id="backLvlBtn">← Změnit úroveň</button></h2>
@@ -90,6 +95,12 @@
     <h2 id="cmTitle"></h2>
     <p class="lead" id="cmSub"></p>
     <div class="modes" id="modeBox"></div>
+  </div>
+
+  <div id="story" class="panel hidden">
+    <button class="back" id="storyBack">← Zpět</button>
+    <h2 id="storyTitle"></h2>
+    <div id="storyBody"></div>
   </div>
 
   <div id="stats" class="panel hidden">
