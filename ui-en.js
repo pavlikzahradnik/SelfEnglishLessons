@@ -324,5 +324,6 @@ window.UI_DATA.en = {
  "Zpět na příběh": "Back to story",
  "Přehrávání není v tomto prohlížeči dostupné.": "Playback is not available in this browser.",
  "Příběh se nepodařilo načíst": "Could not load the story",
- "K tomuto příběhu nejsou otázky.": "This story has no questions."
+ "K tomuto příběhu nejsou otázky.": "This story has no questions.",
+ "Přehrát znovu": "Play again"
 };

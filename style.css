@@ -438,3 +438,8 @@
   #story .opt.good{background:rgba(22,163,74,.15);border-color:var(--ok)}
   #story .opt.bad{background:rgba(220,38,38,.12);border-color:var(--bad)}
   @media(max-width:760px){#story{padding:0 2px}.st-en{font-size:1.05rem}}
+
+  /* Poslech/diktát: po odpovědi se tlačítko změní na „přehrát znovu" (zelené). */
+  .bigspeak.replay{background:linear-gradient(135deg,#16a34a,#0ea5e9);box-shadow:0 12px 30px rgba(22,163,74,.4)}
+  .bigspeak.replay:before{content:'⟳ ';font-size:1.4rem}
+  .bigspeak.replay{font-size:1.9rem}

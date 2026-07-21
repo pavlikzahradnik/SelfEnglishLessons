@@ -324,5 +324,6 @@ window.UI_DATA.de = {
  "Zpět na příběh": "Zurück zur Geschichte",
  "Přehrávání není v tomto prohlížeči dostupné.": "Wiedergabe ist in diesem Browser nicht verfügbar.",
  "Příběh se nepodařilo načíst": "Die Geschichte konnte nicht geladen werden",
- "K tomuto příběhu nejsou otázky.": "Diese Geschichte hat keine Fragen."
+ "K tomuto příběhu nejsou otázky.": "Diese Geschichte hat keine Fragen.",
+ "Přehrát znovu": "Nochmal abspielen"
 };

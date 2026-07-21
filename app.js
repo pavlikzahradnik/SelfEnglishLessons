@@ -1311,6 +1311,10 @@ function exListen(card,done){
     const fb=$('#fb');
     if(ok){fb.textContent=tr('Správně')+' · '+w.en+' = '+w.cz;fb.className='feedback ok';}
     else{fb.textContent='Bylo to: '+w.en+' ('+w.cz+')';fb.className='feedback bad';}
+    /* Po odpovědi se tlačítko změní na „přehrát znovu" — teď už si můžeš slovo
+       pustit kolikrát chceš (na zapamatování). Před odpovědí schválně jen jednou. */
+    big.classList.add('replay');big.title=tr('Přehrát znovu');
+    big.onclick=()=>{big.classList.add('playing');speak(w.en,()=>big.classList.remove('playing'));};
     showContinue(done,ok);
   });
 }
@@ -1351,7 +1355,11 @@ function exDict(card,done){
   const big=$('#big');big.onclick=()=>toast(tr('Přehraje se jen jednou 🙂'));
   setTimeout(()=>speak(w.en,()=>big.classList.remove('playing')),250);
   const inp=$('#ti');inp.focus();
-  const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent=tr('Správně')+' · '+w.en+' = '+w.cz;fb.className='feedback ok';}else{fb.textContent=tr('Správně')+': '+w.en+' ('+w.cz+')';fb.className='feedback bad';}speak(w.en);showContinue(done,ok,true);};
+  const go=()=>{if(inp.disabled)return;inp.disabled=true;$('#chk').disabled=true;const ok=norm(inp.value)===norm(w.en);inp.style.borderColor=ok?'var(--ok)':'var(--bad)';const fb=$('#fb');if(ok){fb.textContent=tr('Správně')+' · '+w.en+' = '+w.cz;fb.className='feedback ok';}else{fb.textContent=tr('Správně')+': '+w.en+' ('+w.cz+')';fb.className='feedback bad';}
+    /* Po odpovědi jde přehrát znovu (na zapamatování správné výslovnosti). */
+    big.classList.add('replay');big.title=tr('Přehrát znovu');
+    big.onclick=()=>{big.classList.add('playing');speak(w.en,()=>big.classList.remove('playing'));};
+    speak(w.en);showContinue(done,ok,true);};
   $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 }
 const SR=window.SpeechRecognition||window.webkitSpeechRecognition;
