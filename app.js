@@ -783,6 +783,10 @@ function buildGrammarMenu(){
     return '<button class="mode" onclick="startGrammar(\''+d[0]+'\')"><div class="mt"><span class="ic '+d[2]+'">'+d[1]+'</span> '+d[3]+'</div><small>'+d[4]+'</small>'+st+'</button>';
   }).join('');
 }
+function reopenTopic(){
+  if(currentTopicId&&TMAP[currentTopicId])openTopic(currentTopicId);
+  else goHome();
+}
 function openTopic(id){
   if(!isUnlocked(id)){toast(tr('Nejdřív dokonči předchozí témata 🔒'));return;}
   currentTopicId=id;const t=TMAP[id];$('#cmTitle').textContent=t.title;
@@ -828,6 +832,9 @@ function startSession(cards, meta){
 }
 function nextCard(){
   if(!sess)return;
+  /* Ukonči případné čtení předchozí otázky — jinak by AI/TTS dočetlo starou větu,
+     i když už jsem u nové otázky (typicky u kvízu, který sám nemluví). */
+  if(window.speechSynthesis)speechSynthesis.cancel();
   if(sess.timeLimit && Date.now()-sess.startTs>sess.timeLimit){return finishSession();}
   if(sess.queue.length===0)return finishSession();
   const card=sess.queue.shift();
@@ -844,11 +851,25 @@ function nextCard(){
   else if(card.type==='gquiz')exGQuiz(card,done);
   else if(card.type==='gfill')exGFill(card,done);
 }
+/* XP jen za skutečný pokrok. Za slovo/cvičení už jednou zvládnuté dnes dostaneš
+   jen malou opakovací odměnu (ne plný zisk), aby se levely nedaly farmit
+   opakováním téhož dokola. „Opakování je matka moudrosti", ale ne zdroj levelů. */
+function xpFor(card,good){
+  if(!good)return 0;
+  const base=card.xp||10;
+  const id=card.word&&card.word.id;
+  if(!id)return base;                       // gramatika bez ID – ber jak dřív
+  S.xpSeen=S.xpSeen||{};
+  const day=Math.floor(Date.now()/864e5);
+  if(S.xpSeen[id]===day)return Math.max(1,Math.round(base*0.2));   // dnes už bráno → 20 %
+  S.xpSeen[id]=day;
+  return base;
+}
 function afterAnswer(card,good){
   const dt=Math.min(Date.now()-sess.lastTs,60000);S.stats.timeMs+=dt;sess.lastTs=Date.now();
-  if(card.type==='pron'){ if(good){sess.correct++;addXP(card.xp||8);} sess.done++;checkMilestones();nextCard();return; }
+  if(card.type==='pron'){ if(good){sess.correct++;addXP(xpFor(card,true)||8);} sess.done++;checkMilestones();nextCard();return; }
   if(card.word && card.word.id) grade(card.word.id, good);
-  if(good){sess.correct++;addXP(card.xp||10);}
+  if(good){sess.correct++;addXP(xpFor(card,good));}
   else{const pos=Math.min(4,sess.queue.length);sess.queue.splice(pos,0,card);}
   sess.done++;
   checkMilestones();
@@ -865,7 +886,9 @@ function finishSession(){
   $('#sessTag').style.display='none';$('#counter').textContent='';setProg(1,1);
   $('#stage').innerHTML='<div class="result"><div class="stars">'+stars+'</div><div class="score">'+pct+'%</div>'+
     '<div class="rowstat"><div><b>'+correct+'/'+total+'</b>'+tr('správně')+'</div><div><b>'+secs+'s</b>'+tr('čas')+'</div><div><b>'+S.daily.done+'/'+S.settings.goal+'</b>'+tr('denní cíl')+'</div></div>'+
-    '<button class="btn big" onclick="goHome()">'+tr('Domů')+'</button></div>';
+    '<div class="resbtns">'+
+    (currentTopicId&&TMAP[currentTopicId]?'<button class="btn big" onclick="reopenTopic()">← '+tr('Zpět na téma')+'</button>':'')+
+    '<button class="btn big ghost" onclick="goHome()">'+tr('Výběr témat')+'</button></div></div>';
   sess=null;persist();
 }
 function quitSession(){sess=null;plc=null;if(window.speechSynthesis)speechSynthesis.cancel();stopRec();goHome();}

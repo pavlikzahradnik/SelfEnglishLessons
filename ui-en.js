@@ -286,5 +286,7 @@ window.UI_DATA.en = {
  "Změnit": "Change",
  "Zpět na výběr jazyka": "Back to language choice",
  "Procvičovat": "Practise",
- "Úroveň dokončena": "Level completed"
+ "Úroveň dokončena": "Level completed",
+ "Zpět na téma": "Back to topic",
+ "Výběr témat": "Topic list"
 };

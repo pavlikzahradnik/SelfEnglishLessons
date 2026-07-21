@@ -286,5 +286,7 @@ window.UI_DATA.de = {
  "Změnit": "Ändern",
  "Zpět na výběr jazyka": "Zurück zur Sprachwahl",
  "Procvičovat": "Üben",
- "Úroveň dokončena": "Niveau abgeschlossen"
+ "Úroveň dokončena": "Niveau abgeschlossen",
+ "Zpět na téma": "Zurück zum Thema",
+ "Výběr témat": "Themenauswahl"
 };
