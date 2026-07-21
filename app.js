@@ -1187,20 +1187,28 @@ function exPron(card,done){
     '<div style="text-align:center;margin-top:10px"><button class="btn big ghost" id="pnext">'+tr('Další')+' →</button></div>';
   $('#spk').onclick=()=>speak(w.en);
   $('#pnext').onclick=()=>done(recognized);
+  let cd=null;
+  function stopCountdown(){if(cd){clearInterval(cd);cd=null;}}
   $('#mic').onclick=()=>{
-    stopRec();rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=3;
-    $('#mic').classList.add('rec');$('#hint').textContent=tr('Poslouchám…');
+    stopRec();stopCountdown();rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=3;
+    $('#mic').classList.add('rec');
+    /* Vizuální odpočet, ať student ví, jak dlouho ho appka ještě poslouchá. */
+    let left=6;
+    const tick=()=>{$('#hint').textContent=tr('Poslouchám…')+' ('+left+' s)';};
+    tick();
+    cd=setInterval(()=>{left--; if(left<=0){stopCountdown();stopRec();$('#hint').textContent=tr('Klikni na mikrofon a zkus slovo říct');} else tick();},1000);
     rec.onresult=(ev)=>{
+      stopCountdown();
       let heard='';for(let i=0;i<ev.results[0].length;i++){heard+=' '+ev.results[0][i].transcript;}
       const target=norm(w.en);const ok=norm(heard).includes(target)||target.includes(norm(ev.results[0][0].transcript));
       const fb=$('#fb');
-      if(ok){recognized=true;fb.textContent=tr('Super, appka ti rozuměla! Slyšela:')+' „'+ev.results[0][0].transcript+'" 👍';fb.className='feedback ok';$('#hint').textContent=tr('Můžeš zkusit znovu, nebo pokračovat dál.');setTimeout(()=>done(true),1300);}
+      if(ok){recognized=true;fb.textContent=tr('Super, appka ti rozuměla! Slyšela:')+' „'+ev.results[0][0].transcript+'" 👍';fb.className='feedback ok';$('#hint').textContent=tr('Můžeš zkusit znovu, nebo pokračovat dál.');setTimeout(()=>done(true),2600);}
       else{fb.textContent=tr('Nerozpoznala jsem to úplně (slyšela')+' „'+ev.results[0][0].transcript+'"). '+tr('Nevadí — zkus to klidně znovu.');fb.className='feedback bad';$('#hint').textContent=tr('Zkus to znovu, nebo pokračuj tlačítkem Další.');}
       $('#mic').classList.remove('rec');
     };
-    rec.onerror=()=>{$('#mic').classList.remove('rec');$('#hint').textContent=tr('Mikrofon se nepodařilo použít — můžeš pokračovat dál.');};
-    rec.onend=()=>{$('#mic').classList.remove('rec');};
-    try{rec.start();}catch(e){}
+    rec.onerror=()=>{stopCountdown();$('#mic').classList.remove('rec');$('#hint').textContent=tr('Mikrofon se nepodařilo použít — můžeš pokračovat dál.');};
+    rec.onend=()=>{stopCountdown();$('#mic').classList.remove('rec');};
+    try{rec.start();}catch(e){stopCountdown();}
   };
 }
 
