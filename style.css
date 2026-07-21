@@ -443,3 +443,12 @@
   .bigspeak.replay{background:linear-gradient(135deg,#16a34a,#0ea5e9);box-shadow:0 12px 30px rgba(22,163,74,.4)}
   .bigspeak.replay:before{content:'⟳ ';font-size:1.4rem}
   .bigspeak.replay{font-size:1.9rem}
+
+  /* ===== Karty příběhů: menší než úrovně (mají míň obsahu) ===== */
+  #storyBox{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  #storyBox .lvlcard{min-height:0!important;padding:14px 14px!important;gap:5px!important}
+  #storyBox .lvlcard .lc-badge{font-size:1.5rem!important;background:transparent!important;padding:0!important;margin-bottom:0}
+  #storyBox .lvlcard .lc-t{font-size:.92rem!important;line-height:1.3}
+  #storyBox .lvlcard .lc-d{font-size:.72rem!important}
+  #storyBox .lvlcard .lc-go{margin-top:2px}
+  @media(max-width:760px){#storyBox{grid-template-columns:repeat(2,1fr)}}
