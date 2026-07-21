@@ -94,12 +94,27 @@ function loadUI(lang,cb){
 let CATS, ALL, BYID, GRAMMAR, GMAP, PATH, CI, FINAL, TMAP;
 
 const BADGES=[
- {id:'first',icon:'●',name:'Začátek',desc:'Dokonči první lekci'},
- {id:'lvl5',icon:'◆',name:'Level 5',desc:'Dosáhni levelu 5'},
+ {id:'first',icon:'🌱',name:'Začátek',desc:'Dokonči první lekci'},
+ /* levely */
+ {id:'lvl5',icon:'🥉',name:'Level 5',desc:'Dosáhni levelu 5'},
+ {id:'lvl10',icon:'🥈',name:'Level 10',desc:'Dosáhni levelu 10'},
+ {id:'lvl20',icon:'🥇',name:'Level 20',desc:'Dosáhni levelu 20'},
+ {id:'lvl50',icon:'👑',name:'Level 50',desc:'Dosáhni levelu 50'},
+ /* série dní */
  {id:'days7',icon:'🔥',name:'7 dní',desc:'7 dní v řadě'},
- {id:'learn50',icon:'★',name:'50 slov',desc:'Nauč se 50 slov'},
- {id:'learn150',icon:'★',name:'150 slov',desc:'Nauč se 150 slov'},
- {id:'noProblem',icon:'✓',name:'Bez problémů',desc:'Vyčisti všechna problémová slova'}
+ {id:'days30',icon:'🔥',name:'30 dní',desc:'30 dní v řadě'},
+ {id:'days100',icon:'💯',name:'100 dní',desc:'100 dní v řadě'},
+ /* naučená slova */
+ {id:'learn50',icon:'⭐',name:'50 slov',desc:'Nauč se 50 slov'},
+ {id:'learn150',icon:'⭐',name:'150 slov',desc:'Nauč se 150 slov'},
+ {id:'learn500',icon:'🌟',name:'500 slov',desc:'Nauč se 500 slov'},
+ {id:'learn1000',icon:'✨',name:'1000 slov',desc:'Nauč se 1000 slov'},
+ /* dokončené úrovně */
+ {id:'doneA',icon:'🎓',name:'Základ hotový',desc:'Dokonči úrovně A1 i A2'},
+ {id:'doneB',icon:'🎓',name:'Střední hotová',desc:'Dokonči úrovně B1 i B2'},
+ /* body */
+ {id:'xp5k',icon:'💎',name:'5000 bodů',desc:'Nasbírej 5000 bodů'},
+ {id:'noProblem',icon:'🧹',name:'Bez problémů',desc:'Vyčisti všechna problémová slova'}
 ];
 
 const STEPS=[2, 60, 1440, 10080, 43200];
@@ -436,7 +451,11 @@ const XP_PER_LEVEL=200;
 function level(){return Math.floor(S.xp/XP_PER_LEVEL)+1;}
 function levelProgress(){return (S.xp%XP_PER_LEVEL)/XP_PER_LEVEL;}
 function toNext(){return XP_PER_LEVEL-(S.xp%XP_PER_LEVEL);}
-function addXP(n){const before=level();S.xp+=n;persist();updateHeader();if(level()>before){toast('Level '+level()+'! 🎉');if(level()>=5)award('lvl5');}}
+function addXP(n){
+  const before=level();
+  S.xp+=n;persist();updateHeader();
+  if(level()>before){toast('Level '+level()+'! 🎉');checkMilestones();}
+}
 
 function ensureDaily(){
   const today=dateStr(Date.now());
@@ -453,13 +472,28 @@ function checkDailyMet(){
     S.daily.met=true;S.daily.streak++;
     if(S.daily.streak>S.stats.bestDays)S.stats.bestDays=S.daily.streak;
     persist();toast(tr('Denní cíl splněn! Série')+' '+S.daily.streak+' '+tr('dní')+' 🔥');
-    if(S.daily.streak>=7)award('days7');
+    if(S.daily.streak>=7)award('days7');checkMilestones();
     updateHeader();renderMission();
   }
 }
 
 function award(id){if(S.badges.includes(id))return;S.badges.push(id);persist();renderAch();updateHeader();const b=BADGES.find(x=>x.id===id);if(b)toast(tr('Úspěch')+': '+tr(b.name));}
-function checkMilestones(){const lc=learnedCount();if(lc>=50)award('learn50');if(lc>=150)award('learn150');if(problemWords().length===0 && S.stats.w>0)award('noProblem');}
+function checkMilestones(){
+  const lc=learnedCount();
+  if(lc>=50)award('learn50');
+  if(lc>=150)award('learn150');
+  if(lc>=500)award('learn500');
+  if(lc>=1000)award('learn1000');
+  if(problemWords().length===0 && S.stats.w>0)award('noProblem');
+  const lv=level();
+  if(lv>=5)award('lvl5');if(lv>=10)award('lvl10');if(lv>=20)award('lvl20');if(lv>=50)award('lvl50');
+  if(S.xp>=5000)award('xp5k');
+  const st=(S.daily&&S.daily.streak)||0;
+  if(st>=7)award('days7');if(st>=30)award('days30');if(st>=100)award('days100');
+  const pair=curPair();
+  if(levelDone(pair,'A1')&&levelDone(pair,'A2'))award('doneA');
+  if(levelDone(pair,'B1')&&levelDone(pair,'B2'))award('doneB');
+}
 
 function updateHeader(){$('#hLevel').textContent=level();$('#hXp').textContent=S.xp;$('#hDays').textContent=S.daily.streak;}
 function renderMission(){
@@ -648,7 +682,7 @@ function renderVerticals(){
   }).join('');
 }
 function chooseLevel(lvl){
-  if(!levelUnlocked(lvl)){toast(tr('Úroveň')+' '+lvl+' '+tr('se odemkne po zvládnutí předchozího závěrečného testu na')+' '+A2_UNLOCK_PCT+' % 🔒');return;}
+  if(!isVertical(lvl) && !levelUnlocked(lvl)){toast(tr('Úroveň')+' '+lvl+' '+tr('se odemkne po zvládnutí předchozího závěrečného testu na')+' '+A2_UNLOCK_PCT+' % 🔒');return;}
   S.settings.level=lvl;
   S.settings.levelByPair=S.settings.levelByPair||{};S.settings.levelByPair[curPair()]=lvl;
   /* CEFR úroveň si pamatujeme zvlášť — vertikála ji nesmí přepsat */
