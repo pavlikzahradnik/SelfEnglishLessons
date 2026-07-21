@@ -142,15 +142,29 @@ function placementAvailable(){const lv=langLevels(curPair());return !!(window.LA
 function plcPool(lvl){
   const u=(langLevels(curPair())[lvl]||{});
   const arr=[];
-  /* a) gramatika (doplň správný tvar) */
+  /* a) gramatika (doplň správný tvar) — jádro testu, rozliší časy a vazby */
   (u.gram||[]).forEach(gg=>gg.items.forEach((it,i)=>arr.push({level:lvl,topic:gg.title,gitem:it,key:gg.id+'#'+i})));
-  /* b) slovní zásoba jako otázka: „přelož slovo" se 3 distraktory z JINÝCH slov téže úrovně.
-     Tím se test opře i o slovíčka, ne jen o gramatiku — a je znatelně těžší. */
+  /* b) VĚTY: doplň chybějící slovo do věty. Testují porozumění celku (slovosled,
+     kontext, vazby) — rozliší úroveň mnohem líp než izolované slovíčko.
+     Distraktory bereme z jiných slov téže kategorie. */
+  (u.cats||[]).forEach(function(c){
+    const bank=(c.vocab||[]).map(v=>v[0]);
+    (c.sentences||[]).forEach(function(s,i){
+      const answer=s[1];
+      const others=shuffle(bank.filter(x=>x!==answer)).slice(0,3);
+      if(others.length<3)return;
+      const opts=shuffle([answer].concat(others));
+      arr.push({level:lvl,topic:c.title,sentence:true,
+        gitem:[s[0],answer,opts,'? '+tr('Doplň slovo do věty')],key:c.id+'#s'+i});
+    });
+  });
+  /* c) slovní zásoba jen jako lehký doplněk (každé 5. slovo), aby test nebyl
+     jen o větách, ale těžiště je jinde. */
   const words=[];(u.cats||[]).forEach(c=>(c.vocab||[]).forEach(v=>words.push(v)));
   if(words.length>=4){
     (u.cats||[]).forEach(function(c){
       (c.vocab||[]).forEach(function(v,i){
-        if(i%2!==0)return;                       /* ne každé slovo, ať pool nenabobtná */
+        if(i%5!==0)return;                       /* jen každé 5. slovo (dřív každé 2.) */
         const others=shuffle(words.filter(w=>w[0]!==v[0])).slice(0,3).map(w=>w[1]);
         if(others.length<3)return;
         const opts=shuffle([v[1]].concat(others));
