@@ -695,7 +695,7 @@ function renderStories(){
     const stat=best!=null?('<div class="lc-go" style="color:var(--ok)">'+best+' % ✓</div>')
               :(rd?'<div class="lc-go" style="color:var(--muted)">'+tr('Přečteno')+'</div>':'<div class="lc-go">'+tr('Číst')+' →</div>');
     return '<button class="lvlcard" onclick="openStory(\''+s.id+'\')">'+
-      '<div class="lc-badge" style="font-size:1.4rem">📖</div>'+
+      '<div class="lc-badge" style="font-size:1.5rem">'+(s.art||'📖')+'</div>'+
       '<div class="lc-t">'+storyTitle(s)+badge+'</div>'+
       '<div class="lc-d">'+s.sents.length+' '+tr('vět')+' · '+s.q.length+' '+tr('otázek')+'</div>'+
       stat+'</button>';
@@ -880,12 +880,13 @@ function findStory(id){return langStories(curPair()).find(s=>s.id===id)||null;}
 function openStory(id){
   const s=findStory(id);if(!s){toast(tr('Příběh se nepodařilo načíst'));return;}
   curStory=s;storyPlaying=false;
-  $('#storyTitle').textContent=storyTitle(s)+'  ('+s.level+')';
-  const back=$('#storyBack');if(back)back.onclick=function(){stopStory();levelChosen=true;refreshHome();};
+  $('#storyTitle').textContent=(s.art?s.art+'  ':'')+storyTitle(s)+'  ('+s.level+')';
+  const back=$('#storyBack');if(back)back.onclick=function(){stopStory();levelChosen=false;refreshHome();show('home');};
   renderStoryText();
   show('story');
 }
 function stopStory(){storyPlaying=false;if(window.speechSynthesis)speechSynthesis.cancel();}
+function storyExit(){stopStory();levelChosen=false;refreshHome();show('home');}
 function renderStoryText(){
   const s=curStory;if(!s)return;
   let showCz=!!(S.settings&&S.settings.storyCz);
@@ -963,7 +964,7 @@ function finishStoryQuiz(){
     '<div class="rowstat"><div><b>'+qz.correct+'/'+s.q.length+'</b>'+tr('správně')+'</div></div>'+
     '<div class="resbtns">'+
     '<button class="btn big" onclick="openStory(\''+s.id+'\')">← '+tr('Zpět na příběh')+'</button>'+
-    '<button class="btn big ghost" onclick="stopStory();levelChosen=true;refreshHome();">'+tr('Hotovo')+'</button>'+
+    '<button class="btn big ghost" onclick="storyExit()">'+tr('Hotovo')+'</button>'+
     '</div></div>';
   storyQuiz=null;
 }
