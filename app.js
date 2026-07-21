@@ -143,8 +143,8 @@ function buildLevel(lvl){
   TMAP={}; CATS.forEach(c=>TMAP[c.id]={type:'vocab',title:c.title,obj:c}); GRAMMAR.forEach(g=>TMAP[g.id]={type:'grammar',title:g.title,obj:g}); TMAP[FINAL.id]={type:'test',title:FINAL.title,obj:FINAL};
 }
 const LOOKAHEAD=3;   // kolik témat dopředu je vidět za dokončenou frontou
-const DONE_EX=2;     // kolik cvičení ≥60 % dokončí téma
-const DONE_PCT=60;
+const DONE_EX=3;     // kolik cvičení ≥DONE_PCT dokončí slovníkové téma
+const DONE_PCT=75;
 
 /* ---- profily (lokální, offline) ---- */
 const AVA_COLORS=['#4f46e5','#0ea5e9','#0d9488','#7c3aed','#db2777','#ea580c','#16a34a','#d97706'];
@@ -222,7 +222,18 @@ function exlogScores(catId){return topicExTypes(catId).map(t=>S.exlog[catId+':'+
 function hasExlog(catId){return exlogScores(catId).length>0;}
 function worstScore(catId){const s=exlogScores(catId);return s.length?Math.min.apply(null,s.map(e=>e.last)):null;}
 function goodExCount(catId){return exlogScores(catId).filter(e=>e.last>=DONE_PCT).length;}
-function isTopicDone(id){if(TMAP[id]&&TMAP[id].type==='test'){const e=S.exlog[id+':test'];return !!(e&&e.last>=60);}return goodExCount(id)>=DONE_EX;}
+function isTopicDone(id){
+  if(TMAP[id]&&TMAP[id].type==='test'){const e=S.exlog[id+':test'];return !!(e&&e.last>=DONE_PCT);}
+  if(isGrammar(id))return grammarDone(id);       /* gramatika: teorie + kvíz + doplň, vše hotové */
+  return goodExCount(id)>=DONE_EX;               /* slovníkové téma: 3 cvičení na 75 % */
+}
+/* Gramatika je hotová, jen když je přečtená teorie A kvíz i doplňovačka na práh. */
+function grammarDone(id){
+  const theory=!!S.exlog[id+':theory'];
+  const quiz=(S.exlog[id+':gquiz']||{}).last>=DONE_PCT;
+  const fill=(S.exlog[id+':gfill']||{}).last>=DONE_PCT;
+  return theory && quiz && fill;
+}
 function completedCount(){let n=0;for(const id of PATH){if(isTopicDone(id))n++;else break;}return n;}
 /* Úroveň je „hotová", když je splněný její závěrečný test. Funguje i pro úroveň,
    ve které zrovna nejsem (čte přímo z balíčku, ne z aktuálně načteného PATH). */
@@ -230,7 +241,7 @@ function levelDone(pair,lvl){
   const u=(langLevels(pair)||{})[lvl];
   if(!u||!u.test)return false;
   const e=S.exlog[u.test+':test'];
-  return !!(e&&e.last>=60);
+  return !!(e&&e.last>=DONE_PCT);
 }
 /* Nejvyšší dokončená úroveň dané dvojice (nebo null). */
 function highestDoneLevel(pair){
@@ -793,12 +804,12 @@ function openTopic(id){
   if(t.type==='test'){
     curGram=null;curCat=null;const e=S.exlog[FINAL.id+':test'];
     $('#cmSub').textContent=tr('Prověř všechna témata najednou')+(e?' · '+tr('nejlepší')+' '+e.last+' %':'');
-    $('#modeBox').innerHTML='<button class="mode" style="grid-column:1/-1" onclick="startTest()"><div class="mt"><span class="ic" style="background:#f7b500">🎓</span> '+tr('Spustit test')+'</div><small>'+tr('30 otázek napříč slovíčky i gramatikou · na 60 % ho dokončíš')+'</small>'+(e?'<div class="exstat done"><span class="d"></span>'+tr('Nejlepší')+' '+e.last+' %</div>':'<div class="exstat"><span class="d"></span>'+tr('Nevyzkoušeno')+'</div>')+'</button>';
+    $('#modeBox').innerHTML='<button class="mode" style="grid-column:1/-1" onclick="startTest()"><div class="mt"><span class="ic" style="background:#f7b500">🎓</span> '+tr('Spustit test')+'</div><small>'+tr('30 otázek napříč slovíčky i gramatikou · na')+' '+DONE_PCT+' % '+tr('ho dokončíš')+'</small>'+(e?'<div class="exstat done"><span class="d"></span>'+tr('Nejlepší')+' '+e.last+' %</div>':'<div class="exstat"><span class="d"></span>'+tr('Nevyzkoušeno')+'</div>')+'</button>';
     show('catMenu');return;
   }
   if(t.type==='grammar'){
     curGram=t.obj;curCat=null;
-    $('#cmSub').textContent=tr('Gramatika')+' · '+(isTopicDone(id)?tr('dokončeno')+' ✓':tr('přečti teorii a zvládni kvíz na')+' '+DONE_PCT+' %+');
+    $('#cmSub').textContent=tr('Gramatika')+' · '+(isTopicDone(id)?tr('dokončeno')+' ✓':tr('přečti teorii a zvládni kvíz i doplňovačku na')+' '+DONE_PCT+' %+');
     buildGrammarMenu();
   }else{
     curCat=t.obj;curGram=null;const g=goodExCount(id);

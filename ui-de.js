@@ -288,5 +288,7 @@ window.UI_DATA.de = {
  "Procvičovat": "Üben",
  "Úroveň dokončena": "Niveau abgeschlossen",
  "Zpět na téma": "Zurück zum Thema",
- "Výběr témat": "Themenauswahl"
+ "Výběr témat": "Themenauswahl",
+ "ho dokončíš": "zum Bestehen",
+ "přečti teorii a zvládni kvíz i doplňovačku na": "lies die Theorie und schaffe Quiz und Lückentext mit"
 };

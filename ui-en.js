@@ -288,5 +288,7 @@ window.UI_DATA.en = {
  "Procvičovat": "Practise",
  "Úroveň dokončena": "Level completed",
  "Zpět na téma": "Back to topic",
- "Výběr témat": "Topic list"
+ "Výběr témat": "Topic list",
+ "ho dokončíš": "to pass",
+ "přečti teorii a zvládni kvíz i doplňovačku na": "read the theory and pass the quiz and fill-in with"
 };
