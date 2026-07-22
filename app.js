@@ -409,10 +409,16 @@ function relTime(ts){const s=(Date.now()-ts)/1000;if(s<60)return tr('právě te�
 let VOICES={};
 function pickVoice(){
   const vs=speechSynthesis.getVoices();
+  if(!vs||!vs.length)return;                  /* Edge/Chrome plní hlasy asynchronně */
   Object.keys(LANG_INFO).forEach(function(l){
     const tag=LANG_INFO[l].tts, base=l;
+    /* 1) přesná shoda (en-GB), 2) jakýkoli hlas téhož jazyka (en-US, en-AU…),
+       3) hlas, jehož název jazyk obsahuje. Tím pokryjeme prohlížeč, který nemá
+       zrovna britskou/německou variantu, ale nějaký anglický/německý hlas má. */
     VOICES[l]=vs.find(v=>new RegExp(tag.replace('-','[-_]'),'i').test(v.lang))||
-              vs.find(v=>new RegExp('^'+base,'i').test(v.lang))||null;
+              vs.find(v=>new RegExp('^'+base+'[-_]','i').test(v.lang))||
+              vs.find(v=>new RegExp('^'+base+'$','i').test(v.lang))||
+              vs.find(v=>new RegExp(base,'i').test(v.lang))||null;
   });
   /* uživatelská volba hlasu má přednost před automatickým výběrem */
   const saved=S&&S.settings&&S.settings.voiceByTgt;
@@ -431,11 +437,26 @@ function speak(txt,cb){
   if(!('speechSynthesis' in window)){cb&&cb();return;}
   speechSynthesis.cancel();
   const lang=curTgt();                       /* mluví se vždy v cílovém jazyce */
-  const u=new SpeechSynthesisUtterance(txt);
-  u.lang=(LANG_INFO[lang]||LANG_INFO.en).tts;u.rate=.9;
-  const v=VOICES[lang];if(v)u.voice=v;
-  if(cb)u.onend=cb;
-  speechSynthesis.speak(u);
+  /* Hlasy se v Edge/Chrome plní asynchronně — když ještě nejsou, vyber je teď
+     a případně krátce počkej, ať první přehrání nespadne do prázdna. */
+  if(!VOICES[lang])pickVoice();
+  const doSpeak=function(){
+    const u=new SpeechSynthesisUtterance(txt);
+    const v=VOICES[lang];
+    /* Když máme konkrétní hlas, nastav lang podle NĚJ (ne natvrdo en-GB),
+       aby to fungovalo i s en-US apod. Bez hlasu použij obecný tag jazyka. */
+    if(v){u.voice=v;u.lang=v.lang;}
+    else{u.lang=(LANG_INFO[lang]||LANG_INFO.en).tts;}
+    u.rate=.9;
+    if(cb)u.onend=cb;
+    speechSynthesis.speak(u);
+  };
+  if(!VOICES[lang] && (!speechSynthesis.getVoices()||!speechSynthesis.getVoices().length)){
+    /* hlasy ještě nedorazily — zkus po krátké prodlevě znovu */
+    setTimeout(function(){pickVoice();doSpeak();},250);
+  }else{
+    doSpeak();
+  }
 }
 
 function srsOf(id){return S.srs[id];}
