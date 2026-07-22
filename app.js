@@ -1303,14 +1303,27 @@ function exGFill(card,done){
   $('#chk').onclick=go;inp.addEventListener('keydown',e=>{if(e.key==='Enter')go();});
 }
 
+/* Když má cvičení míň karet než minimum, doplní je opakováním (zamíchaně),
+   ať student procvičí aspoň MIN_EX otázek. Málo slov/vět se tak zopakuje. */
+const MIN_EX=10;
+function padToMin(cards, min){
+  if(!cards.length || cards.length>=min)return cards;
+  const out=cards.slice();
+  let i=0;
+  const base=shuffle(cards.slice());
+  while(out.length<min){ out.push(base[i%base.length]); i++; }
+  return out;
+}
 function startCat(type){
   const words=curCat.vocab.map((v,i)=>BYID[curCat.id+':'+i]);
   if(type==='fill'){
-    const cards=curCat.sentences.map(s=>({sent:s, word:findWordByEn(curCat,s[1]), type:'fill', dir:'en2cz', xp:S.settings.fill==='hard'?15:8}));
+    let cards=curCat.sentences.map(s=>({sent:s, word:findWordByEn(curCat,s[1]), type:'fill', dir:'en2cz', xp:S.settings.fill==='hard'?15:8}));
+    cards=padToMin(cards, MIN_EX);   /* aspoň 10 otázek — málo vět doplní opakováním */
     return startSession(cards,{tag:curCat.title+' · '+tr('doplň větu'), cat:curCat.id, type:'fill'});
   }
   const dir=type==='pron'||type==='dict'?'en2cz':pickDir();
-  const cards=words.map(w=>({word:w,type,dir, xp: type==='dict'?15:(type==='pron'?12:10)}));
+  let cards=words.map(w=>({word:w,type,dir, xp: type==='dict'?15:(type==='pron'?12:10)}));
+  cards=padToMin(cards, MIN_EX);     /* aspoň 10 otázek i u menších témat */
   startSession(cards,{tag:curCat.title, cat:curCat.id, type:type});
 }
 function findWordByEn(cat,en){const i=cat.vocab.findIndex(v=>norm(v[0])===norm(en));return i>=0?BYID[cat.id+':'+i]:null;}
