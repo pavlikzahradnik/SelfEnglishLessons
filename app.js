@@ -1332,15 +1332,25 @@ function exFlash(card,done){
   const front=showEn?w.en:w.cz, back=showEn?w.cz:w.en;
   const ex=langExamples()[norm(w.en)];
   const exHtml=ex?'<div class="exlist">'+ex.slice(0,2).map(e=>'<div class="exs"><span>'+e[0]+'</span><em>'+e[1]+'</em></div>').join('')+'</div>':'';
+  /* Tlačítko výslovnosti patří k ANGLICKÉMU slovu — ať je vpředu nebo vzadu.
+     Když je angličtina vpředu (showEn), dáme ho na front; jinak na zadní stranu,
+     aby po otočení na „Nurse" šlo slovo přehrát a znovu přehrát. */
+  const spkBtn='<button class="speak" id="spk">♪ '+tr('Výslovnost')+'</button>';
   $('#stage').innerHTML=
     '<div class="flash" id="flash"><div class="flash-inner">'+
       '<div class="face front"><div class="word">'+front+'</div>'+
-      (showEn?'<button class="speak" id="spk">♪ '+tr('Výslovnost')+'</button>':'')+
+      (showEn?spkBtn:'')+
       '<div class="sub">'+tr('klikni pro překlad')+'</div></div>'+
-      '<div class="face back-face"><div class="word">'+back+'</div><div class="sub" style="color:var(--muted)">'+front+'</div>'+exHtml+'</div>'+
+      '<div class="face back-face"><div class="word">'+back+'</div><div class="sub" style="color:var(--muted)">'+front+'</div>'+
+      (!showEn?spkBtn:'')+exHtml+'</div>'+
     '</div></div>'+
     '<div class="knowbtns"><button class="kno" id="bno">✕ '+tr('Neumím')+'</button><button class="kyes" id="byes">✓ '+tr('Umím')+'</button></div>';
-  const f=$('#flash');f.onclick=()=>f.classList.toggle('flip');
+  const f=$('#flash');
+  f.onclick=()=>{
+    f.classList.toggle('flip');
+    /* Po otočení na anglickou stranu slovo automaticky přehraj (zvuková paměť). */
+    if(!showEn && f.classList.contains('flip'))speak(w.en);
+  };
   if($('#spk'))$('#spk').onclick=(e)=>{e.stopPropagation();speak(w.en);};
   $('#bno').onclick=()=>done(false);
   $('#byes').onclick=()=>done(true);
