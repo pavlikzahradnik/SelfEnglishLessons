@@ -326,5 +326,9 @@ window.UI_DATA.de = {
  "Příběh se nepodařilo načíst": "Die Geschichte konnte nicht geladen werden",
  "K tomuto příběhu nejsou otázky.": "Diese Geschichte hat keine Fragen.",
  "Přehrát znovu": "Nochmal abspielen",
- "Doplň slovo do věty": "Ergänze das fehlende Wort"
+ "Doplň slovo do věty": "Ergänze das fehlende Wort",
+ "Začneme od začátku?": "Von vorne anfangen?",
+ "Zdá se, že angličtina je pro tebe nová — a to je úplně v pořádku! Nemusíš dělat celý test. Doporučujeme začít od úrovně A1, kde tě všechno naučíme od nuly.": "Es sieht so aus, als wäre Englisch neu für dich — und das ist völlig in Ordnung! Du musst den ganzen Test nicht machen. Wir empfehlen, mit Niveau A1 zu beginnen, wo wir alles von Grund auf beibringen.",
+ "Začít od úplných začátků (A1)": "Ganz von vorne beginnen (A1)",
+ "Přesto pokračovat v testu": "Test trotzdem fortsetzen"
 };

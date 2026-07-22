@@ -1143,6 +1143,13 @@ function plcDrawItem(){
 function nextPlacementQ(){
   if(!plc)return;
   if(plc.n>=60)return finishPlacement();
+  /* Úplný začátečník: po pár otázkách je jasné, že to nejde ani na nejnižší úrovni.
+     Nemá smysl ho nutit do 50 otázek, kterým nerozumí — nabídneme rovnou A1. */
+  if(plc.n>=6 && !plc.beginnerOffered){
+    const easy=cefrRank(plcCurLevel())<=1;                 // drží se dole (A1/A2)
+    const acc=plc.history.length?plc.history.filter(h=>h.ok).length/plc.history.length:1;
+    if(easy && acc<=0.34){plc.beginnerOffered=true;return offerBeginner();}
+  }
   /* Ukončí až po min. 25 otázkách A když je odhad opravdu ustálený
      (posledních 10 v rozpětí ≤0.5 úrovně). Dřív stačilo 15 a rozpětí 0.55. */
   if(plc.n>=25){
@@ -1181,6 +1188,21 @@ function answerPlacement(ok){
   plc.history.push({ok:ok, lvlIdx:Math.floor(plc.ability), ability:plc.ability});
   showContinue(()=>nextPlacementQ(), ok, false, pctx);
 }
+/* Úplný začátečník: nabídneme mu jemně A1, ať nemusí dělat 50 otázek naslepo.
+   Může ale i pokračovat, kdyby chtěl (třeba se jen zahřívá). */
+function offerBeginner(){
+  if(!plc)return;
+  $('#sessTag').style.display='none';$('#counter').textContent='';setProg(1,1);
+  $('#stage').innerHTML='<div class="result"><div class="stars">🌱</div>'+
+    '<div class="score" style="font-size:1.4rem">'+tr('Začneme od začátku?')+'</div>'+
+    '<p class="lead" style="margin-top:10px;max-width:460px;margin-left:auto;margin-right:auto">'+
+      tr('Zdá se, že angličtina je pro tebe nová — a to je úplně v pořádku! Nemusíš dělat celý test. Doporučujeme začít od úrovně A1, kde tě všechno naučíme od nuly.')+'</p>'+
+    '<div class="resbtns" style="margin-top:16px">'+
+      '<button class="btn big" onclick="applyPlacement(\'A1\')">🌱 '+tr('Začít od úplných začátků (A1)')+'</button>'+
+      '<button class="btn big ghost" onclick="resumePlacement()">'+tr('Přesto pokračovat v testu')+'</button>'+
+    '</div></div>';
+}
+function resumePlacement(){ if(plc)nextPlacementQ(); }
 function finishPlacement(){
   if(!plc)return;
   /* Do úrovně tě zařadí, jen když jsi v ní měl aspoň 3 otázky a ≥75 % správně.
