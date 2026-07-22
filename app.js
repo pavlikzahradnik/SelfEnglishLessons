@@ -1373,7 +1373,9 @@ function exChoice(card,done){
     const fb=$('#fb');
     if(ok){fb.textContent=tr('Správně');fb.className='feedback ok';}
     else{fb.textContent=tr('Správně')+': '+w[key];fb.className='feedback bad';}
-    if(en2cz)speak(w.en);
+    /* Vždy přehraj cílové (anglické/německé) slovo — i ve směru CZ→EN, kdy
+       si student vybral cizí slovo a chce slyšet, jak se vyslovuje. */
+    speak(w.en);
     showContinue(done,ok);
   });
 }
