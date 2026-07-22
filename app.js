@@ -412,13 +412,18 @@ function pickVoice(){
   if(!vs||!vs.length)return;                  /* Edge/Chrome plní hlasy asynchronně */
   Object.keys(LANG_INFO).forEach(function(l){
     const tag=LANG_INFO[l].tts, base=l;
-    /* 1) přesná shoda (en-GB), 2) jakýkoli hlas téhož jazyka (en-US, en-AU…),
-       3) hlas, jehož název jazyk obsahuje. Tím pokryjeme prohlížeč, který nemá
-       zrovna britskou/německou variantu, ale nějaký anglický/německý hlas má. */
-    VOICES[l]=vs.find(v=>new RegExp(tag.replace('-','[-_]'),'i').test(v.lang))||
-              vs.find(v=>new RegExp('^'+base+'[-_]','i').test(v.lang))||
-              vs.find(v=>new RegExp('^'+base+'$','i').test(v.lang))||
-              vs.find(v=>new RegExp(base,'i').test(v.lang))||null;
+    /* Edge má rozbité online „Natural" hlasy (vracejí undefined a nepřehrají).
+       Proto preferujeme LOKÁLNÍ hlasy (localService=true) daného jazyka a teprve
+       pak cokoli dalšího. Pořadí: lokální přesná shoda → lokální jazyk →
+       jakákoli přesná shoda → jakýkoli jazyk. */
+    const local=vs.filter(v=>v.localService!==false);
+    VOICES[l]=
+      local.find(v=>new RegExp(tag.replace('-','[-_]'),'i').test(v.lang))||
+      local.find(v=>new RegExp('^'+base+'[-_]','i').test(v.lang))||
+      local.find(v=>new RegExp('^'+base,'i').test(v.lang))||
+      vs.find(v=>new RegExp(tag.replace('-','[-_]'),'i').test(v.lang))||
+      vs.find(v=>new RegExp('^'+base+'[-_]','i').test(v.lang))||
+      vs.find(v=>new RegExp('^'+base,'i').test(v.lang))||null;
   });
   /* uživatelská volba hlasu má přednost před automatickým výběrem */
   const saved=S&&S.settings&&S.settings.voiceByTgt;
@@ -435,10 +440,8 @@ function voiceList(){
 }
 function speak(txt,cb){
   if(!('speechSynthesis' in window)){cb&&cb();return;}
-  speechSynthesis.cancel();
+  try{speechSynthesis.cancel();}catch(e){}
   const lang=curTgt();                       /* mluví se vždy v cílovém jazyce */
-  /* Hlasy se v Edge/Chrome plní asynchronně — když ještě nejsou, vyber je teď
-     a případně krátce počkej, ať první přehrání nespadne do prázdna. */
   if(!VOICES[lang])pickVoice();
   const doSpeak=function(){
     const u=new SpeechSynthesisUtterance(txt);
@@ -449,7 +452,12 @@ function speak(txt,cb){
     else{u.lang=(LANG_INFO[lang]||LANG_INFO.en).tts;}
     u.rate=.9;
     if(cb)u.onend=cb;
-    speechSynthesis.speak(u);
+    try{
+      speechSynthesis.speak(u);
+      /* Edge/Chrome bug: syntéza občas zůstane „paused" a nic se nepřehraje.
+         Krátce po startu ji probudíme resume(). Neškodí, když běží normálně. */
+      setTimeout(function(){try{if(speechSynthesis.paused)speechSynthesis.resume();}catch(e){}},120);
+    }catch(e){cb&&cb();}
   };
   if(!VOICES[lang] && (!speechSynthesis.getVoices()||!speechSynthesis.getVoices().length)){
     /* hlasy ještě nedorazily — zkus po krátké prodlevě znovu */
