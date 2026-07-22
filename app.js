@@ -315,7 +315,15 @@ function aiCall(fn,dflt){
   try{ return (window.AI && typeof window.AI[fn]==='function') ? window.AI[fn]() : dflt; }
   catch(e){ return dflt; }
 }
-function aiAvailable(){return !!(S.settings.aiOn && aiCall('configured',false));}
+function aiAvailable(){
+  if(!(S.settings.aiOn && aiCall('configured',false)))return false;
+  /* Testovací fáze: i tlačítka během cvičení jen pro povolené emaily. */
+  if(window.AI && window.AI.allowed){
+    const email=(typeof fbUser!=='undefined' && fbUser && fbUser.email)||'';
+    if(!window.AI.allowed(email))return false;
+  }
+  return true;
+}
 function aiFmt(s){
   return String(s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]))
     .replace(/\*\*([^*]+)\*\*/g,'<b>$1</b>').replace(/`([^`]+)`/g,'<b>$1</b>');
@@ -1738,6 +1746,11 @@ function voiceTest(){
 }
 function aiSettingsHtml(){
   if(!window.AI || !aiCall('enabled',false))return '';   /* mode:'off' nebo chybějící ai.js → sekce se skryje */
+  /* Testovací fáze: AI jen pro povolené emaily. Kdo není na seznamu, sekci nevidí. */
+  if(window.AI.allowed){
+    const email=(fbUser&&fbUser.email)||'';
+    if(!window.AI.allowed(email))return '';
+  }
   const soon=aiCall('soon',true);                        /* při pochybnostech radši „Připravujeme" */
   const on=!soon && !!S.settings.aiOn;
   const m=(window.AI.config&&window.AI.config.mode)||'soon';

@@ -12,12 +12,16 @@
 */
 (function () {
   const AI_CONFIG = {
-    mode: 'soon',                      // 'soon' | 'proxy' | 'key' | 'off'
+    mode: 'key',                       // 'soon' | 'proxy' | 'key' | 'off'
     endpoint: '',                      // SEM vlož adresu svého Workeru, např. 'https://anj-ai.tvujucet.workers.dev'
     provider: 'openai',                // pro 'key': 'openai' | 'anthropic'
     model: 'gpt-4o-mini',              // levný a na tohle bohatě stačí
     maxTokens: 400,
-    timeoutMs: 20000
+    timeoutMs: 20000,
+    /* Zatím jen pro vybrané uživatele (testování). Prázdné pole = pro všechny.
+       Dokud tu je tvůj email, AI se ukáže a funguje jen když jsi přihlášený ty.
+       Klíč si stejně zadáváš sám v prohlížeči — do kódu NIKDY nepatří. */
+    allowEmails: ['pavlikzahradnik@gmail.com']
   };
 
   const KEY_LS = 'anj_ai_key';         // klíč uživatele (jen režim 'key')
@@ -144,11 +148,22 @@
     });
   }
 
+  /* Smí tento uživatel AI vidět? Prázdný allowlist = všichni.
+     Jinak jen emaily na seznamu (testovací fáze). */
+  function allowed(email) {
+    const list = AI_CONFIG.allowEmails || [];
+    if (!list.length) return true;
+    if (!email) return false;
+    return list.map(function (x) { return String(x).toLowerCase(); })
+               .indexOf(String(email).toLowerCase()) >= 0;
+  }
+
   window.AI = {
     config: AI_CONFIG,
     configured: configured,
     enabled: enabled,
     soon: soon,
+    allowed: allowed,
     ask: ask,
     userKey: userKey,
     setUserKey: setUserKey,
