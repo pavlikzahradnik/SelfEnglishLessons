@@ -1109,6 +1109,10 @@ function recordExlog(cat,type,pct){
 function startGrammar(type){
   const g=curGram;
   if(type==='theory')return showTheory(g);
+  /* Nejdřív teorie, pak cvičení. Kdo teorii ještě nečetl, uvidí ji teď —
+     a z ní se tlačítkem přesune rovnou do vybraného cvičení. Kdo ji už četl,
+     jde do cvičení bez zdržování. */
+  if(!S.exlog[g.id+':theory']){ return showTheory(g, type); }
   const cards=g.items.map((it,i)=>({gitem:it, word:{id:g.id+'#'+i}, type:(type==='gfill'?'gfill':'gquiz'), xp:type==='gfill'?14:10}));
   startSession(cards,{tag:g.title+' · '+(type==='gfill'?tr('doplň'):tr('kvíz')), cat:g.id, type:type});
 }
@@ -1228,7 +1232,7 @@ function applyPlacement(lvl){
   persist();buildLevel(lvl);levelChosen=true;persist();
   toast(tr('Nastaveno na úroveň')+' '+lvl+' ✓');refreshHome();
 }
-function showTheory(g){
+function showTheory(g, thenType){
   show('activity');
   $('#sessTag').style.display='inline-block';$('#sessTag').textContent=g.title+' · teorie';
   $('#counter').textContent='';setProg(1,1);
@@ -1237,8 +1241,12 @@ function showTheory(g){
   const exHtml=g.items.slice(0,3).map(it=>'<div class="exs"><span>'+it[0].replace('___','<b>'+it[1]+'</b>')+'</span><em>'+it[3]+'</em></div>').join('');
   $('#stage').innerHTML='<div class="theory"><p class="theorytext">'+g.theory+'</p>'+tbl+
     '<div class="sec-label">'+tr('Příklady')+'</div><div class="exlist" style="max-width:none">'+exHtml+'</div>'+
-    '<button class="btn big" id="thok" style="margin-top:18px">'+tr('Rozumím')+' ✓</button></div>';
-  $('#thok').onclick=()=>{addXP(5);recordExlog(g.id,'theory',100);toast(tr('Teorie přečtena · +5'));openTopic(g.id);};
+    '<button class="btn big" id="thok" style="margin-top:18px">'+(thenType?tr('Rozumím — jdeme cvičit')+' →':tr('Rozumím')+' ✓')+'</button></div>';
+  $('#thok').onclick=()=>{
+    addXP(5);recordExlog(g.id,'theory',100);toast(tr('Teorie přečtena · +5'));
+    /* Když jsme sem přišli z pokusu o cvičení, plynule pokračuj do něj. */
+    if(thenType){ startGrammar(thenType); } else { openTopic(g.id); }
+  };
 }
 function exGQuiz(card,done){
   const q=card.gitem[0],a=card.gitem[1],opts=card.gitem[2],cz=card.gitem[3];
