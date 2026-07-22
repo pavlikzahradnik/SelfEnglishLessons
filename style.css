@@ -178,7 +178,7 @@
   .opt.correct{background:var(--okbg);border-color:var(--ok);color:#15803d}
   .opt.wrong{background:var(--badbg);border-color:var(--bad);color:#b91c1c}
   .opt:disabled{cursor:default}
-  .feedback{text-align:center;font-weight:600;margin-top:13px;min-height:22px;font-size:.88rem}
+  .feedback{text-align:center;font-weight:700;margin-top:15px;min-height:26px;font-size:1.15rem}
   /* --- AI vysvětlení --- */
   .aibtn{display:block;margin:12px auto 0;background:transparent;border:1px dashed var(--line);color:var(--muted);
     border-radius:10px;padding:8px 14px;font-size:.84rem;font-weight:600;cursor:pointer}
