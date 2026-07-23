@@ -800,42 +800,58 @@ function chatBubble(who,text,id){
 }
 /* Mluvení v konverzaci. Je to jen JINÝ ZPŮSOB VSTUPU — rozpoznaný text se
    vloží do políčka a ty ho odešleš (nebo opravíš). Psaní zůstává rovnocenné. */
-let chatRecOn=false, chatCd=null;
+let chatRecOn=false, chatHeard='';
 function chatHint(t){const h=$('#chatHint');if(h)h.textContent=t||'';}
+function chatMicIcon(rec){const m=$('#chatMic');if(m)m.textContent=rec?'⏹':'🎙';}
 function chatMicStop(){
   chatRecOn=false;
-  if(chatCd){clearInterval(chatCd);chatCd=null;}
   stopRec();
   const m=$('#chatMic');if(m)m.classList.remove('rec');
+  chatMicIcon(false);
 }
+/* Nahrávání běží, DOKUD ho sám nezastavíš. Žádný odpočet — máš čas
+   rozmyslet si slova, udělat pauzu, opravit se. Stop = klik na kolečko. */
 function chatMicToggle(){
-  if(chatRecOn){chatMicStop();chatHint('');return;}
+  if(chatRecOn){                      /* druhé kliknutí = konec nahrávání */
+    chatMicStop();
+    const inp=$('#chatInput');
+    if(inp&&chatHeard){inp.value=chatHeard.trim();inp.focus();chatHint(tr('Zkontroluj a odešli'));}
+    else chatHint(tr('Nic jsem nezachytila — zkus to znovu'));
+    return;
+  }
   if(!SR){chatHint(tr('Rozpoznávání řeči tvůj prohlížeč nepodporuje. Vyzkoušej Chrome nebo Edge.'));return;}
   if(chatBusy){chatHint(tr('Počkej na odpověď AI'));return;}
   stopRec();
   try{ rec=new SR(); }catch(e){ chatHint(tr('Mikrofon se nepodařilo použít')); return; }
-  /* Poslouchej v CÍLOVÉM jazyce (angličtina/němčina), ne natvrdo anglicky. */
-  rec.lang=(LANG_INFO[curTgt()]||LANG_INFO.en).tts;
-  rec.interimResults=false;rec.maxAlternatives=1;
-  chatRecOn=true;
+  rec.lang=(LANG_INFO[curTgt()]||LANG_INFO.en).tts;   /* poslouchej v cílovém jazyce */
+  rec.continuous=true;          /* neukončuj po první pauze */
+  rec.interimResults=true;      /* ať vidíš text hned, jak mluvíš */
+  rec.maxAlternatives=1;
+  chatRecOn=true;chatHeard='';
   const m=$('#chatMic');if(m)m.classList.add('rec');
-  let left=8;
-  const tick=function(){chatHint(tr('Poslouchám…')+' ('+left+' s)');};
-  tick();
-  chatCd=setInterval(function(){left--;if(left<=0){chatMicStop();chatHint('');}else tick();},1000);
+  chatMicIcon(true);
+  chatHint(tr('Nahrávám… mluv klidně pomalu, pak klikni na ⏹'));
   rec.onresult=function(ev){
-    const heard=(ev.results[0][0].transcript||'').trim();
-    chatMicStop();
-    const inp=$('#chatInput');
-    if(inp&&heard){
-      inp.value=heard;inp.focus();
-      chatHint(tr('Slyšela:')+' „'+heard+'\" — '+tr('zkontroluj a odešli'));
-    }else{
-      chatHint(tr('Nic jsem nezachytila — zkus to znovu'));
+    let fin='',interim='';
+    for(let i=ev.resultIndex;i<ev.results.length;i++){
+      const r=ev.results[i];
+      if(r.isFinal)fin+=' '+r[0].transcript; else interim+=' '+r[0].transcript;
     }
+    if(fin)chatHeard=(chatHeard+' '+fin).replace(/\s+/g,' ').trim();
+    const inp=$('#chatInput');
+    if(inp)inp.value=(chatHeard+' '+interim).replace(/\s+/g,' ').trim();
   };
-  rec.onerror=function(){chatMicStop();chatHint(tr('Mikrofon se nepodařilo použít'));};
-  rec.onend=function(){if(chatRecOn)chatMicStop();};
+  rec.onerror=function(ev){
+    /* „no-speech" jen znamená ticho — nahrávání necháme běžet dál. */
+    if(ev&&ev.error==='no-speech')return;
+    chatMicStop();chatHint(tr('Mikrofon se nepodařilo použít'));
+  };
+  /* Prohlížeč občas rozpoznávání sám ukončí (delší ticho). Když jsme
+     pořád v režimu nahrávání, tiše ho nastartujeme znovu. */
+  rec.onend=function(){
+    if(!chatRecOn)return;
+    try{ rec.start(); }catch(e){ chatMicStop(); }
+  };
   try{rec.start();}catch(e){chatMicStop();chatHint(tr('Mikrofon se nepodařilo použít'));}
 }
 function chatSend(){
@@ -874,8 +890,14 @@ function chatAsk(first){
       el.classList.remove('loading');
       el.innerHTML=aiFmt(t)+'<button class="chbspk" onclick="chatReplay('+idx+')" title="'+tr('Přehrát znovu')+'">♪</button>';
     }
-    /* AI promluví sama — konverzace tak trénuje i poslech. */
-    try{ speak(chatSpeakText(t)); }catch(e){}
+    /* AI promluví sama — konverzace tak trénuje i poslech.
+       Malá prodleva: Chrome/Edge občas zahodí řeč, když přijde hned po
+       cancel() nebo těsně po překreslení. 250 ms to spolehlivě vyřeší. */
+    (function(){
+      const say=chatSpeakText(t);
+      if(!say)return;
+      setTimeout(function(){ try{ speak(say); }catch(e){} },250);
+    })();
     chatBusy=false;
     const i=$('#chatInput');if(i){i.disabled=false;i.focus();}
     const lg=$('#chatLog');if(lg)lg.scrollTop=lg.scrollHeight;

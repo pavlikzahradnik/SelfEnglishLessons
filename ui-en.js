@@ -356,5 +356,7 @@ window.UI_DATA.en = {
  "zkontroluj a odešli": "check it and send",
  "Nic jsem nezachytila — zkus to znovu": "I did not catch that — try again",
  "Mikrofon se nepodařilo použít": "Could not use the microphone",
- "Počkej na odpověď AI": "Wait for the AI to reply"
+ "Počkej na odpověď AI": "Wait for the AI to reply",
+ "Zkontroluj a odešli": "Check it and send",
+ "Nahrávám… mluv klidně pomalu, pak klikni na ⏹": "Recording… take your time, then click ⏹"
 };

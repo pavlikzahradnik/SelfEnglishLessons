@@ -356,5 +356,7 @@ window.UI_DATA.de = {
  "zkontroluj a odešli": "prüfen und senden",
  "Nic jsem nezachytila — zkus to znovu": "Nichts verstanden — versuch es nochmal",
  "Mikrofon se nepodařilo použít": "Mikrofon konnte nicht verwendet werden",
- "Počkej na odpověď AI": "Warte auf die Antwort der KI"
+ "Počkej na odpověď AI": "Warte auf die Antwort der KI",
+ "Zkontroluj a odešli": "Prüfen und senden",
+ "Nahrávám… mluv klidně pomalu, pak klikni na ⏹": "Aufnahme… lass dir Zeit, dann klicke ⏹"
 };

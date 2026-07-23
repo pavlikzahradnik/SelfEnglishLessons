@@ -492,3 +492,12 @@
     width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
     color:var(--accent);font-size:.9rem;cursor:pointer;line-height:1;padding:0}
   .chbspk:hover{border-color:var(--accent);background:var(--surface2)}
+
+  /* Nahrávání v konverzaci: výrazně červené a pulzující, dokud sám nezastavíš. */
+  #chatMic.rec{background:linear-gradient(135deg,#dc2626,#f43f5e);
+    box-shadow:0 0 0 0 rgba(220,38,38,.55);animation:recpulse 1.2s infinite}
+  @keyframes recpulse{
+    0%{box-shadow:0 0 0 0 rgba(220,38,38,.55);transform:scale(1)}
+    70%{box-shadow:0 0 0 20px rgba(220,38,38,0);transform:scale(1.06)}
+    100%{box-shadow:0 0 0 0 rgba(220,38,38,0);transform:scale(1)}
+  }
