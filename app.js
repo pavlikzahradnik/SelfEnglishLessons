@@ -206,6 +206,7 @@ function ensureStateDefaults(){
   const freshProfile=!S.settings;
   S.settings=S.settings||{dir:'en2cz',fill:'easy',theme:'dark',goal:15};
   if(!S.settings.level)S.settings.level='A1';
+  if(!S.chatDone)S.chatDone={};
   if(typeof S.settings.aiOn!=='boolean')S.settings.aiOn=false;   /* AI je vypnutá, dokud si ji uživatel nezapne */
   S.srs=S.srs||{};S.exlog=S.exlog||{};
   /* XP, denní mise, statistiky a odznaky se vedou zvlášť pro každou dvojici.
@@ -257,7 +258,7 @@ function ensureStateDefaults(){
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 function clearAuthFields(){['acPass','cpCur','cpNew'].forEach(function(id){const el=$('#'+id);if(el)el.value='';});}
-function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick','langGate','story'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||id==='langGate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
+function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick','langGate','story','chat'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||id==='langGate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function distractors(w,key,n){let pool=shuffle(ALL.filter(x=>x.cat===w.cat && x.id!==w.id && x[key]!==w[key]));if(pool.length<n){const extra=shuffle(ALL.filter(x=>x.id!==w.id && x[key]!==w[key] && x.cat!==w.cat));pool=pool.concat(extra);}return pool.slice(0,n);}
 function isGrammar(id){return TMAP[id]&&TMAP[id].type==='grammar';}
@@ -724,6 +725,112 @@ function renderLevelPick(){
   const plcBtn=$('#placementBtn');if(plcBtn)plcBtn.style.display=placementAvailable()?'':'none';
   renderVerticals();
   renderStories();
+  try{ renderChats(); }catch(e){}   /* volitelné (AI) — nikdy nesmí shodit výběr úrovní */
+}
+/* ===== KONVERZACE S AI =====
+   Scénáře podle úrovně. Objeví se jen když má uživatel AI zapnutou a nastavenou.
+   Témata jsou společná pro angličtinu i němčinu — jazyk určuje až systémový
+   prompt podle curTgt(). */
+const CHAT_TOPICS=[
+  {id:'c_intro',   lvl:'A1', art:'👋', t:'Představ se',        s:'A friendly first meeting. Ask the learner their name, where they are from, what they do.'},
+  {id:'c_cafe',    lvl:'A1', art:'☕', t:'V kavárně',          s:'You are a waiter in a small cafe. Take the learner\'s order, offer simple things.'},
+  {id:'c_shop',    lvl:'A2', art:'🛒', t:'Nakupování',         s:'You are a shop assistant. Help the learner find clothes, discuss size, colour and price.'},
+  {id:'c_doctor',  lvl:'A2', art:'🩺', t:'U lékaře',           s:'You are a doctor. Ask about symptoms, give simple advice.'},
+  {id:'c_travel',  lvl:'B1', art:'✈️', t:'Na letišti',         s:'You are airport staff. Handle check-in, a delayed flight, and questions about luggage.'},
+  {id:'c_job',     lvl:'B1', art:'💼', t:'Pracovní pohovor',   s:'You are an interviewer. Ask about experience, strengths, and why they want the job.'},
+  {id:'c_hotel',   lvl:'B2', art:'🏨', t:'Stížnost v hotelu',  s:'You are a hotel manager. The learner complains about their room; negotiate a solution.'},
+  {id:'c_debate',  lvl:'B2', art:'💬', t:'Debata o technice',  s:'Discuss whether technology makes life better. Take a mild opposing view to keep it interesting.'},
+  {id:'c_meeting', lvl:'C1', art:'📊', t:'Pracovní jednání',   s:'You are a colleague in a project meeting. Discuss deadlines, risks and priorities.'},
+  {id:'c_culture', lvl:'C1', art:'🌍', t:'Kultura a společnost',s:'Discuss cultural differences, identity and belonging. Ask thoughtful follow-up questions.'},
+  {id:'c_argue',   lvl:'C2', art:'⚖️', t:'Argumentace',        s:'Debate a nuanced topic (ethics of AI, privacy, freedom). Challenge the learner\'s reasoning politely.'},
+  {id:'c_free',    lvl:'C2', art:'✨', t:'Volná konverzace',   s:'Open conversation on any topic the learner chooses. Follow their lead.'}
+];
+function chatTopic(id){return CHAT_TOPICS.filter(function(c){return c.id===id;})[0]||null;}
+/* Doporučená úroveň je jen vodítko — konverzace jsou otevřené všem. */
+function renderChats(){
+  const wrap=$('#chatWrap'), box=$('#chatBox');
+  if(!wrap||!box)return;
+  let on=false;
+  try{ on=aiAvailable(); }catch(e){ on=false; }
+  wrap.classList.toggle('hidden', !on);
+  if(!on)return;
+  box.innerHTML=CHAT_TOPICS.map(function(c){
+    const used=(S.chatDone&&S.chatDone[c.id])||0;
+    const badge='<span class="lvl" style="background:var(--surface2);color:var(--muted);margin-left:6px">'+c.lvl+'</span>';
+    const stat=used?('<div class="lc-go" style="color:var(--ok)">'+used+' × '+tr('procvičeno')+'</div>')
+                   :('<div class="lc-go">'+tr('Začít')+' →</div>');
+    return '<button class="lvlcard" onclick="openChat(\''+c.id+'\')">'+
+      '<div class="lc-badge" style="font-size:1.5rem">'+c.art+'</div>'+
+      '<div class="lc-t">'+tr(c.t)+badge+'</div>'+
+      '<div class="lc-d">'+tr('Piš a AI ti odpoví')+'</div>'+stat+'</button>';
+  }).join('');
+}
+let chatCur=null, chatMsgs=[], chatBusy=false;
+function openChat(id){
+  const c=chatTopic(id);if(!c)return;
+  try{ if(!aiAvailable()){toast(tr('Nejdřív zapni AI v Účtu'));return;} }catch(e){ return; }
+  chatCur=c; chatMsgs=[]; chatBusy=false;
+  $('#chatTitle').textContent=c.art+'  '+tr(c.t)+'  ('+c.lvl+')';
+  $('#chatLog').innerHTML='';
+  const inp=$('#chatInput');
+  if(inp){
+    inp.value='';inp.disabled=false;
+    inp.onkeydown=function(e){ if(e.key==='Enter')chatSend(); };   /* Enter = odeslat */
+  }
+  show('chat');
+  /* AI začne první, ať student nemusí vymýšlet úvod. */
+  chatAsk(true);
+}
+function chatExit(){ chatCur=null;chatMsgs=[];levelChosen=false;refreshHome();show('home'); }
+function chatBubble(who,text,id){
+  const cls=who==='me'?'chb me':'chb ai';
+  return '<div class="'+cls+'"'+(id?' id="'+id+'"':'')+'>'+aiFmt(text)+'</div>';
+}
+function chatSend(){
+  if(chatBusy)return;
+  const inp=$('#chatInput');if(!inp)return;
+  const txt=(inp.value||'').trim();if(!txt)return;
+  inp.value='';
+  chatMsgs.push({who:'me',text:txt});
+  $('#chatLog').insertAdjacentHTML('beforeend',chatBubble('me',txt));
+  chatAsk(false);
+}
+function chatAsk(first){
+  if(!chatCur)return;
+  chatBusy=true;
+  const inp=$('#chatInput');if(inp)inp.disabled=true;
+  const id='chb'+Date.now();
+  $('#chatLog').insertAdjacentHTML('beforeend','<div class="chb ai loading" id="'+id+'">…</div>');
+  const log=$('#chatLog');if(log)log.scrollTop=log.scrollHeight;
+  const tgt=(LANG_INFO[curTgt()]||LANG_INFO.en).label;
+  const lang=curTgt()==='de'?'German':'English';
+  const sys='You are a friendly '+lang+' conversation partner for a Czech learner at CEFR level '+chatCur.lvl+'. '+
+    'Scenario: '+chatCur.s+' '+
+    'Rules: reply ONLY in '+lang+', 1-3 short sentences suitable for '+chatCur.lvl+'. '+
+    'Always end with a question so the conversation continues. '+
+    'If the learner makes a clear mistake, add at the very end one short line starting with "✏️" giving the corrected sentence and a very brief reason in Czech. '+
+    'Never write long paragraphs. Never break character.';
+  const hist=chatMsgs.map(function(m){return (m.who==='me'?'Learner: ':'You: ')+m.text;}).join('\n');
+  const user=first?'Start the conversation now with a short greeting and a question.'
+                  :('Conversation so far:\n'+hist+'\n\nReply to the learner\'s last message.');
+  window.AI.ask(sys,user,null).then(function(t){
+    const el=$('#'+id);
+    if(el){el.classList.remove('loading');el.innerHTML=aiFmt(t);}
+    chatMsgs.push({who:'ai',text:t});
+    chatBusy=false;
+    const i=$('#chatInput');if(i){i.disabled=false;i.focus();}
+    const lg=$('#chatLog');if(lg)lg.scrollTop=lg.scrollHeight;
+    /* počítadlo procvičení — až po pár výměnách, ať se nezapočítá jen otevření */
+    if(chatMsgs.filter(function(m){return m.who==='me';}).length===3){
+      S.chatDone=S.chatDone||{};S.chatDone[chatCur.id]=(S.chatDone[chatCur.id]||0)+1;
+      addXP(15);persist();
+    }
+  }).catch(function(e){
+    const el=$('#'+id);
+    if(el){el.classList.remove('loading');el.classList.add('err');el.textContent='⚠️ '+(e&&e.message?e.message:tr('Nepodařilo se spojit s AI'));}
+    chatBusy=false;
+    const i=$('#chatInput');if(i)i.disabled=false;
+  });
 }
 function renderStories(){
   const wrap=$('#storyWrap'), box=$('#storyBox');
