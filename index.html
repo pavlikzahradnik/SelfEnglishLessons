@@ -113,9 +113,11 @@
     <h2 id="chatTitle"></h2>
     <div id="chatLog" class="chatlog"></div>
     <div class="chatbar">
+      <button class="chatmic" id="chatMic" onclick="chatMicToggle()" title="Mluvit">🎙</button>
       <input id="chatInput" type="text" autocomplete="off" placeholder="Napiš odpověď…">
       <button class="btn" onclick="chatSend()" id="chatSendBtn">→</button>
     </div>
+    <div class="chathint" id="chatHint"></div>
   </div>
 
   <div id="stats" class="panel hidden">

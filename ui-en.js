@@ -350,5 +350,11 @@ window.UI_DATA.en = {
  "Pracovní jednání": "Business meeting",
  "Kultura a společnost": "Culture and society",
  "Argumentace": "Argumentation",
- "Volná konverzace": "Free conversation"
+ "Volná konverzace": "Free conversation",
+ "Mluvit": "Speak",
+ "Slyšela:": "Heard:",
+ "zkontroluj a odešli": "check it and send",
+ "Nic jsem nezachytila — zkus to znovu": "I did not catch that — try again",
+ "Mikrofon se nepodařilo použít": "Could not use the microphone",
+ "Počkej na odpověď AI": "Wait for the AI to reply"
 };

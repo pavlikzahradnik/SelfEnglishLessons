@@ -468,3 +468,20 @@
   .chatbar input:focus{outline:none;border-color:var(--accent)}
   .chatbar .btn{padding:13px 22px;font-size:1.1rem}
   @media(max-width:760px){.chb{max-width:90%}.chatlog{max-height:46vh}}
+
+  /* Karty konverzací: kompaktní jako příběhy (mají málo obsahu). */
+  #chatBox{grid-template-columns:repeat(auto-fit,minmax(150px,1fr))}
+  #chatBox .lvlcard{min-height:0!important;padding:14px 14px!important;gap:5px!important}
+  #chatBox .lvlcard .lc-badge{font-size:1.5rem!important;background:transparent!important;padding:0!important;margin-bottom:0}
+  #chatBox .lvlcard .lc-t{font-size:.92rem!important;line-height:1.3}
+  #chatBox .lvlcard .lc-d{font-size:.72rem!important}
+  #chatBox .lvlcard .lc-go{margin-top:2px}
+  @media(max-width:760px){#chatBox{grid-template-columns:repeat(2,1fr)}}
+
+  /* Mikrofon v konverzaci — psaní i mluvení, podle nálady. */
+  .chatmic{flex:0 0 auto;width:50px;border:1.5px solid var(--line);background:var(--surface);border-radius:12px;
+    font-size:1.25rem;cursor:pointer;transition:.15s;line-height:1}
+  .chatmic:hover{border-color:var(--accent)}
+  .chatmic.rec{background:#fee2e2;border-color:#ef4444;animation:micpulse 1s infinite}
+  @keyframes micpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
+  .chathint{text-align:center;color:var(--muted);font-size:.85rem;margin-top:7px;min-height:18px}

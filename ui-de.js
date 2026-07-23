@@ -350,5 +350,11 @@ window.UI_DATA.de = {
  "Pracovní jednání": "Geschäftsbesprechung",
  "Kultura a společnost": "Kultur und Gesellschaft",
  "Argumentace": "Argumentation",
- "Volná konverzace": "Freies Gespräch"
+ "Volná konverzace": "Freies Gespräch",
+ "Mluvit": "Sprechen",
+ "Slyšela:": "Gehört:",
+ "zkontroluj a odešli": "prüfen und senden",
+ "Nic jsem nezachytila — zkus to znovu": "Nichts verstanden — versuch es nochmal",
+ "Mikrofon se nepodařilo použít": "Mikrofon konnte nicht verwendet werden",
+ "Počkej na odpověď AI": "Warte auf die Antwort der KI"
 };

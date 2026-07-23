@@ -781,16 +781,57 @@ function openChat(id){
   /* AI začne první, ať student nemusí vymýšlet úvod. */
   chatAsk(true);
 }
-function chatExit(){ chatCur=null;chatMsgs=[];levelChosen=false;refreshHome();show('home'); }
+function chatExit(){ chatMicStop();chatHint('');chatCur=null;chatMsgs=[];levelChosen=false;refreshHome();show('home'); }
 function chatBubble(who,text,id){
   const cls=who==='me'?'chb me':'chb ai';
   return '<div class="'+cls+'"'+(id?' id="'+id+'"':'')+'>'+aiFmt(text)+'</div>';
+}
+/* Mluvení v konverzaci. Je to jen JINÝ ZPŮSOB VSTUPU — rozpoznaný text se
+   vloží do políčka a ty ho odešleš (nebo opravíš). Psaní zůstává rovnocenné. */
+let chatRecOn=false, chatCd=null;
+function chatHint(t){const h=$('#chatHint');if(h)h.textContent=t||'';}
+function chatMicStop(){
+  chatRecOn=false;
+  if(chatCd){clearInterval(chatCd);chatCd=null;}
+  stopRec();
+  const m=$('#chatMic');if(m)m.classList.remove('rec');
+}
+function chatMicToggle(){
+  if(chatRecOn){chatMicStop();chatHint('');return;}
+  if(!SR){chatHint(tr('Rozpoznávání řeči tvůj prohlížeč nepodporuje. Vyzkoušej Chrome nebo Edge.'));return;}
+  if(chatBusy){chatHint(tr('Počkej na odpověď AI'));return;}
+  stopRec();
+  try{ rec=new SR(); }catch(e){ chatHint(tr('Mikrofon se nepodařilo použít')); return; }
+  /* Poslouchej v CÍLOVÉM jazyce (angličtina/němčina), ne natvrdo anglicky. */
+  rec.lang=(LANG_INFO[curTgt()]||LANG_INFO.en).tts;
+  rec.interimResults=false;rec.maxAlternatives=1;
+  chatRecOn=true;
+  const m=$('#chatMic');if(m)m.classList.add('rec');
+  let left=8;
+  const tick=function(){chatHint(tr('Poslouchám…')+' ('+left+' s)');};
+  tick();
+  chatCd=setInterval(function(){left--;if(left<=0){chatMicStop();chatHint('');}else tick();},1000);
+  rec.onresult=function(ev){
+    const heard=(ev.results[0][0].transcript||'').trim();
+    chatMicStop();
+    const inp=$('#chatInput');
+    if(inp&&heard){
+      inp.value=heard;inp.focus();
+      chatHint(tr('Slyšela:')+' „'+heard+'\" — '+tr('zkontroluj a odešli'));
+    }else{
+      chatHint(tr('Nic jsem nezachytila — zkus to znovu'));
+    }
+  };
+  rec.onerror=function(){chatMicStop();chatHint(tr('Mikrofon se nepodařilo použít'));};
+  rec.onend=function(){if(chatRecOn)chatMicStop();};
+  try{rec.start();}catch(e){chatMicStop();chatHint(tr('Mikrofon se nepodařilo použít'));}
 }
 function chatSend(){
   if(chatBusy)return;
   const inp=$('#chatInput');if(!inp)return;
   const txt=(inp.value||'').trim();if(!txt)return;
   inp.value='';
+  chatMicStop();chatHint('');
   chatMsgs.push({who:'me',text:txt});
   $('#chatLog').insertAdjacentHTML('beforeend',chatBubble('me',txt));
   chatAsk(false);
@@ -1593,7 +1634,7 @@ function exPron(card,done){
   let cd=null;
   function stopCountdown(){if(cd){clearInterval(cd);cd=null;}}
   $('#mic').onclick=()=>{
-    stopRec();stopCountdown();rec=new SR();rec.lang='en-US';rec.interimResults=false;rec.maxAlternatives=3;
+    stopRec();stopCountdown();rec=new SR();rec.lang=(LANG_INFO[curTgt()]||LANG_INFO.en).tts;rec.interimResults=false;rec.maxAlternatives=3;
     $('#mic').classList.add('rec');
     /* Vizuální odpočet, ať student ví, jak dlouho ho appka ještě poslouchá. */
     let left=6;
