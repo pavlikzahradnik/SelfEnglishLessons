@@ -781,7 +781,19 @@ function openChat(id){
   /* AI začne první, ať student nemusí vymýšlet úvod. */
   chatAsk(true);
 }
-function chatExit(){ chatMicStop();chatHint('');chatCur=null;chatMsgs=[];levelChosen=false;refreshHome();show('home'); }
+function chatExit(){ chatMicStop();chatHint('');if(window.speechSynthesis)speechSynthesis.cancel();chatCur=null;chatMsgs=[];levelChosen=false;refreshHome();show('home'); }
+/* AI mluví: přečte se jen část v CÍLOVÉM jazyce. Českou opravu za ✏️
+   nahlas nečteme (byla by čeština anglickým hlasem). */
+function chatSpeakText(t){
+  let s=String(t||'');
+  const i=s.indexOf('✏');
+  if(i>=0)s=s.slice(0,i);
+  return s.replace(/\*\*/g,'').replace(/`/g,'').trim();
+}
+function chatReplay(i){
+  const m=chatMsgs[i];
+  if(m&&m.who==='ai')speak(chatSpeakText(m.text));
+}
 function chatBubble(who,text,id){
   const cls=who==='me'?'chb me':'chb ai';
   return '<div class="'+cls+'"'+(id?' id="'+id+'"':'')+'>'+aiFmt(text)+'</div>';
@@ -855,9 +867,15 @@ function chatAsk(first){
   const user=first?'Start the conversation now with a short greeting and a question.'
                   :('Conversation so far:\n'+hist+'\n\nReply to the learner\'s last message.');
   window.AI.ask(sys,user,null).then(function(t){
-    const el=$('#'+id);
-    if(el){el.classList.remove('loading');el.innerHTML=aiFmt(t);}
     chatMsgs.push({who:'ai',text:t});
+    const idx=chatMsgs.length-1;
+    const el=$('#'+id);
+    if(el){
+      el.classList.remove('loading');
+      el.innerHTML=aiFmt(t)+'<button class="chbspk" onclick="chatReplay('+idx+')" title="'+tr('Přehrát znovu')+'">♪</button>';
+    }
+    /* AI promluví sama — konverzace tak trénuje i poslech. */
+    try{ speak(chatSpeakText(t)); }catch(e){}
     chatBusy=false;
     const i=$('#chatInput');if(i){i.disabled=false;i.focus();}
     const lg=$('#chatLog');if(lg)lg.scrollTop=lg.scrollHeight;

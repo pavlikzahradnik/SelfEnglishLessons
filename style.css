@@ -485,3 +485,10 @@
   .chatmic.rec{background:#fee2e2;border-color:#ef4444;animation:micpulse 1s infinite}
   @keyframes micpulse{0%,100%{transform:scale(1)}50%{transform:scale(1.07)}}
   .chathint{text-align:center;color:var(--muted);font-size:.85rem;margin-top:7px;min-height:18px}
+
+  /* Konverzace: mikrofon jako ve cvičení + tlačítko pro opakování řeči AI. */
+  #chatMic{margin:14px auto 6px}
+  .chbspk{display:inline-flex;align-items:center;justify-content:center;margin-left:8px;vertical-align:middle;
+    width:28px;height:28px;border-radius:50%;border:1px solid var(--line);background:var(--surface);
+    color:var(--accent);font-size:.9rem;cursor:pointer;line-height:1;padding:0}
+  .chbspk:hover{border-color:var(--accent);background:var(--surface2)}
