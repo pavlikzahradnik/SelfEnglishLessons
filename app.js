@@ -1457,6 +1457,37 @@ function applyPlacement(lvl){
   persist();buildLevel(lvl);levelChosen=true;persist();
   toast(tr('Nastaveno na úroveň')+' '+lvl+' ✓');refreshHome();
 }
+/* Teorie je v datech plynulý text s <br>. Tady ji rozsekáme na přehledné
+   bloky — odstavce, odrážky a samostatný rámeček „časté chyby" — ať se to
+   dá číst po kouscích místo jedné zdi textu. */
+function theoryHtml(raw){
+  const parts=String(raw||'').split(/<br\s*\/?>/i).map(function(s){return s.trim();});
+  let main='',warn='',warnTitle='',inWarn=false,list=[];
+  function flushList(){
+    if(!list.length)return;
+    const html='<ul class="tlist">'+list.map(function(x){return '<li>'+x+'</li>';}).join('')+'</ul>';
+    if(inWarn)warn+=html;else main+=html;
+    list=[];
+  }
+  parts.forEach(function(line){
+    if(!line){flushList();return;}
+    /* ⚠️ bývá uvnitř <b>, proto porovnáváme text bez značek */
+    const plain=line.replace(/<[^>]+>/g,'').trim();
+    if(!inWarn && plain.indexOf('⚠️')===0){
+      flushList();inWarn=true;
+      warnTitle=line.replace(/⚠️/,'').replace(/<b>\s*<\/b>/g,'').trim();
+      return;
+    }
+    if(plain.indexOf('•')===0){list.push(line.replace(/•/,'').trim());return;}
+    flushList();
+    const p='<p>'+line+'</p>';
+    if(inWarn)warn+=p;else main+=p;
+  });
+  flushList();
+  let out='<div class="tbody">'+main+'</div>';
+  if(inWarn)out+='<div class="twarn"><div class="twarn-h">'+warnTitle+'</div>'+warn+'</div>';
+  return out;
+}
 function showTheory(g, thenType){
   show('activity');
   $('#sessTag').style.display='inline-block';$('#sessTag').textContent=g.title+' · teorie';
@@ -1464,7 +1495,7 @@ function showTheory(g, thenType){
   let tbl='';
   if(g.table){tbl='<table class="gtab">'+g.table.map((row,ri)=>'<tr>'+row.map(c=>ri===0?'<th>'+c+'</th>':'<td>'+c+'</td>').join('')+'</tr>').join('')+'</table>';}
   const exHtml=g.items.slice(0,3).map(it=>'<div class="exs"><span>'+it[0].replace('___','<b>'+it[1]+'</b>')+'</span><em>'+it[3]+'</em></div>').join('');
-  $('#stage').innerHTML='<div class="theory"><p class="theorytext">'+g.theory+'</p>'+tbl+
+  $('#stage').innerHTML='<div class="theory">'+theoryHtml(g.theory)+tbl+
     '<div class="sec-label">'+tr('Příklady')+'</div><div class="exlist" style="max-width:none">'+exHtml+'</div>'+
     '<button class="btn big" id="thok" style="margin-top:18px">'+(thenType?tr('Rozumím — jdeme cvičit')+' →':tr('Rozumím')+' ✓')+'</button></div>';
   $('#thok').onclick=()=>{
