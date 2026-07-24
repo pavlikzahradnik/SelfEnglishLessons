@@ -63,6 +63,8 @@ const UI_FILES={en:'ui-en.js',de:'ui-de.js'};
 /* Příběhy jsou volitelný extra soubor per dvojice. Když chybí, sekce se prostě
    neukáže — appka bez nich funguje normálně (žádný crash). */
 const STORY_FILES={'cs-en':'stories-cs-en.js'};
+const BOOK_FILES={'cs-en':'books-cs-en.js'};
+const _bookLoading={};
 const _storyLoading={};
 function loadStories(pair,cb){
   if(!STORY_FILES[pair]){cb&&cb(false);return;}
@@ -76,6 +78,29 @@ function loadStories(pair,cb){
   document.head.appendChild(s);
 }
 function langStories(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].stories)||[];}
+/* Knihy = delší čtení na pokračování. Načítají se líně a jsou volitelné —
+   bez souboru se sekce prostě nezobrazí a appka jede dál. */
+function loadBooks(pair,cb){
+  if(!BOOK_FILES[pair]){cb&&cb(false);return;}
+  if(window.LANG_DATA[pair]&&window.LANG_DATA[pair].books){cb&&cb(true);return;}
+  if(_bookLoading[pair]){_bookLoading[pair].push(cb);return;}
+  _bookLoading[pair]=[cb];
+  const s=document.createElement('script');
+  s.src=BOOK_FILES[pair];
+  s.onload=function(){const q=_bookLoading[pair]||[];delete _bookLoading[pair];q.forEach(f=>f&&f(true));};
+  s.onerror=function(){delete _bookLoading[pair];cb&&cb(false);};
+  document.head.appendChild(s);
+}
+function langBooks(pair){return (window.LANG_DATA[pair]&&window.LANG_DATA[pair].books)||[];}
+function findBook(id){return langBooks(curPair()).filter(function(b){return b.id===id;})[0]||null;}
+/* Kapitola má vlastní id (kniha#index), takže se postup ukládá stejně jako
+   u příběhů — bez nové datové struktury. */
+function chapId(bookId,i){return bookId+'#'+i;}
+function chapDone(bookId,i){return !!(S.storyRead&&S.storyRead[chapId(bookId,i)]);}
+function bookProgress(b){
+  let d=0;for(let i=0;i<b.chapters.length;i++)if(chapDone(b.id,i))d++;
+  return d;
+}
 window.UI_DATA=window.UI_DATA||{};
 const _uiLoading={};
 function tr(s){const m=window.UI_DATA[curSrc()];return (m&&m[s])||s;}
@@ -258,7 +283,7 @@ function ensureStateDefaults(){
 const $=s=>document.querySelector(s);
 const $$=s=>document.querySelectorAll(s);
 function clearAuthFields(){['acPass','cpCur','cpNew'].forEach(function(id){const el=$('#'+id);if(el)el.value='';});}
-function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick','langGate','story','chat'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||id==='langGate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
+function show(id){if(id!=='account')clearAuthFields();['home','catMenu','stats','activity','gate','account','srcPick','langGate','story','chat','book'].forEach(x=>$('#'+x).classList.add('hidden'));$('#'+id).classList.remove('hidden');const tb=$('#topbar');if(tb)tb.style.display=(id==='gate'||id==='langGate'||(id==='srcPick'&&!S.settings.srcLang))?'none':'flex';window.scrollTo(0,0);}
 function shuffle(a){a=a.slice();for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
 function distractors(w,key,n){let pool=shuffle(ALL.filter(x=>x.cat===w.cat && x.id!==w.id && x[key]!==w[key]));if(pool.length<n){const extra=shuffle(ALL.filter(x=>x.id!==w.id && x[key]!==w[key] && x.cat!==w.cat));pool=pool.concat(extra);}return pool.slice(0,n);}
 function isGrammar(id){return TMAP[id]&&TMAP[id].type==='grammar';}
@@ -725,6 +750,7 @@ function renderLevelPick(){
   const plcBtn=$('#placementBtn');if(plcBtn)plcBtn.style.display=placementAvailable()?'':'none';
   renderVerticals();
   renderStories();
+  try{ renderBooks(); }catch(e){}   /* volitelné (knihy) */
   try{ renderChats(); }catch(e){}   /* volitelné (AI) — nikdy nesmí shodit výběr úrovní */
 }
 /* ===== KONVERZACE S AI =====
@@ -912,6 +938,66 @@ function chatAsk(first){
     chatBusy=false;
     const i=$('#chatInput');if(i)i.disabled=false;
   });
+}
+/* ===== KNIHY: čtení na pokračování ===== */
+let curBook=null;
+function renderBooks(){
+  const wrap=$('#bookWrap'), box=$('#bookBox');
+  if(!wrap||!box)return;
+  loadBooks(curPair(),function(ok){
+    const list=ok?langBooks(curPair()):[];
+    wrap.classList.toggle('hidden', !list.length);
+    if(!list.length)return;
+    box.innerHTML=list.map(function(b){
+      const done=bookProgress(b), total=b.chapters.length;
+      const words=b.chapters.reduce(function(s,c){return s+c.sents.reduce(function(x,p){return x+p[0].split(/\s+/).length;},0);},0);
+      const pct=Math.round(done/total*100);
+      const bar='<div class="bkbar"><span style="width:'+pct+'%"></span></div>';
+      const stat=done>=total?('<div class="lc-go" style="color:var(--ok)">✓ '+tr('Přečteno')+'</div>')
+               :done?('<div class="lc-go">'+tr('Pokračovat')+' →</div>')
+               :('<div class="lc-go">'+tr('Začít číst')+' →</div>');
+      return '<button class="lvlcard bkcard" onclick="openBook(\''+b.id+'\')">'+
+        '<div class="lc-badge" style="font-size:1.8rem">'+b.art+'</div>'+
+        '<div class="lc-t">'+b.title.split('/')[0].trim()+' <span class="lvl">'+b.level+'</span></div>'+
+        '<div class="lc-d">'+b.blurb+'</div>'+
+        '<div class="bkmeta">'+total+' '+tr('kapitol')+' · '+words+' '+tr('slov')+' · '+done+'/'+total+'</div>'+
+        bar+stat+'</button>';
+    }).join('');
+  });
+}
+function openBook(id){
+  const b=findBook(id);if(!b){toast(tr('Knihu se nepodařilo načíst'));return;}
+  curBook=b;
+  $('#bookTitle').textContent=b.art+'  '+b.title+'  ('+b.level+')';
+  const done=bookProgress(b), total=b.chapters.length;
+  const chaps=b.chapters.map(function(c,i){
+    const ok=chapDone(b.id,i);
+    const sc=(S.storyScore&&S.storyScore[chapId(b.id,i)]);
+    const mark=ok?'<span class="ch-ok">✓</span>':'<span class="ch-no">'+(i+1)+'</span>';
+    const score=(sc!=null)?'<span class="ch-sc">'+sc+' %</span>':'';
+    return '<button class="chrow'+(ok?' done':'')+'" onclick="openChapter('+i+')">'+
+      mark+'<span class="ch-t">'+c.tcz+'</span>'+score+'<span class="ch-go">→</span></button>';
+  }).join('');
+  const gl=(b.glossary||[]).map(function(g){return '<div class="glrow"><b>'+g[0]+'</b><span>'+g[1]+'</span></div>';}).join('');
+  $('#bookBody').innerHTML=
+    '<p class="lead">'+b.blurb+'</p>'+
+    '<div class="bkprog">'+tr('Přečteno')+': <b>'+done+' / '+total+'</b> '+tr('kapitol')+'</div>'+
+    '<div class="chlist">'+chaps+'</div>'+
+    (gl?('<div class="sec-label" style="margin-top:24px">'+tr('Slovníček')+'</div><div class="gllist">'+gl+'</div>'):'');
+  show('book');
+}
+function bookExit(){ curBook=null;levelChosen=false;refreshHome();show('home'); }
+/* Kapitolu předhodíme stávající čtečce — chová se jako příběh, takže
+   přehrávání, překlad i kvíz fungují beze změny. */
+function openChapter(i){
+  const b=curBook;if(!b||!b.chapters[i])return;
+  const c=b.chapters[i];
+  curStory={id:chapId(b.id,i), title:c.tcz+' / '+c.t, level:b.level, art:b.art, sents:c.sents, q:c.q, _book:b.id, _idx:i};
+  storyPlaying=false;
+  $('#storyTitle').textContent=b.art+'  '+c.tcz+'  ('+(i+1)+'/'+b.chapters.length+')';
+  const back=$('#storyBack');if(back)back.onclick=function(){stopStory();openBook(b.id);};
+  renderStoryText();
+  show('story');
 }
 function renderStories(){
   const wrap=$('#storyWrap'), box=$('#storyBox');
@@ -1125,7 +1211,12 @@ function openStory(id){
   show('story');
 }
 function stopStory(){storyPlaying=false;if(window.speechSynthesis)speechSynthesis.cancel();}
-function storyExit(){stopStory();levelChosen=false;refreshHome();show('home');}
+function storyExit(){
+  stopStory();
+  /* Čteme-li kapitolu knihy, vracíme se na seznam kapitol, ne domů. */
+  if(curStory&&curStory._book){const id=curStory._book;curStory=null;return openBook(id);}
+  levelChosen=false;refreshHome();show('home');
+}
 function renderStoryText(){
   const s=curStory;if(!s)return;
   let showCz=!!(S.settings&&S.settings.storyCz);

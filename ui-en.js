@@ -358,5 +358,11 @@ window.UI_DATA.en = {
  "Mikrofon se nepodařilo použít": "Could not use the microphone",
  "Počkej na odpověď AI": "Wait for the AI to reply",
  "Zkontroluj a odešli": "Check it and send",
- "Nahrávám… mluv klidně pomalu, pak klikni na ⏹": "Recording… take your time, then click ⏹"
+ "Nahrávám… mluv klidně pomalu, pak klikni na ⏹": "Recording… take your time, then click ⏹",
+ "Čtení na pokračování": "Graded readers",
+ "Delší příběhy rozdělené do kapitol — čti, poslouchej a po každé kapitole si ověř porozumění.": "Longer stories in chapters — read, listen and check your understanding after each chapter.",
+ "Začít číst": "Start reading",
+ "kapitol": "chapters",
+ "Slovníček": "Glossary",
+ "Knihu se nepodařilo načíst": "Could not load the book"
 };

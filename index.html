@@ -66,6 +66,11 @@
             <p class="lead" style="margin-top:-4px" data-i18n>Tematické sady nezávislé na úrovni — otevřené celé, sáhni si po tom, co zrovna potřebuješ.</p>
             <div class="lvlpick" id="vertBox"></div>
           </div>
+          <div id="bookWrap" class="hidden">
+            <div class="sec-label" style="margin-top:26px" data-i18n>Čtení na pokračování</div>
+            <p class="lead" style="margin-top:-4px" data-i18n>Delší příběhy rozdělené do kapitol — čti, poslouchej a po každé kapitole si ověř porozumění.</p>
+            <div class="lvlpick" id="bookBox"></div>
+          </div>
           <div id="storyWrap" class="hidden">
             <div class="sec-label" style="margin-top:26px" data-i18n>Příběhy ke čtení</div>
             <p class="lead" style="margin-top:-4px" data-i18n>Krátké příběhy — čti a poslouchej zároveň, pak si ověř porozumění pár otázkami.</p>
@@ -106,6 +111,12 @@
     <button class="back" id="storyBack">← Zpět</button>
     <h2 id="storyTitle"></h2>
     <div id="storyBody"></div>
+  </div>
+
+  <div id="book" class="panel hidden">
+    <button class="back" onclick="bookExit()">← Zpět</button>
+    <h2 id="bookTitle"></h2>
+    <div id="bookBody"></div>
   </div>
 
   <div id="chat" class="panel hidden">

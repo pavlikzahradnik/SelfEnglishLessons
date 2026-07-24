@@ -280,7 +280,7 @@ window.UI_DATA.de = {
  "Učím se německy každý den": "Ich lerne jeden Tag Deutsch",
  "Jaký jazyk se dnes chceš učit?": "Welche Sprache möchtest du heute lernen?",
  "Postup se ti u každého jazyka ukládá zvlášť — můžeš je libovolně střídat.": "Dein Fortschritt wird für jede Sprache getrennt gespeichert — du kannst frei wechseln.",
- "Pokračovat": "Weitermachen",
+ "Pokračovat": "Fortsetzen",
  "Začít od výběru úrovně": "Mit der Niveauwahl beginnen",
  "Tvůj hlavní jazyk": "Deine Hauptsprache",
  "Změnit": "Ändern",
@@ -358,5 +358,11 @@ window.UI_DATA.de = {
  "Mikrofon se nepodařilo použít": "Mikrofon konnte nicht verwendet werden",
  "Počkej na odpověď AI": "Warte auf die Antwort der KI",
  "Zkontroluj a odešli": "Prüfen und senden",
- "Nahrávám… mluv klidně pomalu, pak klikni na ⏹": "Aufnahme… lass dir Zeit, dann klicke ⏹"
+ "Nahrávám… mluv klidně pomalu, pak klikni na ⏹": "Aufnahme… lass dir Zeit, dann klicke ⏹",
+ "Čtení na pokračování": "Lesebücher",
+ "Delší příběhy rozdělené do kapitol — čti, poslouchej a po každé kapitole si ověř porozumění.": "Längere Geschichten in Kapiteln — lies, höre und prüfe nach jedem Kapitel dein Verständnis.",
+ "Začít číst": "Zu lesen beginnen",
+ "kapitol": "Kapitel",
+ "Slovníček": "Wortschatz",
+ "Knihu se nepodařilo načíst": "Buch konnte nicht geladen werden"
 };
